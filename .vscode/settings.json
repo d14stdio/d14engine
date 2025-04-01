@@ -1,0 +1,19 @@
+{
+    "[markdown]": {
+        "editor.wordWrap": "on"
+    },
+    "cmake.generator": "Ninja Multi-Config",
+    "cmake.configureArgs": [
+        "-DD14_TARGET=ColorfulCube",
+    ],
+    "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}",
+        "program": "${workspaceFolder}/d14engine.exe"
+    },
+    "files.encoding": "utf8",
+    "editor.indentSize": 4,
+    "editor.insertSpaces": true,
+    "files.eol": "\r\n",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+}

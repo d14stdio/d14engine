@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "D14Target",
+            "generator": "Ninja Multi-Config",
+            "configurationType": "Debug",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "variables": [
+                {
+                    "name": "D14_TARGET",
+                    "value": "ColorfulCube",
+                    "type": "STRING"
+                }
+            ]
+        }
+    ]
+}
