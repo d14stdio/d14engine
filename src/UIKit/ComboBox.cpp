@@ -1,16 +1,12 @@
-﻿#include "Common/Precompile.h"
+#include "Common/Precompile.h"
 
 #include "UIKit/ComboBox.h"
 
-#include "Common/CppLangUtils/PointerCompare.h"
 #include "Common/DirectXError.h"
-#include "Common/MathUtils/2D.h"
 
-#include "UIKit/Application.h"
 #include "UIKit/IconLabel.h"
 #include "UIKit/Label.h"
 #include "UIKit/PopupMenu.h"
-#include "UIKit/ResourceUtils.h"
 
 using namespace d14engine::renderer;
 
@@ -21,6 +17,15 @@ namespace d14engine::uikit
         Panel(rect, resource_utils::solidColorBrush()),
         FlatButton(IconLabel::comboBoxLayout(), roundRadius, rect)
     {
+        // Here left blank intentionally.
+    }
+
+    void ComboBox::onInitializeFinish()
+    {
+        FlatButton::onInitializeFinish();
+
+        arrowIcon.loadStrokeStyle();
+
         m_dropDownMenu = makeRootUIObject<PopupMenu>();
 
         m_dropDownMenu->f_onTriggerMenuItem = [this]
@@ -31,27 +36,18 @@ namespace d14engine::uikit
         m_dropDownMenu->setBackgroundTriggerPanel(true);
 
         auto& geoSetting = m_dropDownMenu->appearance().geometry;
-        geoSetting.extension = geoSetting.roundRadius = roundRadius;
-
-        // The shadow bitmap of the drop-down menu will be loaded later
-        // in onInitializeFinish when resizing the menu to fit the size.
-    }
-
-    void ComboBox::onInitializeFinish()
-    {
-        FlatButton::onInitializeFinish();
-
-        loadArrowIconStrokeStyle();
+        geoSetting.extension = geoSetting.roundRadius = roundRadiusX;
 
         m_dropDownMenu->setSize(width(), m_dropDownMenu->height());
         m_dropDownMenu->setPosition(m_absoluteRect.left, m_absoluteRect.bottom);
     }
 
-    void ComboBox::loadArrowIconStrokeStyle()
+    void ComboBox::ArrowIcon::loadStrokeStyle()
     {
         THROW_IF_NULL(Application::g_app);
 
-        auto factory = Application::g_app->renderer()->d2d1Factory();
+        auto& app = Application::g_app;
+        auto factory = app->renderer()->d2d1Factory();
 
         auto prop = D2D1::StrokeStyleProperties
         (
@@ -59,7 +55,7 @@ namespace d14engine::uikit
         /* endCap   */ D2D1_CAP_STYLE_ROUND,
         /* dashCap  */ D2D1_CAP_STYLE_ROUND
         );
-        auto& style = arrowIcon.strokeStyle;
+        auto& style = strokeStyle;
 
         THROW_IF_FAILED(factory->CreateStrokeStyle
         (
@@ -144,29 +140,30 @@ namespace d14engine::uikit
         // Drop-down Arrow //
         /////////////////////
 
-        auto& arrowSetting = appearance().arrow;
-        auto& arrowGeometry = arrowSetting.geometry;
-        auto& arrowBackground = m_enabled ? arrowSetting.background : arrowSetting.secondaryBackground;
+        auto& setting = appearance().arrow;
+        auto& geoSetting = setting.geometry;
 
-        resource_utils::solidColorBrush()->SetColor(arrowBackground.color);
-        resource_utils::solidColorBrush()->SetOpacity(arrowBackground.opacity);
+        auto& background = m_enabled ? setting.background : setting.secondaryBackground;
+
+        resource_utils::solidColorBrush()->SetColor(background.color);
+        resource_utils::solidColorBrush()->SetOpacity(background.opacity);
 
         auto arrowOrigin = math_utils::rightTop(m_absoluteRect);
 
         rndr->d2d1DeviceContext()->DrawLine
         (
-        /* point0      */ math_utils::offset(arrowOrigin, arrowGeometry.line0.point0),
-        /* point1      */ math_utils::offset(arrowOrigin, arrowGeometry.line0.point1),
+        /* point0      */ math_utils::offset(arrowOrigin, geoSetting.line0.point0),
+        /* point1      */ math_utils::offset(arrowOrigin, geoSetting.line0.point1),
         /* brush       */ resource_utils::solidColorBrush(),
-        /* strokeWidth */ arrowSetting.strokeWidth,
+        /* strokeWidth */ setting.strokeWidth,
         /* strokeStyle */ arrowIcon.strokeStyle.Get()
         );
         rndr->d2d1DeviceContext()->DrawLine
         (
-        /* point0      */ math_utils::offset(arrowOrigin, arrowGeometry.line1.point0),
-        /* point1      */ math_utils::offset(arrowOrigin, arrowGeometry.line1.point1),
+        /* point0      */ math_utils::offset(arrowOrigin, geoSetting.line1.point0),
+        /* point1      */ math_utils::offset(arrowOrigin, geoSetting.line1.point1),
         /* brush       */ resource_utils::solidColorBrush(),
-        /* strokeWidth */ arrowSetting.strokeWidth,
+        /* strokeWidth */ setting.strokeWidth,
         /* strokeStyle */ arrowIcon.strokeStyle.Get()
         );
     }
