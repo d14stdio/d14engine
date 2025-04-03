@@ -1,0 +1,5 @@
+﻿add_subdirectory(Common)
+add_subdirectory(Renderer)
+add_subdirectory(UIKit)
+add_subdirectory(Pipeline)
+add_subdirectory(Editor)

@@ -1,4 +1,4 @@
-#include "Common/Precompile.h"
+﻿#include "Common/Precompile.h"
 
 #include "Renderer/InfoUtils.h"
 

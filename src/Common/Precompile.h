@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //////////////////////
 // Standard Library //
@@ -76,14 +76,20 @@ namespace d14engine
 // Windows & DirectX SDK //
 ///////////////////////////
 
+#ifndef _D14_AGILITY_SDK
 #define _D14_AGILITY_SDK true
+#endif
 
 #if _D14_AGILITY_SDK
+#ifndef _D14_AGILITY_VER
 #define _D14_AGILITY_VER 615
+#endif
+#ifndef _D14_AGILITY_PATH
 #ifdef _WIN64
 #define _D14_AGILITY_PATH "lib/DirectX/x64/"
 #else
 #define _D14_AGILITY_PATH "lib/DirectX/x86/"
+#endif
 #endif
 #endif
 // Refer to https://devblogs.microsoft.com/directx/gettingstarted-dx12agility/#header-include-order
@@ -99,8 +105,8 @@ namespace d14engine
 // Refer to https://devblogs.microsoft.com/directx/gettingstarted-dx12agility/#2.-set-agility-sdk-parameters
 // We need to set Agility SDK parameters to help locate the custom D3D12Core.dll during building.
 #if _D14_AGILITY_SDK
-extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = _D14_AGILITY_VER; }
-extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = _D14_AGILITY_PATH; }
+extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion; }
+extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath; }
 #endif
 
 #include <comdef.h>

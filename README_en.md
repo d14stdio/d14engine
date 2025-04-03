@@ -1,4 +1,4 @@
-# D14Engine
+﻿# D14Engine
 
 [![Documentation Status](https://readthedocs.org/projects/d14engine/badge/?version=latest)](https://d14std.io/projects/engine/en/latest/?badge=latest)
 

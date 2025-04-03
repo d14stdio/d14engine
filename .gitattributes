@@ -1,4 +1,4 @@
-*.cso filter=lfs diff=lfs merge=lfs -text
+﻿*.cso filter=lfs diff=lfs merge=lfs -text
 *.dll filter=lfs diff=lfs merge=lfs -text
 *.lib filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text

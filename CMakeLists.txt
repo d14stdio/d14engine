@@ -47,111 +47,111 @@ include_directories(
 # Note that cl.exe does not set /utf-8 by default.
 add_compile_options(/utf-8)
 
-##################
-# Target Configs #
-##################
+####################
+# Helper Functions #
+####################
 
 #----------------------------------------------------------
-# Functions used to help locate target source files.
+# Target List
 #----------------------------------------------------------
 
-# Get a global property: D14Target_<name>=<path>.
-function(GetTargetPath name path)
-    get_property(val GLOBAL PROPERTY D14Target_${name})
-    set(${path} ${val} PARENT_SCOPE)
+set(TargetList "")
+
+#----------------------------------------------------------
+# Global Property
+#----------------------------------------------------------
+
+# Check if a property named <key> exists.
+function(IsPropertyValid key value)
+    get_property(result GLOBAL PROPERTY ${key} SET)
+    set(${value} ${result} PARENT_SCOPE)
 endfunction()
 
-# Set a global property: D14Target_<name>=<path>.
-function(SetTargetPath name path)
-    set_property(GLOBAL PROPERTY D14Target_${name} ${path})
+# Get a global property: <key>=<value>.
+function(GetPropertyValue key value)
+    get_property(result GLOBAL PROPERTY ${key})
+    set(${value} "${result}" PARENT_SCOPE)
 endfunction()
 
-# Check if a target named D14Target_<name> exists.
-function(IsTargetValid name result)
-    get_property(val GLOBAL PROPERTY D14Target_${name} SET)
-    set(${result} ${val} PARENT_SCOPE)
+# Set a global property: <key>=<ARGN>.
+function(SetPropertyValue key)
+    set_property(GLOBAL PROPERTY ${key} ${ARGN})
 endfunction()
 
-#----------------------------------------------------------
-# Get source files of each submodule and build target.
-#----------------------------------------------------------
-
-file(GLOB_RECURSE srcCommon     "src/Common/*.cpp")
-file(GLOB_RECURSE srcEditor     "src/Editor/*.cpp")
-file(GLOB_RECURSE srcPipeline   "src/Pipeline/*.cpp")
-file(GLOB_RECURSE srcRenderer   "src/Renderer/*.cpp")
-file(GLOB_RECURSE srcUIKit      "src/UIKit/*.cpp")
-
-SetTargetPath("SimpleWindow"    "test/Renderer/SimpleWindow")
-
-SetTargetPath("ButtonFamily"    "test/UIKit/ButtonFamily")
-SetTargetPath("ColorfulCube"    "test/UIKit/ColorfulCube")
-SetTargetPath("DemoTemplate"    "test/UIKit/DemoTemplate")
-SetTargetPath("ImageViewer"     "test/UIKit/ImageViewer")
-SetTargetPath("ListTreeView"    "test/UIKit/ListTreeView")
-SetTargetPath("PixelAnimation"  "test/UIKit/PixelAnimation")
-SetTargetPath("SimpleEditor"    "test/UIKit/SimpleEditor")
-SetTargetPath("VariousFonts"    "test/UIKit/VariousFonts")
-SetTargetPath("WidgetsGallery"  "test/UIKit/WidgetsGallery")
-
-SetTargetPath("EmptyScene"      "test/Pipeline/EmptyScene")
-SetTargetPath("ManySprites"     "test/Pipeline/2D/ManySprites")
+###################
+# Module & Target #
+###################
 
 #----------------------------------------------------------
-# Decide source files involved in target generation.
+# Find source files of each module and target.
 #----------------------------------------------------------
 
-if(NOT DEFINED D14_TARGET)
-    set(D14_TARGET "SimpleWindow")
-endif()
-# Try to get the source path of the specified target.
-IsTargetValid(${D14_TARGET} D14_TARGET_VALID)
-if (NOT D14_TARGET_VALID)
-    message(FATAL_ERROR "Target ${D14_TARGET} is not valid.")
-endif()
-GetTargetPath(${D14_TARGET} D14_TARGET_PATH)
+add_subdirectory(src)
+add_subdirectory(test)
 
-message(STATUS "Target name: ${D14_TARGET}")
-message(STATUS "Target path: ${D14_TARGET_PATH}")
+#----------------------------------------------------------
+# Extract source files from related properties.
+#----------------------------------------------------------
 
-set(D14_SOURCE ${srcCommon})
+GetPropertyValue(D14_CommonSource   CommonSource)
+GetPropertyValue(D14_RendererSource RendererSource)
+GetPropertyValue(D14_UIKitSource    UIKitSource)
+GetPropertyValue(D14_PipelineSource PipelineSource)
+GetPropertyValue(D14_EditorSource   EditorSource)
 
-if (${D14_TARGET_PATH} MATCHES "test/Renderer/*")
-    list(APPEND D14_SOURCE ${srcRenderer})
+# Set -DTargetName=<what_you_want_to_build> in the command line
+# to set a specific target, otherwise it will default to SimpleWindow.
+
+if(NOT DEFINED TargetName)
+    set(TargetName "SimpleWindow")
 endif()
-if (${D14_TARGET_PATH} MATCHES "test/UIKit/*")
-    list(APPEND D14_SOURCE ${srcRenderer})
-    list(APPEND D14_SOURCE ${srcUIKit})
-endif()
-if (${D14_TARGET_PATH} MATCHES "test/Pipeline/*")
-    list(APPEND D14_SOURCE ${srcRenderer})
-    list(APPEND D14_SOURCE ${srcUIKit})
-    list(APPEND D14_SOURCE ${srcPipeline})
+IsPropertyValid(D14_${TargetName}Source TargetValid)
+if (TargetValid)
+    message(STATUS "Set target to: ${TargetName}")
+else()
+    message(FATAL_ERROR "Target is not valid: ${TargetName}")
 endif()
 
-file(GLOB_RECURSE srcD14Target "${D14_TARGET_PATH}/*.cpp")
-list(APPEND D14_SOURCE ${srcD14Target})
+GetPropertyValue(D14_${TargetName}Module TargetModule)
+GetPropertyValue(D14_${TargetName}Source TargetSource)
 
 #----------------------------------------------------------
-# Add the final build target and related commands.
+# Add Common module and precompile header.
 #----------------------------------------------------------
 
-add_executable(${D14_TARGET} ${D14_SOURCE})
+set(PCH "src/Common/Precompile.h")
 
-target_precompile_headers(
-    ${D14_TARGET} PRIVATE
-    "src/Common/Precompile.h"
-)
-target_link_options(
-    ${D14_TARGET} PRIVATE
-    "/DELAYLOAD:dxcompiler.dll"
-)
-# Since some demo programs require to load DLLs, shaders,
-# or resources based on relative paths, D14Target must be
-# copied to the project root directory before debugging.
+add_library(Common STATIC ${CommonSource})
+target_precompile_headers(Common PRIVATE "${PCH}")
+
+#----------------------------------------------------------
+# Add build target and link Common module.
+#----------------------------------------------------------
+
+add_executable(${TargetName} ${TargetSource})
+target_link_libraries(${TargetName} PRIVATE Common)
+target_precompile_headers(${TargetName} REUSE_FROM Common)
+
+#----------------------------------------------------------
+# Add and link other modules that the target depends on.
+#----------------------------------------------------------
+
+foreach(module ${TargetModule})
+    add_library(${module} STATIC ${${module}Source})
+    target_link_libraries(${TargetName} PRIVATE ${module})
+    target_precompile_headers(${module} REUSE_FROM Common)
+endforeach()
+
+target_link_options(${TargetName} PRIVATE "/DELAYLOAD:dxcompiler.dll")
+
+#----------------------------------------------------------
+# Copy target to root directory for easy debugging.
+#----------------------------------------------------------
+
+set(TargetFile "$<TARGET_FILE:${TargetName}>")
+set(DebugExePath "${PROJECT_SOURCE_DIR}/d14engine.exe")
+
 add_custom_command(
-    TARGET ${D14_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "$<TARGET_FILE:${D14_TARGET}>"
-    "${PROJECT_SOURCE_DIR}/d14engine.exe"
+    TARGET ${TargetName} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "${TargetFile}" "${DebugExePath}"
 )
