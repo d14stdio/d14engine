@@ -200,15 +200,15 @@ namespace d14engine::uikit
 
         UIObjectSet m_uiObjects = {};
 
-        using UIObjectTempSet = ISortable<Panel>::WeakPrioritySet;
-
-        UIObjectTempSet m_hitUIObjects = {};
-
         // The pinned UI objects keep receiving all UI events even not hit.
         // Tips: This can be used to implement a global hotspot mechanism,
         // such as a shortcut key manager or a background auxiliary object.
 
-        UIObjectTempSet m_pinnedUIObjects = {};
+        UIObjectSet m_pinnedUIObjects = {};
+
+        using UIObjectTempSet = ISortable<Panel>::WeakPrioritySet;
+
+        UIObjectTempSet m_hitUIObjects = {};
 
     public:
         const UIObjectSet& uiObjects() const;
@@ -220,6 +220,8 @@ namespace d14engine::uikit
         void removeUIObject(ShrdPtrRefer<Panel> uiobj);
 
         void clearAddedUIObjects();
+
+        const UIObjectSet& pinnedUIObjects() const;
 
         void pinUIObject(ShrdPtrRefer<Panel> uiobj);
         void unpinUIObject(ShrdPtrRefer<Panel> uiobj);

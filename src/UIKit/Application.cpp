@@ -1233,6 +1233,11 @@ if (app != nullptr) \
         m_backPriorities = {};
     }
 
+    const Application::UIObjectSet& Application::pinnedUIObjects() const
+    {
+        return m_pinnedUIObjects;
+    }
+
     void Application::pinUIObject(ShrdPtrRefer<Panel> uiobj)
     {
         if (uiobj == nullptr) return;

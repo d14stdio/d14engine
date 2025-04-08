@@ -208,11 +208,11 @@ namespace d14engine::uikit
 
         ChildObjectSet m_children = {};
 
+        ChildObjectSet m_pinnedChildren = {};
+
         using ChildObjectTempSet = ISortable<Panel>::WeakPrioritySet;
 
         ChildObjectTempSet m_hitChildren = {};
-
-        ChildObjectTempSet m_pinnedChildren = {};
 
     public:
         const WeakPtr<Panel>& parent() const;
@@ -227,6 +227,8 @@ namespace d14engine::uikit
         void removeUIObject(ShrdPtrRefer<Panel> uiobj);
 
         void clearAddedUIObjects();
+
+        const ChildObjectSet& pinnedChildren() const;
 
         void pinUIObject(ShrdPtrRefer<Panel> uiobj);
         void unpinUIObject(ShrdPtrRefer<Panel> uiobj);

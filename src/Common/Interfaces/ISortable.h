@@ -138,8 +138,18 @@ static_assert \
         // Miscellaneous //
         ///////////////////
 
-        // The boolean value returned by func
+        // The boolean value returned by foreach-func
         // indicates whether to handle the remainings.
+
+        static void foreach(
+            ShrdPrioritySet& cont,
+            FuncRefer<bool(ShrdPtrRefer<Target_T>)> func)
+        {
+            for (auto& elem : cont)
+            {
+                if (!func(elem)) break;
+            }
+        }
         static void foreach(
             WeakPrioritySet& cont,
             FuncRefer<bool(ShrdPtrRefer<Target_T>)> func)

@@ -601,6 +601,11 @@ namespace d14engine::uikit
         m_backPriorities = {};
     }
 
+    const Panel::ChildObjectSet& Panel::pinnedChildren() const
+    {
+        return m_pinnedChildren;
+    }
+
     void Panel::pinUIObject(ShrdPtrRefer<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
