@@ -375,17 +375,20 @@ namespace d14engine::uikit
         auto elemItor = m_layout->findElement(content().lock());
         if (elemItor.has_value())
         {
+            auto& elem = elemItor.value()->first;
+            auto& geoInfo = elemItor.value()->second;
+
             if (!m_parentView.expired())
             {
                 auto viewPtr = m_parentView.lock();
 
-                elemItor.value()->second.Left.ToLeft =
+                geoInfo.Left.ToLeft =
                     viewPtr->baseHorzIndent() +
                     viewPtr->horzIndentEachNodelLevel() * m_nodeLevel;
             }
-            else elemItor.value()->second.Left.ToLeft = 0.0f;
+            else geoInfo.Left.ToLeft = 0.0f;
 
-            m_layout->updateElement(elemItor.value());
+            m_layout->updateElement(elem, geoInfo);
         }
     }
 

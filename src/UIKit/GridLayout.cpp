@@ -20,7 +20,10 @@ namespace d14engine::uikit
         m_horzMargin(horzMargin),
         m_horzSpacing(horzSpacing),
         m_vertMargin(vertMargin),
-        m_vertSpacing(vertSpacing) { }
+        m_vertSpacing(vertSpacing)
+    {
+        // Here left blank intentionally.
+    }
 
     void GridLayout::updateCellDeltaInfo()
     {

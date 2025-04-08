@@ -7,7 +7,10 @@ namespace d14engine::uikit
     ConstraintLayout::ConstraintLayout(const D2D1_RECT_F& rect)
         :
         Panel(rect, resource_utils::solidColorBrush()),
-        Layout(rect) { }
+        Layout(rect)
+    {
+        // Here left blank intentionally.
+    }
 
     void ConstraintLayout::updateElement(ShrdPtrRefer<Panel> elem, const GeometryInfo& geoInfo)
     {

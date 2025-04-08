@@ -34,6 +34,13 @@ namespace d14engine::uikit
             float vertSpacing = 0.0f,
             const D2D1_RECT_F& rect = {});
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Cell Delta & Count
+        //------------------------------------------------------------------
     protected:
         float m_horzCellDelta = {}, m_vertCellDelta = {};
         size_t m_horzCellCount = {}, m_vertCellCount = {};
@@ -49,6 +56,9 @@ namespace d14engine::uikit
 
         void setCellCount(size_t horz, size_t vert);
 
+        //------------------------------------------------------------------
+        // Cell Margin & Spacing
+        //------------------------------------------------------------------
     protected:
         float m_horzMargin = {}, m_vertMargin = {};
         float m_horzSpacing = {}, m_vertSpacing = {};
@@ -63,14 +73,21 @@ namespace d14engine::uikit
         void setMargin(float horz, float vert);
         void setSpacing(float horz, float vert);
 
-    public:
-        using Layout::updateElement;
-
+        //------------------------------------------------------------------
+        // Element Geometry Info
+        //------------------------------------------------------------------
     protected:
         void updateElement(ShrdPtrRefer<Panel> elem, const GeometryInfo& geoInfo) override;
 
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     protected:
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onSizeHelper(SizeEvent& e) override;
     };
 }

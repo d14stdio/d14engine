@@ -13,8 +13,6 @@ namespace d14engine::uikit
     template<typename GeometryInfo_T>
     struct Layout : appearance::Layout, ResizablePanel
     {
-        using LayoutType = Layout<GeometryInfo_T>;
-
         using GeometryInfo = GeometryInfo_T;
 
         explicit Layout(const D2D1_RECT_F& rect = {})
@@ -26,6 +24,13 @@ namespace d14engine::uikit
         }
         _D14_SET_APPEARANCE_PROPERTY(Layout)
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Element Geometry Info
+        //------------------------------------------------------------------
     protected:
         using ElementGeometryInfoMap = std::unordered_map<SharedPtr<Panel>, GeometryInfo_T>;
 
@@ -36,65 +41,67 @@ namespace d14engine::uikit
     public:
         void addElement(ShrdPtrRefer<Panel> elem, const GeometryInfo_T& geoInfo)
         {
-            if (!elem) return;
-            addUIObject(elem);
+            if (elem == nullptr) return;
 
+            addUIObject(elem);
             m_elemGeoInfos.insert({ elem, geoInfo });
+
             updateElement(elem, geoInfo);
         }
 
         void removeElement(ShrdPtrRefer<Panel> elem)
         {
-            m_elemGeoInfos.erase(elem);
             removeUIObject(elem);
+            m_elemGeoInfos.erase(elem);
+        }
+
+        using ElementGeometryInfoPtr = ElementGeometryInfoMap::iterator;
+
+        Optional<ElementGeometryInfoPtr> findElement(ShrdPtrRefer<Panel> elem)
+        {
+            auto infoItor = m_elemGeoInfos.find(elem);
+            if (infoItor != m_elemGeoInfos.end()) return infoItor;
+            else return std::nullopt;
         }
 
         void clearAllElements()
         {
-            m_elemGeoInfos.clear();
             clearAddedUIObjects();
-        }
-
-        void updateElement(ElementGeometryInfoMap::iterator elemItor)
-        {
-            if (elemItor != m_elemGeoInfos.end()) updateElement(elemItor->first, elemItor->second);
-        }
-
-        void updateElement(ShrdPtrRefer<Panel> elem)
-        {
-            updateElement(m_elemGeoInfos.find(elem));
+            m_elemGeoInfos.clear();
         }
 
         void updateAllElements()
         {
-            for (auto& kv : m_elemGeoInfos)
+            for (auto& info : m_elemGeoInfos)
             {
-                updateElement(kv.first, kv.second);
+                updateElement(info.first, info.second);
             }
         }
 
-        Optional<typename ElementGeometryInfoMap::iterator> findElement(ShrdPtrRefer<Panel> elem)
-        {
-            auto elemItor = m_elemGeoInfos.find(elem);
-            if (elemItor != m_elemGeoInfos.end()) return elemItor;
-            else return std::nullopt;
-        }
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
 
     protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override
+        //------------------------------------------------------------------
+
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override
         {
             ////////////////
             // Background //
             ////////////////
 
-            resource_utils::solidColorBrush()->SetColor(appearance().background.color);
-            resource_utils::solidColorBrush()->SetOpacity(appearance().background.opacity);
+            auto& background = appearance().background;
+
+            resource_utils::solidColorBrush()->SetColor(background.color);
+            resource_utils::solidColorBrush()->SetOpacity(background.opacity);
 
             Panel::drawBackground(rndr);
         }
 
-        void drawD2d1ObjectPosterior(renderer::Renderer* rndr) override
+        void drawD2d1ObjectPosterior(Renderer* rndr) override
         {
             Panel::drawD2d1ObjectPosterior(rndr);
 
@@ -102,27 +109,28 @@ namespace d14engine::uikit
             // Outline //
             /////////////
 
-            resource_utils::solidColorBrush()->SetColor(appearance().stroke.color);
-            resource_utils::solidColorBrush()->SetOpacity(appearance().stroke.opacity);
+            auto& stroke = appearance().stroke;
 
-            float strokeWidth = appearance().stroke.width;
+            resource_utils::solidColorBrush()->SetColor(stroke.color);
+            resource_utils::solidColorBrush()->SetOpacity(stroke.opacity);
 
-            auto frame = math_utils::inner(m_absoluteRect, strokeWidth);
-            D2D1_ROUNDED_RECT outlineRect = { frame, roundRadiusX, roundRadiusY };
+            auto rect = math_utils::inner(m_absoluteRect, stroke.width);
+            D2D1_ROUNDED_RECT roundedRect = { rect, roundRadiusX, roundRadiusY };
 
             rndr->d2d1DeviceContext()->DrawRoundedRectangle
             (
-            /* roundedRect */ outlineRect,
+            /* roundedRect */ roundedRect,
             /* brush       */ resource_utils::solidColorBrush(),
-            /* strokeWidth */ strokeWidth
+            /* strokeWidth */ stroke.width
             );
         }
-
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override
         {
-            removeElement(uiobj);
-            return true;
+            removeElement(uiobj); return true;
         }
 
         void onSizeHelper(SizeEvent& e) override

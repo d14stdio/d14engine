@@ -109,8 +109,11 @@ namespace d14engine::uikit
                 auto elemItor = m_layout->findElement(item);
                 if (elemItor.has_value())
                 {
-                    elemItor.value()->second.Top.ToTop = offset;
-                    m_layout->updateElement(elemItor.value());
+                    auto& elem = elemItor.value()->first;
+                    auto& geoInfo = elemItor.value()->second;
+
+                    geoInfo.Top.ToTop = offset;
+                    m_layout->updateElement(elem, geoInfo);
                 }
                 offset += item->height();
             }
@@ -175,8 +178,11 @@ namespace d14engine::uikit
                 auto elemItor = m_layout->findElement(*itemIndex);
                 if (elemItor.has_value())
                 {
-                    elemItor.value()->second.Top.ToTop = offset;
-                    m_layout->updateElement(elemItor.value());
+                    auto& elem = elemItor.value()->first;
+                    auto& geoInfo = elemItor.value()->second;
+
+                    geoInfo.Top.ToTop = offset;
+                    m_layout->updateElement(elem, geoInfo);
                 }
                 offset += (*itemIndex)->height();
             }
@@ -247,8 +253,11 @@ do { \
                     auto elemItor = m_layout->findElement(*itemIndex);
                     if (elemItor.has_value())
                     {
-                        elemItor.value()->second.Top.ToTop = offset;
-                        m_layout->updateElement(elemItor.value());
+                        auto& elem = elemItor.value()->first;
+                        auto& geoInfo = elemItor.value()->second;
+
+                        geoInfo.Top.ToTop = offset;
+                        m_layout->updateElement(elem, geoInfo);
                     }
                     offset += (*itemIndex)->height();
                 }
