@@ -2,8 +2,6 @@
 
 #include "Common/Precompile.h"
 
-#include "Common/CppLangUtils/EnumMagic.h"
-
 #include "UIKit/AnimationUtils/BitmapSequence.h"
 #include "UIKit/Panel.h"
 
@@ -14,6 +12,14 @@ namespace d14engine::uikit
     struct Cursor : Panel
     {
         friend Application;
+
+        //////////////////////
+        // Type Definitions //
+        //////////////////////
+
+        //------------------------------------------------------------------
+        // Icon Index
+        //------------------------------------------------------------------
 
         enum class StaticIconIndex
         {
@@ -48,11 +54,14 @@ namespace d14engine::uikit
 #undef SET_STATIC_ALIAS
 #undef SET_DYNAMIC_ALIAS
 
+        //------------------------------------------------------------------
+        // Icon Object
+        //------------------------------------------------------------------
+
         template<typename BitmapData>
         struct Icon
         {
-            BitmapData bitmapData = {};
-            D2D1_POINT_2F hotSpotOffset = {};
+            BitmapData bitmapData = {}; D2D1_POINT_2F hotSpotOffset = {};
         };
         using StaticIcon = Icon<BitmapObject>;
         using DynamicIcon = Icon<animation_utils::BitmapSequence>;
@@ -67,18 +76,32 @@ namespace d14engine::uikit
         };
         using BasicIconThemeMap = std::unordered_map<Wstring, IconSeries>;
 
+        //------------------------------------------------------------------
+        // Initialization
+        //------------------------------------------------------------------
+
         Cursor(
             const BasicIconThemeMap& icons = loadBasicIcons(),
             const D2D1_RECT_F& rect = { 0.0f, 0.0f, 32.0f, 32.0f });
 
         void onInitializeFinish() override;
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Default Icons
+        //------------------------------------------------------------------
     protected:
         static BasicIconThemeMap loadBasicIcons();
 
         static IconSeries loadBasicIconSeries(WstrRefer themeName);
         static DynamicIcon loadBasicIconFrames(WstrRefer framesPath);
 
+        //------------------------------------------------------------------
+        // Register Icons
+        //------------------------------------------------------------------
     protected:
         BasicIconThemeMap m_classifiedBasicIcons = {};
 
@@ -106,6 +129,9 @@ namespace d14engine::uikit
         void registerIcon(WstrRefer name, const DynamicIcon& icon);
         void unregisterDynamicIcon(WstrRefer name);
 
+        //------------------------------------------------------------------
+        // Select Icon Object
+        //------------------------------------------------------------------
     protected:
         template<typename T>
         using IconID = Variant<T, Wstring>;
@@ -133,6 +159,9 @@ namespace d14engine::uikit
         void setIcon(DynamicIconIndex index);
         void setDynamicIcon(WstrRefer name);
 
+        //------------------------------------------------------------------
+        // Select Icon Source
+        //------------------------------------------------------------------
     public:
         enum class IconSource { System, UIKit };
 
@@ -146,21 +175,34 @@ namespace d14engine::uikit
         IconSource iconSource() const;
         void setIconSource(IconSource src);
 
+        //------------------------------------------------------------------
+        // Select System Icon
+        //------------------------------------------------------------------
     protected:
         bool m_systemIconUpdateFlag = false;
 
         // Displays the corresponding system default cursor
-        // based on the currently selected basic icon index.
+        // related on the currently selected basic icon index.
         void setSystemIcon();
 
+        //------------------------------------------------------------------
+        // Miscellaneous
+        //------------------------------------------------------------------
     protected:
         StaticIcon& getCurrentSelectedStaticIcon();
         DynamicIcon& getCurrentSelectedDynamicIcon();
 
-    protected:
-        // IDrawObject2D
-        void onRendererUpdateObject2DHelper(renderer::Renderer* rndr) override;
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
 
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+    protected:
+        //------------------------------------------------------------------
+        // IDrawObject2D
+        //------------------------------------------------------------------
+
+        void onRendererUpdateObject2DHelper(Renderer* rndr) override;
+
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
     };
 }

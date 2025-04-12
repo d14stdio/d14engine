@@ -3,9 +3,7 @@
 #include "UIKit/Cursor.h"
 
 #include "Common/MathUtils/2D.h"
-#include "Common/RuntimeError.h"
 
-#include "UIKit/Application.h"
 #include "UIKit/BitmapUtils.h"
 #include "UIKit/FileSystemUtils.h"
 
@@ -29,18 +27,7 @@ namespace d14engine::uikit
 
         THROW_IF_NULL(Application::g_app);
 
-        /////////////////////////
-        // Update Draw Objects //
-        /////////////////////////
-
         Application::g_app->drawObjects().insert(shared_from_this());
-
-        ///////////////////////
-        // Update Priorities //
-        ///////////////////////
-
-        // No need to update the topmost draw-object priority
-        // since the cursor should always be displayed at the top.
     }
 
     Cursor::BasicIconThemeMap Cursor::loadBasicIcons()
