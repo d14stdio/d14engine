@@ -59,8 +59,8 @@ namespace d14engine::uikit
 
         Optional<ElementGeometryInfoPtr> findElement(ShrdPtrRefer<Panel> elem)
         {
-            auto infoItor = m_elemGeoInfos.find(elem);
-            if (infoItor != m_elemGeoInfos.end()) return infoItor;
+            auto itor = m_elemGeoInfos.find(elem);
+            if (itor != m_elemGeoInfos.end()) return itor;
             else return std::nullopt;
         }
 
