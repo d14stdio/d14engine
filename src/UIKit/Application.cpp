@@ -37,20 +37,15 @@ namespace d14engine::uikit
         // Library Path //
         //////////////////
 
-        Wstring exePath(MAX_PATH, 0);
-        GetModuleFileName(nullptr, exePath.data(), MAX_PATH);
-        // There is no need to check the result of find_last_of
-        // because the exe-path is guaranteed to contain a "\".
-        exePath.resize(exePath.find_last_of(L'\\') + 1);
-
         // Set this before calling AddDllDirectory to ensure that
         // subsequent LoadLibrary calls search user-defined paths.
         SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
+        auto exeDir = (Wstring)platform_utils::exeDirectory();
         for (auto& libPath : info.libraryPaths)
         {
             // Special note: AddDllDirectory only accepts absolute paths!
-            THROW_IF_NULL(AddDllDirectory((exePath + libPath).c_str()));
+            THROW_IF_NULL(AddDllDirectory((exeDir + libPath).c_str()));
         }
         ////////////////////
         // Initialization //

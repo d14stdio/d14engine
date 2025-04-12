@@ -1,8 +1,8 @@
 ﻿#include "Common/Precompile.h"
 
+#include "Common/DirectXError.h"
 #include "Common/MathUtils/Basic.h"
 #include "Common/MathUtils/GDI.h"
-#include "Common/RuntimeError.h"
 
 #include "Renderer/InfoUtils.h"
 #include "Renderer/Renderer.h"
@@ -14,6 +14,19 @@ using namespace d14engine::renderer;
 
 std::unique_ptr<Renderer> initApp(UINT, UINT, Renderer::CreateInfo&);
 
+WstringView exePath()
+{
+    wchar_t* wpgmptr = {};
+    THROW_IF_FAILED(_get_wpgmptr(&wpgmptr));
+    return wpgmptr;
+}
+WstringView exeDirectory()
+{
+    auto path = exePath();
+    auto count = path.find_last_of(L'\\') + 1;
+    return path.substr(0, count);
+}
+
 int wmain(int argc, wchar_t* argv[])
 {
     try // D14Engine - SimpleWindow @ Renderer
@@ -22,29 +35,26 @@ int wmain(int argc, wchar_t* argv[])
         // with relevant information of initialization errors also supports HiDPI.
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-        Wstring exePath(MAX_PATH, 0);
-        GetModuleFileName(nullptr, exePath.data(), MAX_PATH);
-        // There is no need to check the result of find_last_of
-        // because the exe-path is guaranteed to contain a "\".
-        exePath.resize(exePath.find_last_of(L'\\') + 1);
-
         // Set this before calling AddDllDirectory to ensure that
         // subsequent LoadLibrary calls search user-defined paths.
         SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
+#ifdef _WIN64
         std::wstring libPaths[] =
         {
-            L"lib/DirectXShaderCompiler"
+            L"lib/DirectXShaderCompiler/x64"
         };
-#ifdef _WIN64
-        std::wstring arch = L"x64";
 #else
-        std::wstring arch = L"x86";
+        std::wstring libPaths[] =
+        {
+            L"lib/DirectXShaderCompiler/x86"
+        };
 #endif
+        auto exeDir = (Wstring)exeDirectory();
         for (auto& libPath : libPaths)
         {
             // Special note: AddDllDirectory only accepts absolute paths!
-            THROW_IF_NULL(AddDllDirectory((exePath + libPath + L"/" + arch).c_str()));
+            THROW_IF_NULL(AddDllDirectory((exeDir + libPath).c_str()));
         }
         //-------------------------------------------------------------
         //--------------------------- Usage ---------------------------

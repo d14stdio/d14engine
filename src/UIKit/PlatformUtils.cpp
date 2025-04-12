@@ -2,6 +2,7 @@
 
 #include "UIKit/PlatformUtils.h"
 
+#include "Common/DirectXError.h"
 #include "Common/MathUtils/2D.h"
 #include "Common/MathUtils/GDI.h"
 
@@ -9,6 +10,34 @@
 
 namespace d14engine::uikit::platform_utils
 {
+    WstringView exePath()
+    {
+        wchar_t* wpgmptr = {};
+        THROW_IF_FAILED(_get_wpgmptr(&wpgmptr));
+        return wpgmptr;
+    }
+
+    WstringView exeName()
+    {
+        auto path = exePath();
+        auto offset = path.find_last_of(L'\\') + 1;
+        return path.substr(offset);
+    }
+
+    WstringView exeBaseName()
+    {
+        auto name = exeName();
+        auto count = name.find_last_of(L'.');
+        return name.substr(0, count);
+    }
+
+    WstringView exeDirectory()
+    {
+        auto path = exePath();
+        auto count = path.find_last_of(L'\\') + 1;
+        return path.substr(0, count);
+    }
+
     float dpi() // DPI: Dots Per Inch
     {
         auto& app = Application::g_app;

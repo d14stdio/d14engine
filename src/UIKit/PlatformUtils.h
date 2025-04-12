@@ -6,6 +6,11 @@
 
 namespace d14engine::uikit::platform_utils
 {
+    WstringView exePath();
+    WstringView exeName();
+    WstringView exeBaseName();
+    WstringView exeDirectory();
+
     float dpi(); // DPI: Dots Per Inch
 
     template<typename T>
