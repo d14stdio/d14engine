@@ -11,12 +11,14 @@
 namespace d14engine::uikit
 {
     struct Cursor;
+    struct DraggablePanel;
     struct Panel;
     struct TextInputObject;
 
     struct Application : cpp_lang_utils::NonCopyable
     {
         friend Cursor;
+        friend DraggablePanel;
         friend Panel;
 
         struct CreateInfo
@@ -337,17 +339,14 @@ namespace d14engine::uikit
 
         D2D1_POINT_2F m_lastCursorPoint = {};
 
+        // If this is set, the window process skips updating the cursor position,
+        // as the cursor should be fixed relative to the window during dragging.
+        bool m_isDraggingWin32Window = false;
+
     public:
         Cursor* cursor() const;
 
         const D2D1_POINT_2F& lastCursorPoint() const;
-
-        // Note that the access level is public, so any object can modify this.
-        // Therefore, this is merely a flag indicating that a dragging might occur.
-        // If this is set, the window process may skip updating cursor's position,
-        // as the cursor should be fixed relative to the window during a dragging.
-        // Generally, only DraggablePanel and its inheritors may modify this flag.
-        bool isTriggerDraggingWin32Window = false;
 
         ///////////////////
         // Miscellaneous //

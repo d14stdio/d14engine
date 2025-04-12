@@ -50,7 +50,7 @@ namespace d14engine::uikit
 
         auto& app = Application::g_app;
 
-        enableChildrenMouseMoveEvent = false;
+        m_enableChildrenMouseMoveEvent = false;
 
         app->focusUIObject
         (
@@ -58,7 +58,7 @@ namespace d14engine::uikit
         );
         if (draggingTarget == RootWindow)
         {
-            app->isTriggerDraggingWin32Window = true;
+            app->m_isDraggingWin32Window = true;
         }
         app->cursor()->setIcon(Cursor::Move);
     }
@@ -69,7 +69,7 @@ namespace d14engine::uikit
 
         auto& app = Application::g_app;
 
-        enableChildrenMouseMoveEvent = true;
+        m_enableChildrenMouseMoveEvent = true;
 
         app->focusUIObject
         (
@@ -77,7 +77,7 @@ namespace d14engine::uikit
         );
         if (draggingTarget == RootWindow)
         {
-            app->isTriggerDraggingWin32Window = false;
+            app->m_isDraggingWin32Window = false;
         }
         app->cursor()->setIcon(Cursor::Arrow);
     }

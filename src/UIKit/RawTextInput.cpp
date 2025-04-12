@@ -24,7 +24,6 @@ namespace d14engine::uikit
         roundRadiusX = roundRadiusY = roundRadius;
 
         m_placeholder = makeUIObject<Label>();
-        m_placeholder->enableChangeThemeStyleUpdate = false;
     }
 
     void RawTextInput::onInitializeFinish()

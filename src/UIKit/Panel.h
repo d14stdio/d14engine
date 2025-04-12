@@ -409,8 +409,6 @@ namespace d14engine::uikit
 
         Function<void(Panel*, MouseMoveEvent&)> f_onMouseMove = {};
 
-        bool enableChildrenMouseMoveEvent = true;
-
         void onMouseLeave(MouseMoveEvent& e);
 
         Function<void(Panel*, MouseMoveEvent&)> f_onMouseLeave = {};
@@ -443,13 +441,9 @@ namespace d14engine::uikit
 
         Function<void(Panel*, const ThemeStyle&)> f_onChangeThemeStyle = {};
 
-        bool enableChangeThemeStyleUpdate = true;
-
         void onChangeLangLocale(WstrRefer codeName);
 
         Function<void(Panel*, WstrRefer)> f_onChangeLangLocale = {};
-
-        bool enableChangeLangLocaleUpdate = true;
 
         //------------------------------------------------------------------
         // D2D1 Object
@@ -530,6 +524,9 @@ namespace d14engine::uikit
         virtual void onMouseEnterHelper(MouseMoveEvent& e);
         virtual void onMouseMoveHelper(MouseMoveEvent& e);
         virtual void onMouseLeaveHelper(MouseMoveEvent& e);
+
+        bool m_enableChildrenMouseMoveEvent = true;
+        Optional<D2D1_RECT_F> m_childrenHitTestRect = {};
 
         virtual void onMouseButtonHelper(MouseButtonEvent& e);
         virtual void onMouseWheelHelper(MouseWheelEvent& e);

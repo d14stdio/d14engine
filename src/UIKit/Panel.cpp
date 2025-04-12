@@ -1120,15 +1120,21 @@ namespace d14engine::uikit
             }
             return child->appEventTransparency.mouse.move;
         });
-        if (!enableChildrenMouseMoveEvent) return;
+        if (!m_enableChildrenMouseMoveEvent) return;
 
         ChildObjectTempSet hitChildren = {};
 
-        for (auto& child : m_children)
+        if (!m_childrenHitTestRect.has_value() || math_utils::isOverlapped
+            (
+                absoluteToSelfCoord(e.cursorPoint), m_childrenHitTestRect.value()
+            ))
         {
-            if (child->appEventReactability.hitTest && child->isHit(e.cursorPoint))
+            for (auto& child : m_children)
             {
-                hitChildren.insert(child);
+                if (child->appEventReactability.hitTest && child->isHit(e.cursorPoint))
+                {
+                    hitChildren.insert(child);
+                }
             }
         }
         if (forceSingleMouseEnterLeaveEvent)
@@ -1280,10 +1286,7 @@ namespace d14engine::uikit
     {
         for (auto& child : m_children)
         {
-            if (child->enableChangeThemeStyleUpdate)
-            {
-                child->onChangeThemeStyle(style);
-            }
+            child->onChangeThemeStyle(style);
         }
     }
 
@@ -1291,10 +1294,7 @@ namespace d14engine::uikit
     {
         for (auto& child : m_children)
         {
-            if (child->enableChangeLangLocaleUpdate)
-            {
-                child->onChangeLangLocale(codeName);
-            }
+            child->onChangeLangLocale(codeName);
         }
     }
 

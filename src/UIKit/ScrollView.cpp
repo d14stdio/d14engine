@@ -24,6 +24,8 @@ namespace d14engine::uikit
         contentMask(size()),
         m_content(content)
     {
+        m_childrenHitTestRect = m_rect;
+
         setResizable(false);
     }
 
@@ -61,7 +63,7 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        enableChildrenMouseMoveEvent = false;
+        m_enableChildrenMouseMoveEvent = false;
 
         auto focus = Application::FocusType::Mouse;
         Application::g_app->focusUIObject(focus, shared_from_this());
@@ -71,7 +73,7 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        enableChildrenMouseMoveEvent = true;
+        m_enableChildrenMouseMoveEvent = true;
 
         auto focus = Application::FocusType::Mouse;
         Application::g_app->focusUIObject(focus, nullptr);
@@ -82,9 +84,9 @@ namespace d14engine::uikit
         if (m_content) m_content->setPosition(-offset.x, -offset.y);
     }
 
-    D2D1_SIZE_F ScrollView::getSelfSize() const
+    D2D1_SIZE_F ScrollView::getViewSize() const
     {
-        if (customSizeGetter.self) return customSizeGetter.self(this);
+        if (customSizeGetter.view) return customSizeGetter.view(this);
         else return size();
     }
 
@@ -114,18 +116,18 @@ namespace d14engine::uikit
     {
         D2D1_POINT_2F out = { 0.0f, 0.0f };
 
-        auto selfSize = getSelfSize();
+        auto viewSize = getViewSize();
         auto contentSize = getContentSize();
 
-        if (contentSize.width > selfSize.width)
+        if (contentSize.width > viewSize.width)
         {
-            out.x = std::clamp(in.x, 0.0f, contentSize.width - selfSize.width);
+            out.x = std::clamp(in.x, 0.0f, contentSize.width - viewSize.width);
         }
         else out.x = 0.0f;
 
-        if (contentSize.height > selfSize.height)
+        if (contentSize.height > viewSize.height)
         {
-            out.y = std::clamp(in.y, 0.0f, contentSize.height - selfSize.height);
+            out.y = std::clamp(in.y, 0.0f, contentSize.height - viewSize.height);
         }
         else out.y = 0.0f;
 
@@ -151,23 +153,23 @@ namespace d14engine::uikit
 
     D2D1_POINT_2F ScrollView::viewportOffsetPercentage() const
     {
-        auto selfSize = getSelfSize();
+        auto viewSize = getViewSize();
         auto contentSize = getContentSize();
         return
         {
-            m_viewportOffset.x / (contentSize.width - selfSize.width),
-            m_viewportOffset.y / (contentSize.height - selfSize.height)
+            m_viewportOffset.x / (contentSize.width - viewSize.width),
+            m_viewportOffset.y / (contentSize.height - viewSize.height)
         };
     }
 
     void ScrollView::setViewportOffsetPercentage(const D2D1_POINT_2F& relative)
     {
-        auto selfSize = getSelfSize();
+        auto viewSize = getViewSize();
         auto contentSize = getContentSize();
         setViewportOffset
         ({
-            relative.x * (contentSize.width - selfSize.width),
-            relative.y * (contentSize.height - selfSize.height)
+            relative.x * (contentSize.width - viewSize.width),
+            relative.y * (contentSize.height - viewSize.height)
         });
     }
 
@@ -205,22 +207,23 @@ namespace d14engine::uikit
         auto& setting = appearance();
         auto& geoSetting = setting.scrollBar[(size_t)state].geometry;
 
-        auto selfSize = getSelfSize();
+        auto viewSize = getViewSize();
         auto contentSize = getContentSize();
 
-        if (selfSize.width > 0.0f && contentSize.width > selfSize.width)
+        D2D1_RECT_F rect =
+        {
+            0.0f, height() - (geoSetting.offset + geoSetting.width),
+            0.0f, height() - geoSetting.offset
+        };
+        if (viewSize.width > 0.0f && contentSize.width > viewSize.width)
         {
             float horzStart = m_viewportOffset.x / contentSize.width;
-            float horzEnd = horzStart + selfSize.width / contentSize.width;
-            return
-            {
-                horzStart * selfSize.width,
-                height() - (geoSetting.offset + geoSetting.width),
-                horzEnd * selfSize.width,
-                height() - geoSetting.offset
-            };
+            float horzEnd = horzStart + viewSize.width / contentSize.width;
+
+            rect.left = std::round(horzStart * viewSize.width);
+            rect.right = std::round(horzEnd * viewSize.width);
         }
-        else return math_utils::zeroRectF();
+        return rect;
     }
 
     D2D1_RECT_F ScrollView::vertBarSelfcoordRect(ScrollBarState state) const
@@ -228,22 +231,23 @@ namespace d14engine::uikit
         auto& setting = appearance();
         auto& geoSetting = appearance().scrollBar[(size_t)state].geometry;
 
-        auto selfSize = getSelfSize();
+        auto viewSize = getViewSize();
         auto contentSize = getContentSize();
 
-        if (selfSize.height > 0.0f && contentSize.height > selfSize.height)
+        D2D1_RECT_F rect =
+        {
+            width() - (geoSetting.offset + geoSetting.width), 0.0f,
+            width() - geoSetting.offset, 0.0f
+        };
+        if (viewSize.height > 0.0f && contentSize.height > viewSize.height)
         {
             float vertStart = m_viewportOffset.y / contentSize.height;
-            float vertEnd = vertStart + selfSize.height / contentSize.height;
-            return
-            {
-                width() - (geoSetting.offset + geoSetting.width),
-                vertStart * selfSize.height,
-                width() - geoSetting.offset,
-                vertEnd * selfSize.height
-            };
+            float vertEnd = vertStart + viewSize.height / contentSize.height;
+
+            rect.top = std::round(vertStart * viewSize.height);
+            rect.bottom = std::round(vertEnd * viewSize.height);
         }
-        else return math_utils::zeroRectF();
+        return rect;
     }
 
     void ScrollView::onRendererDrawD2d1LayerHelper(Renderer* rndr)
@@ -402,51 +406,92 @@ namespace d14engine::uikit
 
     void ScrollView::onMouseMoveHelper(MouseMoveEvent& e)
     {
-        ResizablePanel::onMouseMoveHelper(e);
-
         auto p = absoluteToSelfCoord(e.cursorPoint);
 
-        auto selfSize = getSelfSize();
+        //////////////////////////////
+        // Update scroll bar state. //
+        //////////////////////////////
+
+        // This has been initialized in the ctor and is guaranteed to be valid.
+        auto& hitTestRect = m_childrenHitTestRect.value();
+
+        if (isHorzBarEnabled)
+        {
+            auto state = m_isHorzBarHover ?
+                ScrollBarState::Hover : ScrollBarState::Idle;
+
+            auto rect = horzBarSelfcoordRect(state);
+            rect = math_utils::overrideBottom(rect, FLT_MAX);
+
+            // Since the judgment of m_childrenHitTestRect uses isOverlapped,
+            // using isOverlapped here may cause conflicts when the cursor
+            // moves to the boundary between the scroll bar and the hit-test rect.
+            // However, the probability of this situation occurring is very low,
+            // so using isOverlapped here for consistency is also acceptable.
+
+            //m_isHorzBarHover = math_utils::isInside(p, rect);
+            m_isHorzBarHover = math_utils::isOverlapped(p, rect);
+
+            // Note that this should be top rather than bottom.
+            hitTestRect.bottom = rect.top;
+        }
+        else hitTestRect.bottom = m_rect.bottom;
+
+        if (isVertBarEnabled)
+        {
+            auto state = m_isVertBarHover ?
+                ScrollBarState::Hover : ScrollBarState::Idle;
+
+            auto rect = vertBarSelfcoordRect(state);
+            rect = math_utils::overrideRight(rect, FLT_MAX);
+
+            // Refer to the comments above about the update of m_isHorzBarHover.
+            //m_isVertBarHover = math_utils::isInside(p, rect);
+            m_isVertBarHover = math_utils::isOverlapped(p, rect);
+
+            // Note that this should be left rather than right.
+            hitTestRect.right = rect.left;
+        }
+        else hitTestRect.right = m_rect.right;
+
+        // Call helper here to ensure the updated m_childrenHitTestRect is used.
+        ResizablePanel::onMouseMoveHelper(e);
 
         //////////////////////////////
         // Perform viewport motion. //
         //////////////////////////////
 
-        if (selfSize.width > 0.0f && selfSize.height > 0.0f)
+        auto viewSize = getViewSize();
+
+        if (viewSize.width > 0.0f && viewSize.height > 0.0f)
         {
             auto contentSize = getContentSize();
 
-            float horzRatio = contentSize.width / selfSize.width;
-            float vertRatio = contentSize.height / selfSize.height;
+            float horzRatio = contentSize.width / viewSize.width;
+            float vertRatio = contentSize.height / viewSize.height;
 
             if (m_isHorzBarDown)
             {
-                setViewportOffset(math_utils::offset(m_originalViewportOffset,
-                    { std::round((p.x - m_horzBarHoldOffset) * horzRatio), 0.0f }));
+                auto deltaX = std::round
+                (
+                    (p.x - m_horzBarHoldOffset) * horzRatio
+                );
+                setViewportOffset(math_utils::offset
+                (
+                    m_originalViewportOffset, { deltaX, 0.0f }
+                ));
             }
             if (m_isVertBarDown)
             {
-                setViewportOffset(math_utils::offset(m_originalViewportOffset,
-                    { 0.0f, std::round((p.y - m_vertBarHoldOffset) * vertRatio) }));
+                auto deltaY = std::round
+                (
+                    (p.y - m_vertBarHoldOffset) * vertRatio
+                );
+                setViewportOffset(math_utils::offset
+                (
+                    m_originalViewportOffset, { 0.0f, deltaY }
+                ));
             }
-        }
-        //////////////////////////////
-        // Update scroll bar state. //
-        //////////////////////////////
-
-        if (isHorzBarEnabled)
-        {
-            auto state = m_isHorzBarHover ? ScrollBarState::Hover : ScrollBarState::Idle;
-            auto rect = math_utils::overrideBottom(horzBarSelfcoordRect(state), FLT_MAX);
-
-            m_isHorzBarHover = math_utils::isOverlapped(p, rect);
-        }
-        if (isVertBarEnabled)
-        {
-            auto state = m_isVertBarHover ? ScrollBarState::Hover : ScrollBarState::Idle;
-            auto rect = math_utils::overrideRight(vertBarSelfcoordRect(state), FLT_MAX);
-
-            m_isVertBarHover = math_utils::isOverlapped(p, rect);
         }
     }
 

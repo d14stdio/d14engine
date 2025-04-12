@@ -419,9 +419,10 @@ namespace d14engine::uikit
             };
             cursorPoint = platform_utils::restoredByDpi(cursorPoint);
 
-            if (!app->isTriggerDraggingWin32Window)
+            // When dragging the Win32 window, the cursor position should be updated
+            // by the system (not the application), otherwise it will cause ugly jitter.
+            if (!app->m_isDraggingWin32Window)
             {
-                // The cursor position may jitter When dragging the Win32 window.
                 app->m_cursor->setPosition(cursorPoint.x, cursorPoint.y);
             }
             app->m_cursor->setIcon(Cursor::Arrow);
@@ -1409,10 +1410,7 @@ if (app != nullptr) \
         }
         for (auto& uiobj : m_uiObjects)
         {
-            if (uiobj->enableChangeThemeStyleUpdate)
-            {
-                uiobj->onChangeThemeStyle(style);
-            }
+            uiobj->onChangeThemeStyle(style);
         }
         m_themeStyle = style;
     }
@@ -1426,10 +1424,7 @@ if (app != nullptr) \
     {
         for (auto& uiobj : m_uiObjects)
         {
-            if (uiobj->enableChangeLangLocaleUpdate)
-            {
-                uiobj->onChangeLangLocale(codeName);
-            }
+            uiobj->onChangeLangLocale(codeName);
         }
         m_langLocale = codeName;
     }

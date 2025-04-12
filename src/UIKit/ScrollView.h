@@ -42,7 +42,7 @@ namespace d14engine::uikit
         {
             using Func = Function<D2D1_SIZE_F(const ScrollView*)>;
 
-            Func self = {};
+            Func view = {};
             Func content = {};
         }
         customSizeGetter = {};
@@ -55,7 +55,7 @@ namespace d14engine::uikit
         deltaDipsPerScroll = {};
 
     protected:
-        D2D1_SIZE_F getSelfSize() const;
+        D2D1_SIZE_F getViewSize() const;
         D2D1_SIZE_F getContentSize() const;
 
     protected:
