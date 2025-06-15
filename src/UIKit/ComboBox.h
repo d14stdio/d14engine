@@ -43,38 +43,28 @@ namespace d14engine::uikit
         // Public Interfaces
         //------------------------------------------------------------------
     public:
-        void onSelectedChange(IconLabel* content);
+        void onSelectedChange(OptRefer<size_t> index);
 
-        Function<void(ComboBox*, IconLabel*)> f_onSelectedChange = {};
+        Function<void(ComboBox*, OptRefer<size_t>)> f_onSelectedChange = {};
 
         //------------------------------------------------------------------
         // Protected Helpers
         //------------------------------------------------------------------
     protected:
-        void onSelectedChangeHelper(IconLabel* content);
+        void onSelectedChangeHelper(OptRefer<size_t> index);
 
         /////////////////////////
         // Graphics Components //
         /////////////////////////
 
         //------------------------------------------------------------------
-        // Children Objects
-        //------------------------------------------------------------------
-    protected:
-        WeakPtr<MenuItem> m_selected = {};
-
-    public:
-        const WeakPtr<MenuItem>& selected() const;
-        void setSelected(Optional<size_t> indexInDropDownMenu);
-
-        //------------------------------------------------------------------
-        // Master Menu
+        // Drop-Down Menu
         //------------------------------------------------------------------
     protected:
         SharedPtr<PopupMenu> m_dropDownMenu = {};
 
     public:
-        const SharedPtr<PopupMenu>& dropDownMenu() const;
+        ShrdPtrRefer<PopupMenu> dropDownMenu() const;
         void setDropDownMenu(ShrdPtrRefer<PopupMenu> menu);
 
         ///////////////////////
@@ -86,6 +76,16 @@ namespace d14engine::uikit
         //------------------------------------------------------------------
     public:
         Optional<D2D1_POINT_2F> menuOffset = {};
+
+        //------------------------------------------------------------------
+        // Select Item
+        //------------------------------------------------------------------
+    protected:
+        Optional<size_t> m_selectedIndex = {};
+
+    public:
+        OptRefer<size_t> selectedIndex() const;
+        void setSelected(OptRefer<size_t> index);
 
         /////////////////////////
         // Interface Overrides //

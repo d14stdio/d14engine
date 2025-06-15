@@ -353,9 +353,10 @@ void createSettingsTabPage(ConstraintLayout* page)
         [=,
             strModeMap = StrModeMap{ strModeArray.begin(), strModeArray.end() }
         ]
-        (ComboBox* cb, IconLabel* content)
+        (ComboBox* cb, OptRefer<size_t> index)
         {
-            Application::g_app->renderer()->setAntialiasMode2D(strModeMap.at(content->label()->text()));
+            auto& text = cb->content()->label()->text();
+            Application::g_app->renderer()->setAntialiasMode2D(strModeMap.at(text));
         };
         ui_2dAntialiasModeSelector->setSelected(1);
 
@@ -660,12 +661,12 @@ void createSettingsTabPage(ConstraintLayout* page)
         changeTextRenderingMode();
     };
     ui_pixelGeometrySelector->f_onSelectedChange =
-    [=](ComboBox* cb, IconLabel* content)
+    [=](ComboBox* cb, OptRefer<size_t> index)
     {
         changeTextRenderingMode();
     };
     ui_renderingModeSelector->f_onSelectedChange =
-    [=](ComboBox* cb, IconLabel* content)
+    [=](ComboBox* cb, OptRefer<size_t> index)
     {
         changeTextRenderingMode();
 
@@ -705,7 +706,7 @@ void createSettingsTabPage(ConstraintLayout* page)
                 }
             }
         };
-        auto& modeStr = content->label()->text();
+        auto& modeStr = cb->content()->label()->text();
         if (modeStr == L"Aliased")
         {
             updateConflictMenuItems({ L"ClearType", L"Grayscale" });
@@ -725,10 +726,8 @@ void createSettingsTabPage(ConstraintLayout* page)
     [=,
         textAntialiasModeMap = TextAntialiasModeMap{ textAntialiasModePairs.begin(), textAntialiasModePairs.end() }
     ]
-    (ComboBox* cb, IconLabel* content)
+    (ComboBox* cb, OptRefer<size_t> index)
     {
-        Application::g_app->renderer()->setTextAntialiasMode(textAntialiasModeMap.at(content->label()->text()));
-
         // Text Antialias Mode Conflict:
         //
         // D2D1_TEXT_ANTIALIAS_MODE_ALIASED:
@@ -759,7 +758,7 @@ void createSettingsTabPage(ConstraintLayout* page)
                 }
             }
         };
-        auto& modeStr = content->label()->text();
+        auto& modeStr = cb->content()->label()->text();
         if (modeStr == L"Aliased")
         {
             updateConflictMenuItems({ L"GDI Classic", L"GDI Natural", L"Natural", L"Natural Symmetric" });
@@ -772,6 +771,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         {
             updateConflictMenuItems({ L"Aliased"});
         }
+        Application::g_app->renderer()->setTextAntialiasMode(textAntialiasModeMap.at(modeStr));
     };
     ui_textAntialiasModeSelector->setSelected(2); // Antialias ClearType
     ui_renderingModeSelector->setSelected(5); // Natural Symmetric

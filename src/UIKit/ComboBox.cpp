@@ -65,57 +65,19 @@ namespace d14engine::uikit
         ));
     }
 
-    void ComboBox::onSelectedChange(IconLabel* content)
+    void ComboBox::onSelectedChange(OptRefer<size_t> index)
     {
-        onSelectedChangeHelper(content);
+        onSelectedChangeHelper(index);
 
-        if (f_onSelectedChange) f_onSelectedChange(this, content);
+        if (f_onSelectedChange) f_onSelectedChange(this, index);
     }
 
-    void ComboBox::onSelectedChangeHelper(IconLabel* content)
+    void ComboBox::onSelectedChangeHelper(OptRefer<size_t> index)
     {
         // This method intentionally left blank.
     }
 
-    const WeakPtr<MenuItem>& ComboBox::selected() const
-    {
-        return m_selected;
-    }
-
-    void ComboBox::setSelected(Optional<size_t> indexInDropDownMenu)
-    {
-        WeakPtr<MenuItem> originalSelected = m_selected;
-
-        auto& items = m_dropDownMenu->items();
-        if (indexInDropDownMenu.has_value() && indexInDropDownMenu.value() < items.size())
-        {
-            auto& item = items[indexInDropDownMenu.value()];
-            auto content = item->getContent<IconLabel>().lock();
-
-            m_selected = item;
-            if (content != nullptr)
-            {
-                m_content->icon = content->icon;
-
-                auto label = content->label().get();
-                m_content->label()->copyTextStyle(label, label->text());
-
-                m_content->updateLayout();
-                m_content->setPrivateVisible(true);
-            }
-        }
-        else // Typically, pass nullopt to clear current selected item.
-        {
-            m_selected.reset();
-            m_content->setPrivateVisible(false);
-        }
-        if (!cpp_lang_utils::isMostDerivedEqual(originalSelected.lock(), m_selected.lock()))
-        {
-            onSelectedChange(m_content.get());
-        }
-    }
-
-    const SharedPtr<PopupMenu>& ComboBox::dropDownMenu() const
+    ShrdPtrRefer<PopupMenu> ComboBox::dropDownMenu() const
     {
         return m_dropDownMenu;
     }
@@ -128,6 +90,41 @@ namespace d14engine::uikit
 
             m_dropDownMenu->release();
             m_dropDownMenu = menu;
+        }
+    }
+
+    OptRefer<size_t> ComboBox::selectedIndex() const
+    {
+        return m_selectedIndex;
+    }
+
+    void ComboBox::setSelected(OptRefer<size_t> index)
+    {
+        auto& items = m_dropDownMenu->items();
+        if (index.has_value() && index.value() < items.size())
+        {
+            auto& item = items[index.value()];
+            auto content = item->getContent<IconLabel>().lock();
+
+            if (content != nullptr)
+            {
+                m_content->icon = content->icon;
+
+                auto label = content->label().get();
+                m_content->label()->copyTextStyle(label, label->text());
+            }
+        }
+        else // Typically, pass nullopt to clear current selected item.
+        {
+            m_content->icon = {};
+            m_content->label()->setText({});
+        }
+        m_content->updateLayout();
+
+        if (index != m_selectedIndex)
+        {
+            onSelectedChange(index);
+            m_selectedIndex = index;
         }
     }
 
@@ -189,7 +186,12 @@ namespace d14engine::uikit
         {
             if (!menuOffset.has_value())
             {
-                auto offsetY = m_selected.expired() ? 0.0f : -m_selected.lock()->position().y;
+                float offsetY = 0.0f;
+                if (m_selectedIndex.has_value())
+                {
+                    auto& item = m_dropDownMenu->items()[m_selectedIndex.value()];
+                    offsetY = -item->position().y;
+                }
                 m_dropDownMenu->setPosition(math_utils::offset(absolutePosition(), { 0.0f, offsetY }));
             }
             else m_dropDownMenu->setPosition(selfCoordToAbsolute(menuOffset.value()));

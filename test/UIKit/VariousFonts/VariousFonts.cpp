@@ -319,33 +319,37 @@ D14_SET_APP_ENTRY(mainVariousFonts)
             geoInfo2.axis.y = { 0, 1 };
             ui_controlPanel->addElement(ui_label, geoInfo2);
 
-            std::vector<std::pair<Wstring, D2D1_TEXT_ANTIALIAS_MODE>> strModeArray =
+            std::vector<std::pair<Wstring, D2D1_TEXT_ANTIALIAS_MODE>> textAntialiasModePairs =
             {
                 { L"Default", D2D1_TEXT_ANTIALIAS_MODE_DEFAULT },
                 { L"ClearType", D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE },
                 { L"Grayscale", D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE }
             };
-            PopupMenu::ItemArray strModeItems = {};
-            for (auto& strMode : strModeArray)
+            PopupMenu::ItemArray modeItems = {};
+            for (auto& mode : textAntialiasModePairs)
             {
-                strModeItems.push_back(makeUIObject<MenuItem>(
-                    IconLabel::comboBoxLayout(strMode.first), math_utils::heightOnlyRect(40.0f)));
+                modeItems.push_back(makeUIObject<MenuItem>(
+                    IconLabel::comboBoxLayout(mode.first), math_utils::heightOnlyRect(40.0f)));
             }
             auto& dropDownMenu = ui_textAntialiasModeSelector->dropDownMenu();
 
             dropDownMenu->setSize(dropDownMenu->width(), 120.0f);
-            dropDownMenu->appendItem(strModeItems);
+            dropDownMenu->appendItem(modeItems);
 
             ui_textAntialiasModeSelector->setSelected(0);
 
-            using StrModeMap = std::unordered_map<Wstring, D2D1_TEXT_ANTIALIAS_MODE>;
+            using TextAntialiasModeMap = std::unordered_map<Wstring, D2D1_TEXT_ANTIALIAS_MODE>;
             ui_textAntialiasModeSelector->f_onSelectedChange =
             [=,
-                strModeMap = StrModeMap{ strModeArray.begin(), strModeArray.end() }
+                textAntialiasModeMap = TextAntialiasModeMap
+                {
+                    textAntialiasModePairs.begin(), textAntialiasModePairs.end()
+                }
             ]
-            (ComboBox* cb, IconLabel* content)
+            (ComboBox* cb, OptRefer<size_t> index)
             {
-                app->renderer()->setTextAntialiasMode(strModeMap.at(content->label()->text()));
+                auto& modeStr = cb->content()->label()->text();
+                app->renderer()->setTextAntialiasMode(textAntialiasModeMap.at(modeStr));
             };
         }
         auto ui_fontSizeSlider = makeUIObject<HorzSlider>();
@@ -453,7 +457,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
                 }
             }
         };
-        ui_fontNameSelector->f_onSelectedChange = [=](ComboBox* cb, IconLabel* content)
+        ui_fontNameSelector->f_onSelectedChange = [=](ComboBox* cb, OptRefer<size_t> index)
         {
             if (!wk_fontSizeSlider.expired() && !wk_fontWeightSelector.expired())
             {
@@ -461,7 +465,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
                 auto sh_fontWeightSlider = wk_fontWeightSelector.lock();
 
                 auto textFormatName =
-                    content->label()->text() + L"/" +
+                    cb->content()->label()->text() + L"/" +
                     sh_fontWeightSlider->valueLabel()->text() + L"/" +
                     std::to_wstring(math_utils::round(sh_fontSizeSlider->value()));
 
