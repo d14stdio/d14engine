@@ -28,7 +28,7 @@ namespace d14engine::renderer
 
     public:
         double fps() const;
-        // round integer number of fps
+        // rounded integer value of fps
         UINT fpsNum() const;
 
         double sampleInterval() const;

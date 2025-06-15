@@ -562,7 +562,7 @@ do { \
         prvwDst.shadow.offset = prvwSrc.shadow.offset;
         prvwDst.shadow.standardDeviation = prvwSrc.shadow.standardDeviation;
 
-        PopupMenu::ItemList prvwItems = {};
+        PopupMenu::ItemArray prvwItems = {};
 
         // Insert the non-candidate tabs into the preview-panel.
         for ( ; tabIndex.valid(); ++tabIndex )
@@ -717,6 +717,23 @@ do { \
             return cpp_lang_utils::isMostDerivedEqual(targetTabGroup, shared_from_this());
         }
         else return false;
+    }
+
+    void TabGroup::onRendererUpdateObject2DHelper(Renderer* rndr)
+    {
+        ResizablePanel::onRendererUpdateObject2DHelper(rndr);
+
+        for (auto& tab : m_tabs)
+        {
+            if (tab.caption->isD2d1ObjectVisible())
+            {
+                tab.caption->onRendererUpdateObject2D(rndr);
+            }
+            if (tab.content->isD2d1ObjectVisible())
+            {
+                tab.content->onRendererUpdateObject2D(rndr);
+            }
+        }
     }
 
     void TabGroup::onRendererDrawD2d1LayerHelper(Renderer* rndr)

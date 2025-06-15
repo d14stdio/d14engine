@@ -30,20 +30,18 @@ namespace d14engine::uikit
 
         Function<void(PopupMenu*, bool)> f_onChangeActivity = {};
 
-        using WaterfallView::ItemIndexParam;
+        void onTriggerMenuItem(size_t index);
 
-        void onTriggerMenuItem(ItemIndexParam itemIndex);
-
-        Function<void(PopupMenu*, ItemIndexParam)> f_onTriggerMenuItem = {};
+        Function<void(PopupMenu*, size_t)> f_onTriggerMenuItem = {};
 
     protected:
         virtual void onChangeActivityHelper(bool value);
 
-        virtual void onTriggerMenuItemHelper(ItemIndexParam itemIndex);
+        virtual void onTriggerMenuItemHelper(size_t index);
 
     public:
-        void insertItem(const ItemList& items, size_t index = 0) override;
-        void appendItem(const ItemList& items);
+        void insertItem(const ItemArray& items, size_t index = 0) override;
+        void appendItem(const ItemArray& items);
 
         void removeItem(size_t index, size_t count = 1) override;
         void clearAllItems() override;

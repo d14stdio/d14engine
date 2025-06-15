@@ -101,10 +101,10 @@ namespace d14engine::uikit
     {
         if (!cpp_lang_utils::isMostDerivedEqual(content, m_content))
         {
-            removeUIObject(m_content);
+            unregisterUIEvents(m_content);
 
             m_content = content;
-            addUIObject(m_content);
+            registerUIEvents(m_content);
 
             if (m_content) m_content->setPosition(0.0f, 0.0f);
 
@@ -248,6 +248,16 @@ namespace d14engine::uikit
             rect.bottom = std::round(vertEnd * viewSize.height);
         }
         return rect;
+    }
+
+    void ScrollView::onRendererUpdateObject2DHelper(Renderer* rndr)
+    {
+        ResizablePanel::onRendererUpdateObject2DHelper(rndr);
+
+        if (m_content && m_content->isD2d1ObjectVisible())
+        {
+            m_content->onRendererUpdateObject2D(rndr);
+        }
     }
 
     void ScrollView::onRendererDrawD2d1LayerHelper(Renderer* rndr)

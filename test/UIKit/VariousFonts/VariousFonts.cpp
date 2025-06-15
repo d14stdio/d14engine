@@ -282,7 +282,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
             geoInfo2.spacing.left = 24.0f;
             ui_controlPanel->addElement(ui_label, geoInfo2);
 
-            PopupMenu::ItemList fontNameItems = {};
+            PopupMenu::ItemArray fontNameItems = {};
             for (auto& fontName : fontNameArray)
             {
                 auto content = IconLabel::comboBoxLayout(fontName);
@@ -325,7 +325,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
                 { L"ClearType", D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE },
                 { L"Grayscale", D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE }
             };
-            PopupMenu::ItemList strModeItems = {};
+            PopupMenu::ItemArray strModeItems = {};
             for (auto& strMode : strModeArray)
             {
                 strModeItems.push_back(makeUIObject<MenuItem>(

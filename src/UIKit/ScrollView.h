@@ -59,7 +59,8 @@ namespace d14engine::uikit
         D2D1_SIZE_F getContentSize() const;
 
     protected:
-        // NO WeakPtr here as we provide a content-param in the ctor.
+        // Avoid WeakPtr here: a init-param for this member is provided in ctor but the actual
+        // init happens in onInitializeFinish. WeakPtr would make ref-count hit zero unexpectedly.
         SharedPtr<Panel> m_content = {};
 
     public:
@@ -108,6 +109,8 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
+        void onRendererUpdateObject2DHelper(renderer::Renderer* rndr) override;
+
         void onRendererDrawD2d1LayerHelper(renderer::Renderer* rndr) override;
 
         void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;

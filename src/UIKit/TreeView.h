@@ -14,28 +14,30 @@ namespace d14engine::uikit
         void onInitializeFinish() override;
 
     protected:
-        ItemList m_rootItems = {};
+        ItemArray m_rootItems = {};
 
     public:
-        const ItemList& rootItems() const;
+        const ItemArray& rootItems() const;
 
-        void insertRootItem(const ItemList& rootItems, size_t rootIndex = 0);
-        void appendRootItem(const ItemList& rootItems);
+        void insertRootItem(const ItemArray& rootItems, size_t rootIndex = 0);
+        void appendRootItem(const ItemArray& rootItems);
 
         void removeRootItem(size_t rootIndex, size_t count = 1);
         void clearAllItems() override;
 
-    protected:
-        float m_baseHorzIndent = 24.0f;
+    public:
+        constexpr static float g_defaultHorzIndent = 24.0f;
 
-        float m_horzIndentEachNodeLevel = 24.0f;
+    protected:
+        float m_baseHorzIndent = g_defaultHorzIndent;
+        float m_nodeHorzIndent = g_defaultHorzIndent;
 
     public:
         float baseHorzIndent() const;
         void setBaseHorzIndent(float value);
 
-        float horzIndentEachNodelLevel() const;
-        void setHorzIndentEachNodelLevel(float value);
+        float nodeHorzIndent() const;
+        void setNodeHorzIndent(float value);
 
     protected:
         // You can insert/erase only root-items with the master tree-view.
@@ -45,8 +47,8 @@ namespace d14engine::uikit
 
         void setItemIndexRangeActive(bool value) override;
 
-        ItemIndex getRootItemGlobalIndex(
-            size_t rootIndex,
-            Optional<ItemIndex> start = {}) const;
+        Optional<size_t> getRootItemGlobalIndex(
+            size_t rootIndex, // startIndex in global field
+            Optional<size_t> startIndex = std::nullopt) const;
     };
 }

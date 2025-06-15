@@ -65,7 +65,7 @@ namespace d14engine::uikit
 
     public:
         const WeakPtr<MenuItem>& selected() const;
-        void setSelected(size_t indexInDropDownMenu);
+        void setSelected(Optional<size_t> indexInDropDownMenu);
 
         //------------------------------------------------------------------
         // Master Menu

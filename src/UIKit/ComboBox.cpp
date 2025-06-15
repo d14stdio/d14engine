@@ -28,18 +28,17 @@ namespace d14engine::uikit
 
         m_dropDownMenu = makeRootUIObject<PopupMenu>();
 
-        m_dropDownMenu->f_onTriggerMenuItem = [this]
-        (PopupMenu* menu, PopupMenu::ItemIndexParam itemIndex)
+        m_dropDownMenu->f_onTriggerMenuItem = [this](PopupMenu* menu, size_t index)
         {
-            setSelected(itemIndex.index);
+            setSelected(index);
         };
         m_dropDownMenu->setBackgroundTriggerPanel(true);
 
-        auto& geoSetting = m_dropDownMenu->appearance().geometry;
-        geoSetting.extension = geoSetting.roundRadius = roundRadiusX;
+        auto& geometry = m_dropDownMenu->appearance().geometry;
+        geometry.extension = geometry.roundRadius = roundRadiusX;
 
         m_dropDownMenu->setSize(width(), m_dropDownMenu->height());
-        m_dropDownMenu->setPosition(m_absoluteRect.left, m_absoluteRect.bottom);
+        m_dropDownMenu->setPosition(math_utils::leftBottom(m_absoluteRect));
     }
 
     void ComboBox::ArrowIcon::loadStrokeStyle()
@@ -83,29 +82,29 @@ namespace d14engine::uikit
         return m_selected;
     }
 
-    void ComboBox::setSelected(size_t indexInDropDownMenu)
+    void ComboBox::setSelected(Optional<size_t> indexInDropDownMenu)
     {
         WeakPtr<MenuItem> originalSelected = m_selected;
 
         auto& items = m_dropDownMenu->items();
-        if (indexInDropDownMenu >= 0 && indexInDropDownMenu < items.size())
+        if (indexInDropDownMenu.has_value() && indexInDropDownMenu.value() < items.size())
         {
-            auto itor = std::next(items.begin(), indexInDropDownMenu);
-            auto newContent = (*itor)->getContent<IconLabel>().lock();
+            auto& item = items[indexInDropDownMenu.value()];
+            auto content = item->getContent<IconLabel>().lock();
 
-            m_selected = (*itor);
-            if (newContent != nullptr)
+            m_selected = item;
+            if (content != nullptr)
             {
-                m_content->icon = newContent->icon;
+                m_content->icon = content->icon;
 
-                auto newLabel = newContent->label().get();
-                m_content->label()->copyTextStyle(newLabel, newLabel->text());
+                auto label = content->label().get();
+                m_content->label()->copyTextStyle(label, label->text());
 
                 m_content->updateLayout();
                 m_content->setPrivateVisible(true);
             }
         }
-        else // Typically, pass SIZE_MAX to clear current selected item.
+        else // Typically, pass nullopt to clear current selected item.
         {
             m_selected.reset();
             m_content->setPrivateVisible(false);
@@ -125,7 +124,7 @@ namespace d14engine::uikit
     {
         if (menu && !cpp_lang_utils::isMostDerivedEqual(menu, m_dropDownMenu))
         {
-            setSelected(SIZE_MAX);
+            setSelected(std::nullopt);
 
             m_dropDownMenu->release();
             m_dropDownMenu = menu;
@@ -141,7 +140,7 @@ namespace d14engine::uikit
         /////////////////////
 
         auto& setting = appearance().arrow;
-        auto& geoSetting = setting.geometry;
+        auto& geometry = setting.geometry;
 
         auto& background = m_enabled ? setting.background : setting.secondaryBackground;
 
@@ -152,16 +151,16 @@ namespace d14engine::uikit
 
         rndr->d2d1DeviceContext()->DrawLine
         (
-        /* point0      */ math_utils::offset(arrowOrigin, geoSetting.line0.point0),
-        /* point1      */ math_utils::offset(arrowOrigin, geoSetting.line0.point1),
+        /* point0      */ math_utils::offset(arrowOrigin, geometry.line0.point0),
+        /* point1      */ math_utils::offset(arrowOrigin, geometry.line0.point1),
         /* brush       */ resource_utils::solidColorBrush(),
         /* strokeWidth */ setting.strokeWidth,
         /* strokeStyle */ arrowIcon.strokeStyle.Get()
         );
         rndr->d2d1DeviceContext()->DrawLine
         (
-        /* point0      */ math_utils::offset(arrowOrigin, geoSetting.line1.point0),
-        /* point1      */ math_utils::offset(arrowOrigin, geoSetting.line1.point1),
+        /* point0      */ math_utils::offset(arrowOrigin, geometry.line1.point0),
+        /* point1      */ math_utils::offset(arrowOrigin, geometry.line1.point1),
         /* brush       */ resource_utils::solidColorBrush(),
         /* strokeWidth */ setting.strokeWidth,
         /* strokeStyle */ arrowIcon.strokeStyle.Get()

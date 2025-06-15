@@ -106,13 +106,18 @@ namespace d14engine::renderer
 
         ++m_frameCount;
 
+        auto currPoint = elapsedSecs();
         auto updatePoint = m_updatePoint + m_sampleInterval;
-        if (elapsedSecs() >= updatePoint)
+
+        if (currPoint >= updatePoint)
         {
-            m_fps = (double)m_frameCount / m_sampleInterval;
+            auto sampleInterval = currPoint - m_updatePoint;
+            sampleInterval = std::max(sampleInterval, DBL_EPSILON);
+
+            m_fps = (double)m_frameCount / sampleInterval;
 
             m_frameCount = 0;
-            m_updatePoint = elapsedSecs();
+            m_updatePoint = currPoint;
         }
     }
 

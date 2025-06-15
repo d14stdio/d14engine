@@ -2,14 +2,10 @@
 
 #include "Common/Precompile.h"
 
-#include "Common/CppLangUtils/IndexIterator.h"
-#include "Common/RuntimeError.h"
-
 // Do NOT remove this header for code tidy
 // as the template deduction relies on it.
 #include "Common/CppLangUtils/PointerCompare.h"
 
-#include "UIKit/Application.h"
 #include "UIKit/ConstraintLayout.h"
 #include "UIKit/ScrollView.h"
 #include "UIKit/ViewItem.h"
@@ -36,13 +32,15 @@ namespace d14engine::uikit
 
             m_layout = std::dynamic_pointer_cast<ConstraintLayout>(m_content);
 
-            m_layout->f_onReleaseUIObject = [this](Panel* p, ShrdPtrRefer<Panel> uiobj)
+            m_layout->f_onReleaseUIObject = [this]
+            (Panel* p, ShrdPtrRefer<Panel> uiobj)
             {
-                for (ItemIndex itemIndex = &m_items; itemIndex.valid(); ++itemIndex)
+                for (size_t i = 0; i < m_items.size(); ++i)
                 {
-                    if (cpp_lang_utils::isMostDerivedEqual(uiobj, *itemIndex))
+                    auto& item = m_items[i];
+                    if (cpp_lang_utils::isMostDerivedEqual(uiobj, item))
                     {
-                        removeItem(itemIndex); return true;
+                        removeItem(i); return true;
                     }
                 }
                 return false;
@@ -66,12 +64,7 @@ namespace d14engine::uikit
         // Public Interfaces
         //------------------------------------------------------------------
     public:
-        using ItemList = std::list<SharedPtr<Item_T>>;
-
-        using ItemIndex = cpp_lang_utils::IndexIterator<ItemList>;
-
-        // Use std::less to enable Heterogeneous Lookup.
-        using ItemIndexSet = std::set<ItemIndex, std::less<>>;
+        using ItemIndexSet = std::set<size_t>;
 
         void onSelectChange(const ItemIndexSet& selected)
         {
@@ -106,11 +99,11 @@ namespace d14engine::uikit
             float offset = 0.0f;
             for (auto& item : m_items)
             {
-                auto elemItor = m_layout->findElement(item);
-                if (elemItor.has_value())
+                auto itor = m_layout->findElement(item);
+                if (itor.has_value())
                 {
-                    auto& elem = elemItor.value()->first;
-                    auto& geoInfo = elemItor.value()->second;
+                    auto& elem = itor.value()->first;
+                    auto& geoInfo = itor.value()->second;
 
                     geoInfo.Top.ToTop = offset;
                     m_layout->updateElement(elem, geoInfo);
@@ -120,13 +113,16 @@ namespace d14engine::uikit
             m_layout->setSize(width(), offset);
         }
 
+    public:
+        using ItemArray = std::vector<SharedPtr<Item_T>>;
+
     protected:
-        ItemList m_items = {};
+        ItemArray m_items = {};
 
         ItemIndexSet m_selectedItemIndices = {};
 
     public:
-        const ItemList& items() const
+        const ItemArray& items() const
         {
             return m_items;
         }
@@ -135,10 +131,13 @@ namespace d14engine::uikit
             return m_selectedItemIndices;
         }
 
-        virtual void insertItem(const ItemList& items, size_t index = 0)
+        virtual void insertItem(const ItemArray& items, size_t index = 0)
         {
             index = std::clamp(index, 0_uz, m_items.size());
 
+            //------------------------------------------------------
+            // Master Layout
+            //------------------------------------------------------
             float height = 0.0f;
             for (auto& item : items)
             {
@@ -146,48 +145,58 @@ namespace d14engine::uikit
             }
             m_layout->setSize(width(), m_layout->height() + height);
 
-            auto itemIndex = ItemIndex::begin(&m_items);
-
             float offset = 0.0f;
+            //------------------------------------------------------
             // Lower Items
-            for (; itemIndex < index; ++itemIndex)
+            //------------------------------------------------------
+            for (size_t i = 0; i < index; ++i)
             {
-                offset += (*itemIndex)->height();
+                offset += m_items[i]->height();
             }
-            ItemIndex insertStartIndex = itemIndex;
+            //------------------------------------------------------
             // Inserted Items
+            //------------------------------------------------------
             for (auto& item : items)
             {
                 item->setPrivateVisible(false);
                 item->appEventReactability.hitTest = false;
 
-                ConstraintLayout::GeometryInfo info = {};
+                ConstraintLayout::GeometryInfo geoInfo = {};
 
-                info.keepWidth = false;
-                info.Left.ToLeft = 0.0f;
-                info.Right.ToRight = 0.0f;
-                info.Top.ToTop = offset;
+                geoInfo.keepWidth = false;
+                geoInfo.Left.ToLeft = 0.0f;
+                geoInfo.Right.ToRight = 0.0f;
+                geoInfo.Top.ToTop = offset;
 
-                m_layout->addElement(item, info);
+                m_layout->addElement(item, geoInfo);
 
                 offset += item->height();
             }
+            //------------------------------------------------------
             // Higher Items
-            for (; itemIndex < m_items.size(); ++itemIndex)
+            //------------------------------------------------------
+            for (size_t i = index; i < m_items.size(); ++i)
             {
-                auto elemItor = m_layout->findElement(*itemIndex);
-                if (elemItor.has_value())
+                auto itor = m_layout->findElement(m_items[i]);
+                if (itor.has_value())
                 {
-                    auto& elem = elemItor.value()->first;
-                    auto& geoInfo = elemItor.value()->second;
+                    auto& elem = itor.value()->first;
+                    auto& geoInfo = itor.value()->second;
 
                     geoInfo.Top.ToTop = offset;
                     m_layout->updateElement(elem, geoInfo);
                 }
-                offset += (*itemIndex)->height();
+                offset += m_items[i]->height();
             }
-            m_items.insert(insertStartIndex.iterator, items.begin(), items.end());
+            //------------------------------------------------------
+            // Item Array
+            //------------------------------------------------------
 
+            m_items.insert(m_items.begin() + index, items.begin(), items.end());
+
+            //------------------------------------------------------
+            // Item Indices
+            //------------------------------------------------------
             ItemIndexSet updatedItemIndices = {};
             for (auto& itemIndex : m_selectedItemIndices)
             {
@@ -195,15 +204,22 @@ namespace d14engine::uikit
                 {
                     updatedItemIndices.insert(itemIndex);
                 }
-                else updatedItemIndices.insert(itemIndex.getIndexNext(items.size()));
+                else // needs to update
+                {
+                    updatedItemIndices.insert(itemIndex + items.size());
+                }
             }
             m_selectedItemIndices = std::move(updatedItemIndices);
 
 #define UPDATE_ITEM_INDEX(Item_Index) \
 do { \
-    if (Item_Index.generalValid() && Item_Index >= index) \
+    if (Item_Index.has_value()) \
     { \
-        Item_Index.moveIndexNext(items.size()); \
+        auto& indexValue = Item_Index.value(); \
+        if (indexValue >= index) \
+        { \
+            indexValue += items.size(); \
+        } \
     } \
 } while (0)
             UPDATE_ITEM_INDEX(m_lastHoverItemIndex);
@@ -225,44 +241,56 @@ do { \
                 count = std::min(count, m_items.size() - index);
                 size_t endIndex = index + count;
 
+                //------------------------------------------------------
+                // Master Layout
+                //------------------------------------------------------
                 float height = 0.0f;
-                for (ItemIndex itemIndex = { &m_items, index }; itemIndex < endIndex; ++itemIndex)
+                for (size_t i = index; i < endIndex; ++i)
                 {
-                    height += (*itemIndex)->height();
+                    height += m_items[i]->height();
                 }
                 m_layout->setSize(width(), m_layout->height() - height);
 
-                auto itemIndex = ItemIndex::begin(&m_items);
-
                 float offset = 0.0f;
+                //------------------------------------------------------
                 // Lower Items
-                for (; itemIndex < index; ++itemIndex)
+                //------------------------------------------------------
+                for (size_t i = 0; i < index; ++i)
                 {
-                    offset += (*itemIndex)->height();
+                    offset += m_items[i]->height();
                 }
-                ItemIndex eraseStartIndex = itemIndex;
+                //------------------------------------------------------
                 // Removed Items
-                for (; itemIndex < endIndex; ++itemIndex)
+                //------------------------------------------------------
+                for (size_t i = index; i < endIndex; ++i)
                 {
-                    m_layout->removeElement(*itemIndex);
+                    m_layout->removeElement(m_items[i]);
                 }
-                ItemIndex eraseEndIndex = itemIndex;
+                //------------------------------------------------------
                 // Higher Items
-                for (; itemIndex < m_items.size(); ++itemIndex)
+                //------------------------------------------------------
+                for (size_t i = endIndex; i < m_items.size(); ++i)
                 {
-                    auto elemItor = m_layout->findElement(*itemIndex);
-                    if (elemItor.has_value())
+                    auto itor = m_layout->findElement(m_items[i]);
+                    if (itor.has_value())
                     {
-                        auto& elem = elemItor.value()->first;
-                        auto& geoInfo = elemItor.value()->second;
+                        auto& elem = itor.value()->first;
+                        auto& geoInfo = itor.value()->second;
 
                         geoInfo.Top.ToTop = offset;
                         m_layout->updateElement(elem, geoInfo);
                     }
-                    offset += (*itemIndex)->height();
+                    offset += m_items[i]->height();
                 }
-                m_items.erase(eraseStartIndex.iterator, eraseEndIndex.iterator);
+                //------------------------------------------------------
+                // Item Array
+                //------------------------------------------------------
 
+                m_items.erase(m_items.begin() + index, m_items.begin() + endIndex);
+
+                //------------------------------------------------------
+                // Item Indices
+                //------------------------------------------------------
                 ItemIndexSet updatedItemIndices = {};
                 for (auto& itemIndex : m_selectedItemIndices)
                 {
@@ -272,60 +300,36 @@ do { \
                     }
                     else if (itemIndex >= endIndex)
                     {
-                        updatedItemIndices.insert(itemIndex.getIndexPrev(count));
+                        updatedItemIndices.insert(itemIndex - count);
                     }
                 }
                 m_selectedItemIndices = std::move(updatedItemIndices);
 
 #define UPDATE_ITEM_INDEX(Item_Index) \
 do { \
-    if (Item_Index.generalValid()) \
+    if (Item_Index.has_value()) \
     { \
-        if (Item_Index >= endIndex) \
+        auto& indexValue = Item_Index.value(); \
+        if (indexValue < index) \
         { \
-            Item_Index.moveIndexPrev(count); \
+            /* No change needed. */ \
         } \
-        else if (Item_Index >= index) \
+        else if (indexValue >= endIndex) \
         { \
-            Item_Index.invalidate(); \
+            indexValue -= count; \
         } \
+        else Item_Index.reset(); \
     } \
 } while (0)
                 UPDATE_ITEM_INDEX(m_lastHoverItemIndex);
                 UPDATE_ITEM_INDEX(m_lastSelectedItemIndex);
                 UPDATE_ITEM_INDEX(m_extendedSelectItemIndex);
 
+                UPDATE_ITEM_INDEX(m_activeItemIndexRange.index1);
+                UPDATE_ITEM_INDEX(m_activeItemIndexRange.index2);
+
 #undef UPDATE_ITEM_INDEX
 
-                if (m_activeItemIndexRange.index1.generalValid() &&
-                    m_activeItemIndexRange.index2.generalValid())
-                {
-                    if (m_activeItemIndexRange.index1 >= endIndex)
-                    {
-                        m_activeItemIndexRange.index1.moveIndexPrev(count);
-                        m_activeItemIndexRange.index2.moveIndexPrev(count);
-                    }
-                    else if (m_activeItemIndexRange.index1 >= index)
-                    {
-                        if (m_activeItemIndexRange.index2 >= endIndex)
-                        {
-                            m_activeItemIndexRange.index1 = eraseEndIndex.getIndexPrev(count);
-                        }
-                        else // all visible items removed
-                        {
-                            m_activeItemIndexRange.index1.invalidate();
-                            m_activeItemIndexRange.index2.invalidate();
-                        }
-                    }
-                    else if (m_activeItemIndexRange.index2 >= endIndex)
-                    {
-                        m_activeItemIndexRange.index2.moveIndexPrev(count);
-                    }
-                    else if (m_activeItemIndexRange.index2 >= index)
-                    {
-                        m_activeItemIndexRange.index2 = eraseEndIndex.getIndexPrev(count + 1);
-                    }
-                }
                 updateItemIndexRangeActivity();
             }
         }
@@ -336,14 +340,14 @@ do { \
             m_layout->setSize(m_layout->width(), 0.0f);
 
             m_items.clear();
-
             m_selectedItemIndices.clear();
-            m_lastHoverItemIndex.invalidate();
-            m_lastSelectedItemIndex.invalidate();
-            m_extendedSelectItemIndex.invalidate();
 
-            m_activeItemIndexRange.index1.invalidate();
-            m_activeItemIndexRange.index2.invalidate();
+            m_lastHoverItemIndex.reset();
+            m_lastSelectedItemIndex.reset();
+            m_extendedSelectItemIndex.reset();
+
+            m_activeItemIndexRange.index1.reset();
+            m_activeItemIndexRange.index2.reset();
         }
 
         ///////////////////////
@@ -364,171 +368,160 @@ do { \
         // Select Trigger
         //------------------------------------------------------------------
     protected:
-        using ItemIndexParam = const ItemIndex&;
-
-        ItemIndex m_lastHoverItemIndex{};
-        ItemIndex m_lastSelectedItemIndex{};
-
-        ItemIndex m_extendedSelectItemIndex{};
+        Optional<size_t> m_lastHoverItemIndex = {};
+        Optional<size_t> m_lastSelectedItemIndex = {};
+        Optional<size_t> m_extendedSelectItemIndex = {};
 
         void triggerNoneSelect()
         {
-            for (auto& itemIndex : m_selectedItemIndices)
+            for (auto& i : m_selectedItemIndices)
             {
-                (*itemIndex)->triggerUnchkStateTrans();
+                m_items[i]->triggerUnchkStateTrans();
             }
             m_selectedItemIndices.clear();
 
-            m_lastSelectedItemIndex.invalidate();
-            m_extendedSelectItemIndex.invalidate();
+            m_lastSelectedItemIndex.reset();
+            m_extendedSelectItemIndex.reset();
         }
 
-        void triggerSingleSelect(ItemIndexParam itemIndex)
+        void triggerSingleSelect(size_t itemIndex)
         {
-            for (auto& tmpItemIndex : m_selectedItemIndices)
+            for (auto& i : m_selectedItemIndices)
             {
-                (*tmpItemIndex)->triggerUnchkStateTrans();
+                m_items[i]->triggerUnchkStateTrans();
             }
-            (*itemIndex)->triggerCheckStateTrans();
+            m_items[itemIndex]->triggerCheckStateTrans();
 
             m_selectedItemIndices = { itemIndex };
 
-            m_lastSelectedItemIndex = m_extendedSelectItemIndex = itemIndex;
+            m_lastSelectedItemIndex = itemIndex;
+            m_extendedSelectItemIndex = itemIndex;
         }
 
-        void triggerMultipleSelect(ItemIndexParam itemIndex)
+        void triggerMultipleSelect(size_t itemIndex)
         {
-            auto itemIndexItor = m_selectedItemIndices.find(itemIndex);
-            if (itemIndexItor != m_selectedItemIndices.end())
+            auto itor = m_selectedItemIndices.find(itemIndex);
+            if (itor != m_selectedItemIndices.end())
             {
-                (*itemIndex)->triggerUnchkStateTrans();
+                m_items[itemIndex]->triggerUnchkStateTrans();
 
-                m_selectedItemIndices.erase(itemIndexItor);
+                m_selectedItemIndices.erase(itor);
 
                 if (m_lastSelectedItemIndex == itemIndex)
                 {
-                    m_lastSelectedItemIndex.invalidate();
+                    m_lastSelectedItemIndex.reset();
                 }
                 if (m_extendedSelectItemIndex == itemIndex)
                 {
-                    m_extendedSelectItemIndex.invalidate();
+                    m_extendedSelectItemIndex.reset();
                 }
             }
             else // select new item
             {
-                (*itemIndex)->triggerCheckStateTrans();
+                m_items[itemIndex]->triggerCheckStateTrans();
 
                 m_selectedItemIndices.insert(itemIndex);
 
-                if (m_lastSelectedItemIndex.valid())
+                if (m_lastSelectedItemIndex.has_value())
                 {
-                    (*m_lastSelectedItemIndex)->triggerLeaveStateTrans();
+                    auto& item = m_items[m_lastSelectedItemIndex.value()];
+                    item->triggerLeaveStateTrans();
                 }
-                m_lastSelectedItemIndex = m_extendedSelectItemIndex = itemIndex;
+                m_lastSelectedItemIndex = itemIndex;
+                m_extendedSelectItemIndex = itemIndex;
             }
         }
 
-        void triggerExtendedSelect(ItemIndexParam itemIndex)
+        void triggerExtendedSelect(size_t itemIndex)
         {
-            //////////
-            // Ctrl //
-            //////////
+            if (KeyboardEvent::SHIFT())
+            {
+                if (m_extendedSelectItemIndex.has_value())
+                {
+                    for (auto& i : m_selectedItemIndices)
+                    {
+                        m_items[i]->triggerUnchkStateTrans();
+                    }
+                    m_selectedItemIndices.clear();
 
-            if (KeyboardEvent::CTRL() && !KeyboardEvent::SHIFT())
+                    auto& extIndex = m_extendedSelectItemIndex.value();
+                    auto range = std::minmax(itemIndex, extIndex);
+
+                    for (auto i = range.first; i <= range.second; ++i)
+                    {
+                        m_items[i]->triggerCheckStateTrans();
+
+                        if (i != itemIndex)
+                        {
+                            // Highlight only the last selected item.
+                            m_items[i]->triggerLeaveStateTrans();
+                        }
+                        m_selectedItemIndices.insert(i);
+                    }
+                    m_lastSelectedItemIndex = itemIndex;
+                }
+                else triggerSingleSelect(itemIndex);
+            }
+            else if (KeyboardEvent::CTRL())
             {
                 triggerMultipleSelect(itemIndex);
             }
-            ///////////
-            // Shift //
-            ///////////
-
-            else if (!KeyboardEvent::CTRL() && KeyboardEvent::SHIFT())
-            {
-                for (auto& index : m_selectedItemIndices)
-                {
-                    (*index)->triggerUnchkStateTrans();
-                }
-                m_selectedItemIndices.clear();
-
-                auto range = std::minmax(itemIndex, m_extendedSelectItemIndex);
-                for (auto index = range.first; index <= range.second; ++index)
-                {
-                    (*index)->triggerCheckStateTrans();
-
-                    if (index != itemIndex)
-                    {
-                        // Highlight only the last selected item.
-                        (*index)->triggerLeaveStateTrans();
-                    }
-                    m_selectedItemIndices.insert(index);
-                }
-                m_lastSelectedItemIndex = itemIndex;
-            }
-            //////////////////
-            // Ctrl + Shift //
-            //////////////////
-
-            else if (KeyboardEvent::CTRL() && KeyboardEvent::SHIFT())
-            {
-                auto range = std::minmax(itemIndex, m_extendedSelectItemIndex);
-                for (auto index = range.first; index <= range.second; ++index)
-                {
-                    (*index)->triggerCheckStateTrans();
-
-                    if (index != itemIndex)
-                    {
-                        // Highlight only the last selected item.
-                        (*index)->triggerLeaveStateTrans();
-                    }
-                    m_selectedItemIndices.insert(index);
-                }
-                m_lastSelectedItemIndex = itemIndex;
-            }
-            //////////////
-            // Fallback //
-            //////////////
-
             else triggerSingleSelect(itemIndex);
+        }
+
+        //------------------------------------------------------------------
+        // Item Index Calculators
+        //------------------------------------------------------------------
+    public:
+        Optional<size_t> getItemIndex(ShrdPtrRefer<Item_T> item) const
+        {
+            for (size_t i = 0; i < m_items.size(); ++i)
+            {
+                if (cpp_lang_utils::isMostDerivedEqual(item, m_items[i]))
+                {
+                    return i;
+                }
+            }
+            return std::nullopt;
+        }
+
+        Optional<size_t> viewportOffsetToItemIndex(float offset) const
+        {
+            if (offset >= 0.0f && offset <= m_layout->height())
+            {
+                float height = 0.0f;
+                for (size_t i = 0; i < m_items.size(); ++i)
+                {
+                    height += m_items[i]->height();
+                    if (height > offset) return i;
+                }
+            }
+            return std::nullopt;
         }
 
         //------------------------------------------------------------------
         // Active Item Index Range
         //------------------------------------------------------------------
     protected:
-        ItemIndex viewportOffsetToItemIndex(float offset) const
-        {
-            float itemHeight = 0.0f;
-            for (ItemIndex itemIndex = (ItemList*)&m_items; itemIndex.valid(); ++itemIndex)
-            {
-                // Do not use "itemHeight < offset" since it might cause the
-                // unexpected capture failure when the cursor-point is right
-                // on the edge of an item.
-                if (itemHeight <= offset)
-                {
-                    itemHeight += (*itemIndex)->height();
-                    if (itemHeight > offset) return itemIndex;
-                }
-                else break;
-            }
-            return ItemIndex{};
-        }
-
-    protected:
         struct ItemIndexRange
         {
-            ItemIndex index1 = {}, index2 = {};
+            Optional<size_t> index1 = {}, index2 = {};
         }
         m_activeItemIndexRange = {};
 
         virtual void setItemIndexRangeActive(bool value)
         {
             auto& range = m_activeItemIndexRange;
-            if (range.index1.valid() && range.index2.valid())
+            if (range.index1.has_value() && range.index2.has_value())
             {
-                for (auto itemIndex = range.index1; itemIndex <= range.index2; ++itemIndex)
+                auto& index1 = range.index1.value();
+                auto& index2 = range.index2.value();
+
+                for (auto i = index1; i <= index2; ++i)
                 {
-                    (*itemIndex)->setPrivateVisible(value);
-                    (*itemIndex)->appEventReactability.hitTest = value;
+                    auto& item = m_items[i];
+                    item->setPrivateVisible(value);
+                    item->appEventReactability.hitTest = value;
                 }
             }
         }
@@ -538,17 +531,14 @@ do { \
         {
             setItemIndexRangeActive(false);
 
-            m_activeItemIndexRange.index1 = viewportOffsetToItemIndex
-            (
-                m_viewportOffset.y
-            );
-            m_activeItemIndexRange.index2  = viewportOffsetToItemIndex
-            (
-                m_viewportOffset.y + height()
-            );
-            if (m_activeItemIndexRange.index1.valid() && !m_activeItemIndexRange.index2.valid())
+            auto& range = m_activeItemIndexRange;
+            range.index1 = viewportOffsetToItemIndex(m_viewportOffset.y);
+            range.index2 = viewportOffsetToItemIndex(m_viewportOffset.y + height());
+
+            if (range.index1.has_value() &&
+               !range.index2.has_value())
             {
-                m_activeItemIndexRange.index2 = ItemIndex::last(&m_items);
+                range.index2 = m_items.size() - 1;
             }
             setItemIndexRangeActive(true);
         }
@@ -566,9 +556,9 @@ do { \
         {
             ScrollView::onGetKeyboardFocusHelper();
 
-            for (auto& itemIndex : m_selectedItemIndices)
+            for (auto& i : m_selectedItemIndices)
             {
-                (*itemIndex)->triggerGetfcStateTrans();
+                m_items[i]->triggerGetfcStateTrans();
             }
         }
 
@@ -576,9 +566,9 @@ do { \
         {
             ScrollView::onLoseKeyboardFocusHelper();
 
-            for (auto& itemIndex : m_selectedItemIndices)
+            for (auto& i : m_selectedItemIndices)
             {
-                (*itemIndex)->triggerLosfcStateTrans();
+                m_items[i]->triggerLosfcStateTrans();
             }
         }
 
@@ -590,16 +580,21 @@ do { \
             auto relative = absoluteToSelfCoord(p);
 
             // In case trigger by mistake when controlling the scroll bars.
-            auto itemIndex = isControllingScrollBars() ? ItemIndex{} :
+            auto itemIndex = isControllingScrollBars() ? std::nullopt :
                 viewportOffsetToItemIndex(m_viewportOffset.y + relative.y);
 
-            if (itemIndex.valid() && itemIndex != m_lastHoverItemIndex)
+            if (itemIndex != m_lastHoverItemIndex)
             {
-                (*itemIndex)->triggerEnterStateTrans();
-            }
-            if (m_lastHoverItemIndex.valid() && m_lastHoverItemIndex != itemIndex)
-            {
-                (*m_lastHoverItemIndex)->triggerLeaveStateTrans();
+                if (itemIndex.has_value())
+                {
+                    auto& indexValue = itemIndex.value();
+                    m_items[indexValue]->triggerEnterStateTrans();
+                }
+                if (m_lastHoverItemIndex.has_value())
+                {
+                    auto& indexValue = m_lastHoverItemIndex.value();
+                    m_items[indexValue]->triggerLeaveStateTrans();
+                }
             }
             m_lastHoverItemIndex = itemIndex;
         }
@@ -608,11 +603,12 @@ do { \
         {
             ScrollView::onMouseLeaveHelper(e);
 
-            if (m_lastHoverItemIndex.valid())
+            if (m_lastHoverItemIndex.has_value())
             {
-                (*m_lastHoverItemIndex)->triggerLeaveStateTrans();
+                auto& indexValue = m_lastHoverItemIndex.value();
+                m_items[indexValue]->triggerLeaveStateTrans();
             }
-            m_lastHoverItemIndex.invalidate();
+            m_lastHoverItemIndex.reset();
         }
 
         void onMouseButtonHelper(MouseButtonEvent& e) override
@@ -626,25 +622,25 @@ do { \
 
             if (e.state.leftDown())
             {
-                Application::g_app->focusUIObject
-                (
-                    Application::FocusType::Keyboard, shared_from_this()
-                );
                 // In case trigger by mistake when controlling the scroll bars.
-                auto itemIndex = isControllingScrollBars() ? ItemIndex{} :
+                auto itemIndex = isControllingScrollBars() ? std::nullopt :
                     viewportOffsetToItemIndex(m_viewportOffset.y + relative.y);
 
-                if (itemIndex.valid() && (*itemIndex)->m_enabled)
+                if (itemIndex.has_value())
                 {
-                    switch (selectMode)
+                    auto& indexValue = itemIndex.value();
+                    if (m_items[indexValue]->m_enabled)
                     {
-                    case SelectMode::None: triggerNoneSelect(); break;
-                    case SelectMode::Single: triggerSingleSelect(itemIndex); break;
-                    case SelectMode::Multiple: triggerMultipleSelect(itemIndex); break;
-                    case SelectMode::Extended: triggerExtendedSelect(itemIndex); break;
-                    default: break;
+                        switch (selectMode)
+                        {
+                        case SelectMode::None: triggerNoneSelect(); break;
+                        case SelectMode::Single: triggerSingleSelect(indexValue); break;
+                        case SelectMode::Multiple: triggerMultipleSelect(indexValue); break;
+                        case SelectMode::Extended: triggerExtendedSelect(indexValue); break;
+                        default: break;
+                        }
+                        onSelectChange(m_selectedItemIndices);
                     }
-                    onSelectChange(m_selectedItemIndices);
                 }
             }
         }

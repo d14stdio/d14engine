@@ -155,7 +155,7 @@ namespace d14engine::uikit
         }
         case Intermediate:
         {
-            auto& geoSetting = appearance().icon.geometry.intermediate;
+            auto& geometry = appearance().icon.geometry.intermediate;
             auto& background = appearance().icon.background[m_state.index()];
 
             resource_utils::solidColorBrush()->SetColor(background.color);
@@ -163,14 +163,14 @@ namespace d14engine::uikit
 
             rndr->d2d1DeviceContext()->FillRectangle
             (
-            /* rect  */ math_utils::centered(m_absoluteRect, geoSetting.size),
+            /* rect  */ math_utils::centered(m_absoluteRect, geometry.size),
             /* brush */ resource_utils::solidColorBrush()
             );
             break;
         }
         case Checked:
         {
-            auto& geoSetting = appearance().icon.geometry.checked;
+            auto& geometry = appearance().icon.geometry.checked;
             auto& background = appearance().icon.background[m_state.index()];
 
             resource_utils::solidColorBrush()->SetColor(background.color);
@@ -180,18 +180,18 @@ namespace d14engine::uikit
 
             rndr->d2d1DeviceContext()->DrawLine
             (
-            /* point0      */ math_utils::offset(iconLeftTop, geoSetting.tickLine0.point0),
-            /* point1      */ math_utils::offset(iconLeftTop, geoSetting.tickLine0.point1),
+            /* point0      */ math_utils::offset(iconLeftTop, geometry.tickLine0.point0),
+            /* point1      */ math_utils::offset(iconLeftTop, geometry.tickLine0.point1),
             /* brush       */ resource_utils::solidColorBrush(),
-            /* strokeWidth */ geoSetting.strokeWidth,
+            /* strokeWidth */ geometry.strokeWidth,
             /* strokeStyle */ checkedIcon.strokeStyle.Get()
             );
             rndr->d2d1DeviceContext()->DrawLine
             (
-            /* point0      */ math_utils::offset(iconLeftTop, geoSetting.tickLine1.point0),
-            /* point1      */ math_utils::offset(iconLeftTop, geoSetting.tickLine1.point1),
+            /* point0      */ math_utils::offset(iconLeftTop, geometry.tickLine1.point0),
+            /* point1      */ math_utils::offset(iconLeftTop, geometry.tickLine1.point1),
             /* brush       */ resource_utils::solidColorBrush(),
-            /* strokeWidth */ geoSetting.strokeWidth,
+            /* strokeWidth */ geometry.strokeWidth,
             /* strokeStyle */ checkedIcon.strokeStyle.Get()
             );
             break;

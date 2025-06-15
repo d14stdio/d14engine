@@ -148,7 +148,7 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
         {
             ui_mainBodyView->transform(25.0f, 94.0f, 767.0f, 462.0f);
 
-            ui_mainBodyView->customSizeGetter.self =
+            ui_mainBodyView->customSizeGetter.view =
             [
                 wk_mainBodyInput = (WeakPtr<TextEditor>)ui_mainBodyInput
             ]
@@ -229,12 +229,12 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
             [
                 wk_mainBodyInput = (WeakPtr<TextEditor>)ui_mainBodyInput
             ]
-            (PopupMenu* menu, PopupMenu::ItemIndexParam itemIndex)
+            (PopupMenu* menu, size_t index)
             {
                 if (!wk_mainBodyInput.expired())
                 {
                     auto sh_mainBodyInput = wk_mainBodyInput.lock();
-                    switch (itemIndex.index)
+                    switch (index)
                     {
                     case 0: sh_mainBodyInput->performCommandCtrlA(); break;
                     case 2: sh_mainBodyInput->performCommandCtrlX(); break;
@@ -245,15 +245,15 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
                         auto& editable = sh_mainBodyInput->editable;
 
                         editable = !editable;
-                        auto content = (*itemIndex)->getContent<IconLabel2>();
+                        auto content = menu->items()[index]->getContent<IconLabel2>();
                         if (!content.expired())
                         {
                             content.lock()->label2()->setText(
                                 editable ? L"✓" : L"");
                         }
                         // Remember to disable the cut/paste if not editable.
-                        (*itemIndex.getPrev(2))->setEnabled(editable);
-                        (*itemIndex.getPrev(4))->setEnabled(editable);
+                        menu->items()[2]->setEnabled(editable);
+                        menu->items()[4]->setEnabled(editable);
                         break;
                     }
                     default: break;

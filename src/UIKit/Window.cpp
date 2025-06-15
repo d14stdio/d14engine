@@ -523,8 +523,11 @@ namespace d14engine::uikit
     {
         Panel::onRendererUpdateObject2DHelper(rndr);
 
-        m_caption->onRendererUpdateObject2D(rndr);
-        if (m_content)
+        if (m_caption->isD2d1ObjectVisible())
+        {
+            m_caption->onRendererUpdateObject2D(rndr);
+        }
+        if (m_content && m_content->isD2d1ObjectVisible())
         {
             m_content->onRendererUpdateObject2D(rndr);
         }
@@ -534,8 +537,11 @@ namespace d14engine::uikit
     {
         Panel::drawChildrenLayers(rndr);
         {
-            m_caption->onRendererDrawD2d1Layer(rndr);
-            if (m_content)
+            if (m_caption->isD2d1ObjectVisible())
+            {
+                m_caption->onRendererDrawD2d1Layer(rndr);
+            }
+            if (m_content && m_content->isD2d1ObjectVisible())
             {
                 m_content->onRendererDrawD2d1Layer(rndr);
             }
@@ -577,7 +583,10 @@ namespace d14engine::uikit
                     /* rect  */ captionPanelAbsoluteRect(),
                     /* brush */ resource_utils::solidColorBrush()
                     );
-                    m_caption->onRendererDrawD2d1Object(rndr);
+                    if (m_caption->isD2d1ObjectVisible())
+                    {
+                        m_caption->onRendererDrawD2d1Object(rndr);
+                    }
                 }
                 //------------------------------------------------------------------
                 // Decorative Bar
@@ -748,7 +757,7 @@ namespace d14engine::uikit
             // Content //
             /////////////
 
-            if (m_content)
+            if (m_content && m_content->isD2d1ObjectVisible())
             {
                 m_content->onRendererDrawD2d1Object(rndr);
             }

@@ -39,11 +39,11 @@ namespace d14engine::uikit
         if (f_onChangeActivity) f_onChangeActivity(this, value);
     }
 
-    void PopupMenu::onTriggerMenuItem(ItemIndexParam itemIndex)
+    void PopupMenu::onTriggerMenuItem(size_t index)
     {
-        onTriggerMenuItemHelper(itemIndex);
+        onTriggerMenuItemHelper(index);
 
-        if (f_onTriggerMenuItem) f_onTriggerMenuItem(this, itemIndex);
+        if (f_onTriggerMenuItem) f_onTriggerMenuItem(this, index);
     }
 
     void PopupMenu::onChangeActivityHelper(bool value)
@@ -53,12 +53,12 @@ namespace d14engine::uikit
         Application::g_app->sendNextImmediateMouseMoveEvent = true;
     }
 
-    void PopupMenu::onTriggerMenuItemHelper(ItemIndexParam itemIndex)
+    void PopupMenu::onTriggerMenuItemHelper(size_t index)
     {
         // This method intentionally left blank.
     }
 
-    void PopupMenu::insertItem(const ItemList& items, size_t index)
+    void PopupMenu::insertItem(const ItemArray& items, size_t index)
     {
         for (auto& item : items)
         {
@@ -67,21 +67,21 @@ namespace d14engine::uikit
         WaterfallView::insertItem(items, index);
     }
 
-    void PopupMenu::appendItem(const ItemList& items)
+    void PopupMenu::appendItem(const ItemArray& items)
     {
         insertItem(items, m_items.size());
     }
 
     void PopupMenu::removeItem(size_t index, size_t count)
     {
-        if (index >= 0 && index < m_items.size() && count > 0)
+        if (index < m_items.size() && count > 0)
         {
             count = std::min(count, m_items.size() - index);
             size_t endIndex = index + count - 1;
 
-            for (ItemIndex itemIndex = { &m_items, index }; itemIndex < endIndex; ++itemIndex)
+            for (size_t i = index; i < endIndex; ++i)
             {
-                (*itemIndex)->m_parentMenu.reset();
+                m_items[i]->m_parentMenu.reset();
             }
         }
         WaterfallView::removeItem(index, count);
@@ -116,10 +116,10 @@ namespace d14engine::uikit
             // Place the menu above the bkgn-trigger-panel.
             bringToFront();
         }
-        else if (m_lastHoverItemIndex.valid())
+        else if (m_lastHoverItemIndex.has_value())
         {
-            (*m_lastHoverItemIndex)->triggerLeaveStateTrans();
-            m_lastHoverItemIndex.invalidate();
+            m_items[m_lastHoverItemIndex.value()]->triggerLeaveStateTrans();
+            m_lastHoverItemIndex.reset();
         }
         onChangeActivity(value);
     }
@@ -136,9 +136,13 @@ namespace d14engine::uikit
 
     void PopupMenu::setActivatedIncludingChildren(bool value)
     {
-        if (m_lastHoverItemIndex.valid() && (*m_lastHoverItemIndex)->m_associatedMenu != nullptr)
+        if (m_lastHoverItemIndex.has_value())
         {
-            (*m_lastHoverItemIndex)->m_associatedMenu->setActivatedIncludingChildren(value);
+            auto& item = m_items[m_lastHoverItemIndex.value()];
+            if (item->m_associatedMenu != nullptr)
+            {
+                item->m_associatedMenu->setActivatedIncludingChildren(value);
+            }
         }
         setActivated(value); // Note m_lastHoverItemIndex may be invalidated in setActivated.
     }
@@ -301,25 +305,28 @@ namespace d14engine::uikit
 
     void PopupMenu::onMouseMoveHelper(MouseMoveEvent& e)
     {
-        ItemIndex lastHoverItemIndex = m_lastHoverItemIndex;
+        auto lastHoverItemIndex = m_lastHoverItemIndex;
+        auto& currHoverItemIndex = m_lastHoverItemIndex;
 
         // Note this callback will update m_lastHoverItemIndex.
         WaterfallView::onMouseMoveHelper(e);
 
-        ItemIndex& currHoverItemIndex = m_lastHoverItemIndex;
-
-        if (lastHoverItemIndex.valid() && lastHoverItemIndex != currHoverItemIndex)
+        if (lastHoverItemIndex.has_value() &&
+            lastHoverItemIndex != currHoverItemIndex)
         {
-            if ((*lastHoverItemIndex)->m_associatedMenu != nullptr)
+            auto& item = m_items[lastHoverItemIndex.value()];
+            if (item->m_associatedMenu != nullptr)
             {
-                (*lastHoverItemIndex)->m_associatedMenu->setActivated(false);
+                item->m_associatedMenu->setActivated(false);
             }
         }
-        if (currHoverItemIndex.valid() && currHoverItemIndex != lastHoverItemIndex)
+        if (currHoverItemIndex.has_value() &&
+            currHoverItemIndex != lastHoverItemIndex)
         {
-            if ((*currHoverItemIndex)->m_associatedMenu != nullptr)
+            auto& item = m_items[currHoverItemIndex.value()];
+            if (item->m_associatedMenu != nullptr)
             {
-                (*currHoverItemIndex)->popupAssociatedMenu();
+                item->popupAssociatedMenu();
             }
         }
     }
@@ -328,12 +335,13 @@ namespace d14engine::uikit
     {
         ScrollView::onMouseLeaveHelper(e);
 
-        if (m_lastHoverItemIndex.valid())
+        if (m_lastHoverItemIndex.has_value())
         {
-            if ((*m_lastHoverItemIndex)->m_associatedMenu == nullptr)
+            auto& item = m_items[m_lastHoverItemIndex.value()];
+            if (item->m_associatedMenu == nullptr)
             {
-                (*m_lastHoverItemIndex)->triggerLeaveStateTrans();
-                m_lastHoverItemIndex.invalidate();
+                item->triggerLeaveStateTrans();
+                m_lastHoverItemIndex.reset();
             }
         }
     }
@@ -348,11 +356,12 @@ namespace d14engine::uikit
             auto itemIndex = viewportOffsetToItemIndex(
                 m_viewportOffset.y + absoluteToSelfCoord(e.cursorPoint).y);
 
-            if (itemIndex.valid())
+            if (itemIndex.has_value())
             {
-                if ((*itemIndex)->m_enabled && (*itemIndex)->isTriggerItem)
+                auto& item = m_items[itemIndex.value()];
+                if (item->m_enabled && item->isTriggerItem)
                 {
-                    onTriggerMenuItem(itemIndex);
+                    onTriggerMenuItem(itemIndex.value());
                 }
             }
         }

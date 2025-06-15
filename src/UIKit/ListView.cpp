@@ -9,7 +9,7 @@ namespace d14engine::uikit
         Panel(rect, resource_utils::solidColorBrush()),
         WaterfallView(rect) { }
 
-    void ListView::insertItem(const ItemList& items, size_t index)
+    void ListView::insertItem(const ItemArray& items, size_t index)
     {
         for (auto& item : items)
         {
@@ -18,21 +18,21 @@ namespace d14engine::uikit
         WaterfallView::insertItem(items, index);
     }
 
-    void ListView::appendItem(const ItemList& items)
+    void ListView::appendItem(const ItemArray& items)
     {
         insertItem(items, m_items.size());
     }
 
     void ListView::removeItem(size_t index, size_t count)
     {
-        if (index >= 0 && index < m_items.size() && count > 0)
+        if (index < m_items.size() && count > 0)
         {
             count = std::min(count, m_items.size() - index);
             size_t endIndex = index + count - 1;
 
-            for (ItemIndex itemIndex = { &m_items, index }; itemIndex < endIndex; ++itemIndex)
+            for (size_t i = index; i < endIndex; ++i)
             {
-                (*itemIndex)->m_parentView.reset();
+                m_items[i]->m_parentView.reset();
             }
         }
         WaterfallView::removeItem(index, count);

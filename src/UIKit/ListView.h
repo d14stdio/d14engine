@@ -11,8 +11,8 @@ namespace d14engine::uikit
     {
         explicit ListView(const D2D1_RECT_F& rect = {});
 
-        void insertItem(const ItemList& items, size_t index = 0) override;
-        void appendItem(const ItemList& items);
+        void insertItem(const ItemArray& items, size_t index = 0) override;
+        void appendItem(const ItemArray& items);
 
         void removeItem(size_t index, size_t count = 1) override;
         void clearAllItems() override;

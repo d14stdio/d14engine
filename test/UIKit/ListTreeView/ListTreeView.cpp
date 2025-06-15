@@ -95,13 +95,13 @@ D14_SET_APP_ENTRY(mainListTreeView)
             ui_listView->appearance().stroke.opacity = 1.0f;
 
             // Populate list-view items.
-            ListView::ItemList ui_listViewItemList = {};
+            ListView::ItemArray ui_listViewItems = {};
             for (int i = 1; i <= 30; ++i)
             {
-                ui_listViewItemList.push_back(makeUIObject<ListViewItem>(
+                ui_listViewItems.push_back(makeUIObject<ListViewItem>(
                     std::to_wstring(i), math_utils::heightOnlyRect(30.0f)));
             }
-            ui_listView->appendItem(ui_listViewItemList);
+            ui_listView->appendItem(ui_listViewItems);
         }
         auto ui_treeView = makeManagedUIObject<TreeView>(ui_clientArea);
         {
@@ -111,33 +111,33 @@ D14_SET_APP_ENTRY(mainListTreeView)
             ui_treeView->appearance().stroke.opacity = 1.0f;
 
             // Populate tree-view items.
-            TreeView::ItemList ui_treeViewItemList1 = {};
+            TreeView::ItemArray ui_treeViewItems1 = {};
             for (int i = 1; i <= 3; ++i)
             {
                 auto ui_treeViewItem1 = makeUIObject<TreeViewItem>(
                     L"1 - " + std::to_wstring(i), math_utils::heightOnlyRect(30.0f));
 
-                TreeView::ItemList ui_treeViewItemList2 = {};
+                TreeView::ItemArray ui_treeViewItems2 = {};
                 for (int j = 1; j <= 4; ++j)
                 {
                     auto ui_treeViewItem2 = makeUIObject<TreeViewItem>(
                         L"2 - " + std::to_wstring(j), math_utils::heightOnlyRect(30.0f));
 
-                    TreeView::ItemList ui_treeViewItemList3 = {};
+                    TreeView::ItemArray ui_treeViewItems3 = {};
                     for (int k = 1; k <= 5; ++k)
                     {
-                        ui_treeViewItemList3.push_back(makeUIObject<TreeViewItem>(
+                        ui_treeViewItems3.push_back(makeUIObject<TreeViewItem>(
                             L"3 - " + std::to_wstring(k), math_utils::heightOnlyRect(30.0f)));
                     }
-                    ui_treeViewItem2->appendItem(ui_treeViewItemList3);
+                    ui_treeViewItem2->appendItem(ui_treeViewItems3);
                     ui_treeViewItem2->setFolded(TreeViewItem::FOLDED);
-                    ui_treeViewItemList2.push_back(ui_treeViewItem2);
+                    ui_treeViewItems2.push_back(ui_treeViewItem2);
                 }
-                ui_treeViewItem1->appendItem(ui_treeViewItemList2);
+                ui_treeViewItem1->appendItem(ui_treeViewItems2);
                 ui_treeViewItem1->setFolded(TreeViewItem::FOLDED);
-                ui_treeViewItemList1.push_back(ui_treeViewItem1);
+                ui_treeViewItems1.push_back(ui_treeViewItem1);
             }
-            ui_treeView->appendRootItem(ui_treeViewItemList1);
+            ui_treeView->appendRootItem(ui_treeViewItems1);
         }
         auto ui_sideLayout = makeManagedUIObject<GridLayout>(ui_clientArea);
         {
@@ -154,9 +154,9 @@ D14_SET_APP_ENTRY(mainListTreeView)
             geoInfo.axis.y = { 0, 1 };
             ui_sideLayout->addElement(ui_banner1, geoInfo);
         }
-        auto ui_checkBox1 = makeUIObject<CheckBox>(true);
+        auto ui_checkBox1 = makeUIObject<CheckBox>(CheckBox::TriState);
         {
-            ui_checkBox1->setCheckedState(CheckBox::Checked);
+            ui_checkBox1->setCheckState(CheckBox::Checked);
 
             GridLayout::GeometryInfo geoInfo1 = {};
             geoInfo1.isFixedSize = true;
@@ -221,15 +221,15 @@ D14_SET_APP_ENTRY(mainListTreeView)
                     auto sd_listView = wk_listView.lock();
                     if (!sd_listView->selectedItemIndices().empty())
                     {
-                        auto selected = sd_listView->selectedItemIndices().begin();
-                        auto selectedContent = (*selected->iterator)->getContent<IconLabel>().lock();
-                        sd_listView->insertItem(
-                        {
-                            makeUIObject<ListViewItem>(
-                                selectedContent->label()->text() + L"_new",
-                                math_utils::heightOnlyRect(30.0f))
-                        },
-                        selected->index);
+                        auto selectedIndex = *sd_listView->selectedItemIndices().begin();
+                        auto& selectedItem = sd_listView->items()[selectedIndex];
+                        auto selectedContent = selectedItem->getContent<IconLabel>().lock();
+
+                        auto item = makeUIObject<ListViewItem>(
+                            selectedContent->label()->text() + L"_new",
+                            math_utils::heightOnlyRect(30.0f));
+
+                        sd_listView->insertItem({ item }, selectedIndex);
                     }
                 }
             };
@@ -254,7 +254,10 @@ D14_SET_APP_ENTRY(mainListTreeView)
                     auto sd_listView = wk_listView.lock();
                     while (!sd_listView->selectedItemIndices().empty())
                     {
-                        (*sd_listView->selectedItemIndices().begin()->iterator)->release();
+                        auto selectedIndex = *sd_listView->selectedItemIndices().begin();
+                        auto& selectedItem = sd_listView->items()[selectedIndex];
+
+                        selectedItem->release();
                     }
                 }
             };
@@ -269,9 +272,9 @@ D14_SET_APP_ENTRY(mainListTreeView)
             geoInfo.axis.y = { 4, 1 };
             ui_sideLayout->addElement(ui_banner2, geoInfo);
         }
-        auto ui_checkBox2 = makeUIObject<CheckBox>(true);
+        auto ui_checkBox2 = makeUIObject<CheckBox>(CheckBox::TriState);
         {
-            ui_checkBox2->setCheckedState(CheckBox::Checked);
+            ui_checkBox2->setCheckState(CheckBox::Checked);
 
             GridLayout::GeometryInfo geoInfo1 = {};
             geoInfo1.isFixedSize = true;
@@ -336,14 +339,15 @@ D14_SET_APP_ENTRY(mainListTreeView)
                     auto sd_treeView = wk_treeView.lock();
                     if (!sd_treeView->selectedItemIndices().empty())
                     {
-                        auto selected = sd_treeView->selectedItemIndices().begin();
-                        auto selectedContent = (*selected->iterator)->getContent<IconLabel>().lock();
-                        (*selected->iterator)->insertItem(
-                        {
-                            makeUIObject<TreeViewItem>(
-                                selectedContent->label()->text() + L"_child",
-                                math_utils::heightOnlyRect(30.0f))
-                        });
+                        auto selectedIndex = *sd_treeView->selectedItemIndices().begin();
+                        auto& selectedItem = sd_treeView->items()[selectedIndex];
+                        auto selectedContent = selectedItem->getContent<IconLabel>().lock();
+
+                        auto item = makeUIObject<TreeViewItem>(
+                            selectedContent->label()->text() + L"_child",
+                            math_utils::heightOnlyRect(30.0f));
+
+                        selectedItem->insertItem({ item });
                     }
                 }
             };
@@ -369,22 +373,23 @@ D14_SET_APP_ENTRY(mainListTreeView)
                     auto sd_treeView = wk_treeView.lock();
                     if (!sd_treeView->selectedItemIndices().empty())
                     {
-                        auto selected = sd_treeView->selectedItemIndices().begin();
-                        if ((*selected->iterator)->parentItem().expired()) // Insert as a root-peer.
+                        auto selectedIndex = *sd_treeView->selectedItemIndices().begin();
+                        auto& selectedItem = sd_treeView->items()[selectedIndex];
+                        if (selectedItem->parentItem().expired()) // Insert as a root-peer.
                         {
                             size_t index = 0;
                             for (auto& item : sd_treeView->rootItems())
                             {
-                                if (cpp_lang_utils::isMostDerivedEqual(item, *selected->iterator))
+                                if (cpp_lang_utils::isMostDerivedEqual(item, selectedItem))
                                 {
-                                    auto selectedContent = (*selected->iterator)->getContent<IconLabel>().lock();
-                                    sd_treeView->insertRootItem(
-                                    {
-                                        makeUIObject<TreeViewItem>(
-                                            selectedContent->label()->text() + L"_peer",
-                                            math_utils::heightOnlyRect(30.0f))
-                                    },
-                                    index); break;
+                                    auto selectedContent = selectedItem->getContent<IconLabel>().lock();
+
+                                    auto item = makeUIObject<TreeViewItem>(
+                                        selectedContent->label()->text() + L"_peer",
+                                        math_utils::heightOnlyRect(30.0f));
+
+                                    sd_treeView->insertRootItem({ item }, index);
+                                    break;
                                 }
                                 ++index;
                             }
@@ -392,19 +397,19 @@ D14_SET_APP_ENTRY(mainListTreeView)
                         else // The selected is managed by another item, so insert as a child-peer.
                         {
                             size_t index = 0;
-                            auto parentItem = (*selected->iterator)->parentItem().lock();
+                            auto parentItem = selectedItem->parentItem().lock();
                             for (auto& item : parentItem->childrenItems())
                             {
-                                if (cpp_lang_utils::isMostDerivedEqual(item.ptr, *selected->iterator))
+                                if (cpp_lang_utils::isMostDerivedEqual(item->ptr, selectedItem))
                                 {
-                                    auto selectedContent = (*selected->iterator)->getContent<IconLabel>().lock();
-                                    parentItem->insertItem(
-                                    {
-                                        makeUIObject<TreeViewItem>(
-                                            selectedContent->label()->text() + L"_peer",
-                                            math_utils::heightOnlyRect(30.0f))
-                                    },
-                                    index); break;
+                                    auto selectedContent = selectedItem->getContent<IconLabel>().lock();
+
+                                    auto item = makeUIObject<TreeViewItem>(
+                                        selectedContent->label()->text() + L"_peer",
+                                        math_utils::heightOnlyRect(30.0f));
+
+                                    parentItem->insertItem({ item }, index);
+                                    break;
                                 }
                                 ++index;
                             }
@@ -433,7 +438,10 @@ D14_SET_APP_ENTRY(mainListTreeView)
                     auto sd_treeView = wk_treeView.lock();
                     while (!sd_treeView->selectedItemIndices().empty())
                     {
-                        (*sd_treeView->selectedItemIndices().begin()->iterator)->release();
+                        auto selectedIndex = *sd_treeView->selectedItemIndices().begin();
+                        auto& selectedItem = sd_treeView->items()[selectedIndex];
+
+                        selectedItem->release();
                     }
                 }
             };
@@ -474,10 +482,10 @@ D14_SET_APP_ENTRY(mainListTreeView)
                 if (!wk_listView.expired())
                 {
                     auto sh_listView = wk_listView.lock();
-                    for (auto& selected : sh_listView->selectedItemIndices())
+                    for (auto& selectedIndex : sh_listView->selectedItemIndices())
                     {
-                        auto& item = *selected.iterator;
-                        item->setSize(item->width(), value);
+                        auto& selectedItem = sh_listView->items()[selectedIndex];
+                        selectedItem->setSize(selectedItem->width(), value);
                     }
                     sh_listView->updateItemConstraints();
                     sh_listView->updateItemIndexRangeActivity();
@@ -485,14 +493,14 @@ D14_SET_APP_ENTRY(mainListTreeView)
                 if (!wk_treeView.expired())
                 {
                     auto sh_treeView = wk_treeView.lock();
-                    for (auto& selected : sh_treeView->selectedItemIndices())
+                    for (auto& selectedIndex : sh_treeView->selectedItemIndices())
                     {
-                        auto& item = *selected.iterator;
-                        if (item->peekItemImpl() != nullptr)
+                        auto& selectedItem = sh_treeView->items()[selectedIndex];
+                        if (!selectedItem->itemImplPtr().expired())
                         {
-                            item->peekItemImpl()->setUnfoldedHeight(value);
+                            selectedItem->itemImplPtr().lock()->setUnfoldedHeight(value);
                         }
-                        else item->setSize(item->width(), value);
+                        else selectedItem->setSize(selectedItem->width(), value);
                     }
                     sh_treeView->updateItemConstraints();
                     sh_treeView->updateItemIndexRangeActivity();

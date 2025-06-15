@@ -97,32 +97,30 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
         {
             ui_pixelViewer->transform(0.0f, 40.0f, 500.0f, 524.0f);
         }
-        auto rawFrames = std::make_shared<animation_utils::BitmapSequence::FramePackage>();
         auto ui_stickBoy = makeUIObject<FrameAnimPanel>();
         auto wk_stickBoy = (WeakPtr<FrameAnimPanel>)ui_stickBoy;
         {
             ui_stickBoy->setSize(256.0f, 256.0f);
 
-            Wstring assetsPath = L"Test/UIKit/PixelAnimation/stick_boy/";
+            Wstring assetsPath = L"test/UIKit/PixelAnimation/stick_boy/";
+            animation_utils::BitmapSequence::FramePackage rawFrames = {};
 
             file_system_utils::foreachFileInDir(assetsPath, L"*.png", [&](WstrRefer& path)
             {
-                auto name = file_system_utils::extractFilePrefix(
+                auto index = file_system_utils::extractFilePrefix(
                             file_system_utils::extractFileName(path));
 
                 BitmapObject bmpobj = bitmap_utils::loadBitmap(path);
                 bmpobj.interpolationMode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
 
-                rawFrames->insert({ name, bmpobj });
-
-                return false;
+                rawFrames.insert({ index, bmpobj }); return false;
             });
-            auto& frames = ui_stickBoy->bitmapData.fanim.frames;
-            frames.resize(rawFrames->size());
-            for (auto& kv : *rawFrames)
+            auto& fanim = ui_stickBoy->bitmapData.fanim;
+            fanim.frames.resize(rawFrames.size());
+            for (auto& kv : rawFrames)
             {
-                ui_stickBoy->bitmapData.fanim.frames[std::stoi(kv.first)] = kv.second;
-                ui_stickBoy->bitmapData.fanim.timeSpanDataInSecs = 0.06f;
+                fanim.frames[std::stoi(kv.first)] = kv.second;
+                fanim.timeSpanDataInSecs = 0.06f;
             }
             auto caption = makeUIObject<TabCaption>(L"stick_boy");
             caption->title()->label()->setTextFormat(D14_FONT(L"Default/12"));
@@ -137,11 +135,11 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
             ui_pixelViewer->appendTab({ caption, content });
             ui_pixelViewer->selectTab(0);
 
-            for (int i = 0; i < frames.size(); ++i)
+            for (int i = 0; i < fanim.frames.size(); ++i)
             {
                 auto ui_stickBoyFrame = makeUIObject<Panel>();
                 ui_stickBoyFrame->setSize(256.0f, 256.0f);
-                ui_stickBoyFrame->bitmap = frames[i].data;
+                ui_stickBoyFrame->bitmap = fanim.frames[i].data;
                 auto& interpMode = ui_stickBoyFrame->bitmapProperty.interpolationMode;
                 interpMode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
 

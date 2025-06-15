@@ -103,6 +103,8 @@ namespace d14engine::uikit
     protected:
         SharedPtr<IconLabel> m_caption = {};
 
+        // Avoid WeakPtr here: a init-param for this member is provided in ctor but the actual
+        // init happens in onInitializeFinish. WeakPtr would make ref-count hit zero unexpectedly.
         SharedPtr<Panel> m_content = {};
 
     public:

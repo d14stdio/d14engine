@@ -22,7 +22,7 @@ namespace d14engine::uikit
 
         TreeViewItem(WstrRefer text = L"ViewItem", const D2D1_RECT_F& rect = {});
 
-        using ChildItemList = std::list<SharedPtr<TreeViewItem>>;
+        using ChildItemArray = std::vector<SharedPtr<TreeViewItem>>;
 
         void onInitializeFinish() override;
 
@@ -99,13 +99,13 @@ namespace d14engine::uikit
             // and then call updateMasterViewConstraints finally.
             void setUnfoldedHeight(float value);
         };
-        using ChildItemImplList = std::list<ChildItemImpl>;
+        using ChildItemImplArray = std::vector<SharedPtr<ChildItemImpl>>;
 
-        ChildItemImplList m_childrenItems = {};
+        ChildItemImplArray m_childrenItems = {};
 
-        // Points to ChildItemImpl maintained in ChildItemImplList of the
+        // Points to ChildItemImpl maintained in ChildItemImplArray of the
         // parent item (however, always equals nullptr for any root-item).
-        ChildItemImpl* m_itemImplPtr = nullptr;
+        WeakPtr<ChildItemImpl> m_itemImplPtr = {};
 
     public:
         const WeakPtr<TreeView>& parentView() const;
@@ -116,15 +116,15 @@ namespace d14engine::uikit
 
         const WeakPtr<TreeViewItem>& parentItem() const;
 
-        const ChildItemImplList& childrenItems() const;
+        const ChildItemImplArray& childrenItems() const;
 
-        void insertItem(const ChildItemList& items, size_t index = 0);
-        void appendItem(const ChildItemList& items);
+        void insertItem(const ChildItemArray& items, size_t index = 0);
+        void appendItem(const ChildItemArray& items);
 
         void removeItem(size_t index, size_t count = 1);
         void clearAllItems();
 
-        ChildItemImpl* peekItemImpl() const;
+        WeakPtrRefer<ChildItemImpl> itemImplPtr() const;
 
     protected:
         void fold(); void notifyHideChildrenItems();
@@ -144,13 +144,13 @@ namespace d14engine::uikit
 
         size_t getExpandedChildrenCount() const;
 
-        friend size_t getExpandedTreeViewItemCount(const ChildItemList& items);
-        friend size_t getExpandedTreeViewItemCount(const ChildItemImplList& items);
+        friend size_t getExpandedTreeViewItemCount(const ChildItemArray& items);
+        friend size_t getExpandedTreeViewItemCount(const ChildItemImplArray& items);
 
-        ChildItemList getExpandedChildrenItems() const;
+        ChildItemArray getExpandedChildrenItems() const;
 
-        friend ChildItemList getExpandedTreeViewItems(const ChildItemList& items);
-        friend ChildItemList getExpandedTreeViewItems(const ChildItemImplList& items);
+        friend ChildItemArray getExpandedTreeViewItems(const ChildItemArray& items);
+        friend ChildItemArray getExpandedTreeViewItems(const ChildItemImplArray& items);
 
         void updateContentHorzIndent();
         void updateSelfContentHorzIndent();

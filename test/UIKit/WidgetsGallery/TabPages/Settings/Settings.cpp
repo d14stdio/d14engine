@@ -71,7 +71,7 @@ void createSettingsTabPage(ConstraintLayout* page)
             auto& appear = dynamic_cast<FlatButton*>(p)->appearance();
 
 #define BUTTON_FOREGROUND_COLOR(State_Name) \
-    appear.main[(size_t)Button::State::State_Name].foreground.color
+    appear.main[(size_t)ButtonState::State_Name].foreground.color
 
             BUTTON_FOREGROUND_COLOR(Idle) = BUTTON_FOREGROUND_COLOR(Hover) =
             BUTTON_FOREGROUND_COLOR(Down) = appearance::color1();
@@ -309,7 +309,7 @@ void createSettingsTabPage(ConstraintLayout* page)
             else if (e.off()) style.name = L"Light";
             Application::g_app->setThemeStyle(style);
         };
-        ui_autoThemeCheckBox->setChecked(CheckBox::Checked);
+        ui_autoThemeCheckBox->setCheckState(CheckBox::Checked);
     }
     auto ui_antialiasModeLabel = makeUIObject<Label>(L"Antialias Mode");
     {
@@ -335,7 +335,7 @@ void createSettingsTabPage(ConstraintLayout* page)
             { L"Aliased", D2D1_ANTIALIAS_MODE_ALIASED },
             { L"Per Primitive", D2D1_ANTIALIAS_MODE_PER_PRIMITIVE }
         };
-        PopupMenu::ItemList strModeItems = {};
+        PopupMenu::ItemArray strModeItems = {};
         for (auto& strMode : strModeArray)
         {
             auto ui_content = IconLabel::comboBoxLayout(strMode.first);
@@ -389,7 +389,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         geoInfo1.Top.ToTop = 294.0f;
         ui_settingsLayout->addElement(ui_textAntialiasModeSelector, geoInfo1);
 
-        PopupMenu::ItemList strModeItems = {};
+        PopupMenu::ItemArray strModeItems = {};
         for (auto& strMode : textAntialiasModePairs)
         {
             auto ui_content = IconLabel::comboBoxLayout(strMode.first);
@@ -538,7 +538,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         geoInfo1.Top.ToTop = 625.0f;
         ui_settingsLayout->addElement(ui_pixelGeometrySelector, geoInfo1);
 
-        PopupMenu::ItemList strModeItems = {};
+        PopupMenu::ItemArray strModeItems = {};
         for (auto& strMode : pixelGeometryPairs)
         {
             auto ui_content = IconLabel::comboBoxLayout(strMode.first);
@@ -586,7 +586,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         geoInfo1.Top.ToTop = 685.0f;
         ui_settingsLayout->addElement(ui_renderingModeSelector, geoInfo1);
 
-        PopupMenu::ItemList strModeItems = {};
+        PopupMenu::ItemArray strModeItems = {};
         for (auto& strMode : renderingModePairs)
         {
             auto ui_content = IconLabel::comboBoxLayout(strMode.first);
@@ -872,7 +872,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         };
         ui_realTimeFpsLabel->f_onRendererUpdateObject2DAfter = [](Panel* p, Renderer* rndr)
         {
-            if (p->enabled()) ((Label*)p)->setText(L"Real-time FPS: " + std::to_wstring(rndr->timer()->fps()));
+            if (p->enabled()) ((Label*)p)->setText(L"Real-time FPS: " + std::to_wstring(rndr->timer()->fpsNum()));
         };
     }
 }

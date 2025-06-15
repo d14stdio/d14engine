@@ -36,7 +36,7 @@ namespace d14engine::uikit
                     auto itemobjParent = itemobj->parentItem().lock();
                     for (auto& item : itemobjParent->childrenItems())
                     {
-                        if (cpp_lang_utils::isMostDerivedEqual(uiobj, item.ptr))
+                        if (cpp_lang_utils::isMostDerivedEqual(uiobj, item->ptr))
                         {
                             itemobjParent->removeItem(index);
                             return true;
@@ -49,58 +49,65 @@ namespace d14engine::uikit
         };
     }
 
-    const TreeView::ItemList& TreeView::rootItems() const
+    const TreeView::ItemArray& TreeView::rootItems() const
     {
         return m_rootItems;
     }
 
-    void TreeView::insertRootItem(const ItemList& rootitems, size_t rootIndex)
+    void TreeView::insertRootItem(const ItemArray& rootitems, size_t rootIndex)
     {
         // "index == m_rootItems.size()" ---> append.
         rootIndex = std::clamp(rootIndex, 0_uz, m_rootItems.size());
 
         auto insertIndex = getRootItemGlobalIndex(rootIndex);
-
-        insertItem(getExpandedTreeViewItems(rootitems), insertIndex.index);
-
-        for (auto& rootItem : rootitems)
+        if (insertIndex.has_value())
         {
-            rootItem->m_parentView = std::dynamic_pointer_cast<TreeView>(shared_from_this());
-            rootItem->m_nodeLevel = 0;
-            rootItem->m_parentItem.reset();
-            rootItem->updateSelfContentHorzIndent();
-            rootItem->updateChildrenMiscellaneousFields();
+            insertItem(getExpandedTreeViewItems(rootitems), insertIndex.value());
+
+            for (auto& rootItem : rootitems)
+            {
+                rootItem->m_parentView = std::dynamic_pointer_cast<TreeView>(shared_from_this());
+                rootItem->m_nodeLevel = 0;
+                rootItem->m_parentItem.reset();
+                rootItem->updateSelfContentHorzIndent();
+                rootItem->updateChildrenMiscellaneousFields();
+            }
+            m_rootItems.insert(std::next(m_rootItems.begin(), rootIndex), rootitems.begin(), rootitems.end());
         }
-        m_rootItems.insert(std::next(m_rootItems.begin(), rootIndex), rootitems.begin(), rootitems.end());
     }
 
-    void TreeView::appendRootItem(const ItemList& rootitems)
+    void TreeView::appendRootItem(const ItemArray& rootitems)
     {
         insertRootItem(rootitems, m_rootItems.size());
     }
 
     void TreeView::removeRootItem(size_t rootIndex, size_t count)
     {
-        if (rootIndex >= 0 && rootIndex < m_rootItems.size() && count > 0)
+        if (rootIndex < m_rootItems.size() && count > 0)
         {
             count = std::min(count, m_rootItems.size() - rootIndex);
 
             auto removeStartIndex = getRootItemGlobalIndex(rootIndex);
             auto removeLastIndex = getRootItemGlobalIndex(count - 1, removeStartIndex);
 
-            size_t removeCount = removeLastIndex.index - removeStartIndex.index + 1;
-            removeItem(removeStartIndex.index, removeCount + (*removeLastIndex)->getExpandedChildrenCount());
-
-            auto baseItor = std::next(m_rootItems.begin(), rootIndex);
-            for (size_t i = 0; i < count; ++i)
+            if (removeStartIndex.has_value() && removeLastIndex.has_value())
             {
-                (*baseItor)->m_parentView.reset();
-                (*baseItor)->m_nodeLevel = 0;
-                (*baseItor)->m_parentItem.reset();
-                (*baseItor)->updateSelfContentHorzIndent();
-                (*baseItor)->updateChildrenMiscellaneousFields();
+                size_t removeCount = removeLastIndex.value() - removeStartIndex.value() + 1;
+                removeItem(
+                    removeStartIndex.value(),
+                    removeCount + m_items[removeLastIndex.value()]->getExpandedChildrenCount());
 
-                baseItor = m_rootItems.erase(baseItor);
+                auto baseItor = std::next(m_rootItems.begin(), rootIndex);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    (*baseItor)->m_parentView.reset();
+                    (*baseItor)->m_nodeLevel = 0;
+                    (*baseItor)->m_parentItem.reset();
+                    (*baseItor)->updateSelfContentHorzIndent();
+                    (*baseItor)->updateChildrenMiscellaneousFields();
+
+                    baseItor = m_rootItems.erase(baseItor);
+                }
             }
         }
     }
@@ -129,14 +136,14 @@ namespace d14engine::uikit
         for (auto& item : m_items) item->updateContentHorzIndent();
     }
 
-    float TreeView::horzIndentEachNodelLevel() const
+    float TreeView::nodeHorzIndent() const
     {
-        return m_horzIndentEachNodeLevel;
+        return m_nodeHorzIndent;
     }
 
-    void TreeView::setHorzIndentEachNodelLevel(float value)
+    void TreeView::setNodeHorzIndent(float value)
     {
-        m_horzIndentEachNodeLevel = value;
+        m_nodeHorzIndent = value;
         for (auto& item : m_items) item->updateContentHorzIndent();
     }
 
@@ -144,13 +151,13 @@ namespace d14engine::uikit
     {
         auto& range = m_activeItemIndexRange;
 
-        if (range.index1.valid() && range.index2.valid())
+        if (range.index1.has_value() && range.index2.has_value())
         {
             if (value)
             {
-                for (ItemIndex itemIndex = range.index1; itemIndex <= range.index2; ++itemIndex)
+                for (size_t i = range.index1.value(); i <= range.index2.value(); ++i)
                 {
-                    auto value = (*itemIndex)->m_stateDetail.ancestorUnfolded();
+                    auto value = m_items[i]->m_stateDetail.ancestorUnfolded();
 
                     // When folding a tree view item, we set its height to
                     // zero to hide the content, but its rect, however, is
@@ -158,38 +165,39 @@ namespace d14engine::uikit
                     // make sure the item is not belonging to any folded item
                     // before showing it.
 
-                    (*itemIndex)->setPrivateVisible(value);
-                    (*itemIndex)->appEventReactability.hitTest = value;
+                    m_items[i]->setPrivateVisible(value);
+                    m_items[i]->appEventReactability.hitTest = value;
                 }
             }
             else // It is always safe to deactivate an item.
             {
-                for (ItemIndex itemIndex = range.index1; itemIndex <= range.index2; ++itemIndex)
+                for (size_t i = range.index1.value(); i <= range.index2.value(); ++i)
                 {
-                    (*itemIndex)->setPrivateVisible(false);
-                    (*itemIndex)->appEventReactability.hitTest = false;
+                     m_items[i]->setPrivateVisible(false);
+                     m_items[i]->appEventReactability.hitTest = false;
                 }
             }
         }
     }
 
-    TreeView::ItemIndex TreeView::getRootItemGlobalIndex(size_t rootIndex, Optional<ItemIndex> start) const
+    Optional<size_t> TreeView::getRootItemGlobalIndex(size_t rootIndex, Optional<size_t> startIndex) const
     {
-        if (!m_items.empty())
+        auto globalIndex = startIndex.has_value() ? startIndex.value() : 0;
+        if (m_items.empty())
         {
-            if (!start.has_value()) start = ItemIndex::begin((ItemList*)&m_items);
-            for (size_t i = 0; i < rootIndex; ++i)
-            {
-                start.value().moveNext((*start.value())->getExpandedChildrenCount() + 1);
-                if (start.value() >= m_items.size()) return ItemIndex::end((ItemList*)&m_items);
-            }
+            if (globalIndex == 0) return 0;
+            else return std::nullopt;
+        }
+        for (size_t i = 0; i < rootIndex; ++i)
+        {
+            if (globalIndex >= m_items.size()) return std::nullopt;
+            globalIndex += m_items[globalIndex]->getExpandedChildrenCount() + 1;
+        }
 #pragma warning(push)
 #pragma warning(disable : 26816)
-            // Warning C26816: The pointer points to memory allocated on the stack (ES.65)
-            // The result returned here is a copy. Not sure why MSVC gives this warning.
-            return start.value();
+        // Warning C26816: The pointer points to memory allocated on the stack (ES.65)
+        // The result returned here is a copy. Not sure why MSVC gives this warning.
+        return globalIndex;
 #pragma warning(pop)
-        }
-        else return ItemIndex::end((ItemList*)&m_items);
     }
 }

@@ -91,14 +91,7 @@ namespace d14engine::uikit
         /* pvAttribute */ &state,
         /* cbAttribute */ sizeof(state))
         );
-        if (ret)
-        {
-            m_cornerState = state;
-            if (m_displayState != Normal)
-            {
-                m_originalCornerState = state;
-            }
-        }
+        if (ret) m_cornerState = state;
         return ret;
     }
 

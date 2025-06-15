@@ -64,7 +64,7 @@ item->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style) \
 };
 
 #define START_ADD_CHILDREN_ITEMS \
-TreeViewItem::ChildItemList childrenItems = \
+TreeViewItem::ChildItemArray childrenItems = \
 {
 #define ADD_CHILD_ITEM_PAGE(Id, Name) \
 create##Id##Page((pages[L#Name] = makeUIObject<ConstraintLayout>()).get())

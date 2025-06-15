@@ -137,7 +137,7 @@ void createGalleryTabPage(ConstraintLayout* page)
         ui_sideCategory->selectMode = TreeView::SelectMode::Single;
 
         ui_sideCategory->setBaseHorzIndent(40.0f);
-        ui_sideCategory->setHorzIndentEachNodelLevel(40.0f);
+        ui_sideCategory->setNodeHorzIndent(40.0f);
 
         ConstraintLayout::GeometryInfo geoInfo = {};
 
@@ -151,7 +151,7 @@ void createGalleryTabPage(ConstraintLayout* page)
 
         ui_sideLayout->addElement(ui_sideCategory, geoInfo);
 
-        TreeView::ItemList items =
+        TreeView::ItemArray items =
         {
             createGuidancePage(*categoryPages),
             createBasicPanelPage(*categoryPages),
@@ -288,7 +288,7 @@ void createGalleryTabPage(ConstraintLayout* page)
     {
         if (!selected.empty())
         {
-            auto currItem = (**selected.begin())->getContent<IconLabel>();
+            auto currItem = view->items()[*selected.begin()]->getContent<IconLabel>();
             if (!currItem.expired())
             {
                 auto& categoryName = currItem.lock()->label()->text();
