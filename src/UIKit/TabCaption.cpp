@@ -241,7 +241,7 @@ namespace d14engine::uikit
                     if (cpp_lang_utils::isMostDerivedEqual(tab.caption, shared_from_this())) break;
                     ++tabIndex;
                 }
-                tabGroup->selectTab(tabIndex);
+                tabGroup->setSelectedTab(tabIndex);
 
                 Application::g_app->sendNextImmediateMouseMoveEvent = true;
             }

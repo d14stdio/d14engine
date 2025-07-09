@@ -34,7 +34,7 @@ namespace d14engine::uikit
                 else // managed by another item
                 {
                     auto itemobjParent = itemobj->parentItem().lock();
-                    for (auto& item : itemobjParent->childrenItems())
+                    for (auto& item : itemobjParent->childItems())
                     {
                         if (cpp_lang_utils::isMostDerivedEqual(uiobj, item->ptr))
                         {
@@ -54,7 +54,7 @@ namespace d14engine::uikit
         return m_rootItems;
     }
 
-    void TreeView::insertRootItem(const ItemArray& rootitems, size_t rootIndex)
+    void TreeView::insertRootItem(const ItemArray& rootItems, size_t rootIndex)
     {
         // "index == m_rootItems.size()" ---> append.
         rootIndex = std::clamp(rootIndex, 0_uz, m_rootItems.size());
@@ -62,23 +62,23 @@ namespace d14engine::uikit
         auto insertIndex = getRootItemGlobalIndex(rootIndex);
         if (insertIndex.has_value())
         {
-            insertItem(getExpandedTreeViewItems(rootitems), insertIndex.value());
+            insertItem(getExpandedTreeViewItems(rootItems), insertIndex.value());
 
-            for (auto& rootItem : rootitems)
+            for (auto& rootItem : rootItems)
             {
                 rootItem->m_parentView = std::dynamic_pointer_cast<TreeView>(shared_from_this());
                 rootItem->m_nodeLevel = 0;
                 rootItem->m_parentItem.reset();
                 rootItem->updateSelfContentHorzIndent();
-                rootItem->updateChildrenMiscellaneousFields();
+                rootItem->updateChildMiscellaneousFields();
             }
-            m_rootItems.insert(std::next(m_rootItems.begin(), rootIndex), rootitems.begin(), rootitems.end());
+            m_rootItems.insert(m_rootItems.begin() + rootIndex, rootItems.begin(), rootItems.end());
         }
     }
 
-    void TreeView::appendRootItem(const ItemArray& rootitems)
+    void TreeView::appendRootItem(const ItemArray& rootItems)
     {
-        insertRootItem(rootitems, m_rootItems.size());
+        insertRootItem(rootItems, m_rootItems.size());
     }
 
     void TreeView::removeRootItem(size_t rootIndex, size_t count)
@@ -86,6 +86,7 @@ namespace d14engine::uikit
         if (rootIndex < m_rootItems.size() && count > 0)
         {
             count = std::min(count, m_rootItems.size() - rootIndex);
+            size_t endRootIndex = rootIndex + count;
 
             auto removeStartIndex = getRootItemGlobalIndex(rootIndex);
             auto removeLastIndex = getRootItemGlobalIndex(count - 1, removeStartIndex);
@@ -95,7 +96,7 @@ namespace d14engine::uikit
                 size_t removeCount = removeLastIndex.value() - removeStartIndex.value() + 1;
                 removeItem(
                     removeStartIndex.value(),
-                    removeCount + m_items[removeLastIndex.value()]->getExpandedChildrenCount());
+                    removeCount + m_items[removeLastIndex.value()]->getExpandedChildCount());
 
                 auto baseItor = std::next(m_rootItems.begin(), rootIndex);
                 for (size_t i = 0; i < count; ++i)
@@ -104,10 +105,9 @@ namespace d14engine::uikit
                     (*baseItor)->m_nodeLevel = 0;
                     (*baseItor)->m_parentItem.reset();
                     (*baseItor)->updateSelfContentHorzIndent();
-                    (*baseItor)->updateChildrenMiscellaneousFields();
-
-                    baseItor = m_rootItems.erase(baseItor);
+                    (*baseItor)->updateChildMiscellaneousFields();
                 }
+                m_rootItems.erase(m_rootItems.begin() + rootIndex, m_rootItems.begin() + endRootIndex);
             }
         }
     }
@@ -120,7 +120,7 @@ namespace d14engine::uikit
             item->m_nodeLevel = 0;
             item->m_parentItem.reset();
             item->updateSelfContentHorzIndent();
-            item->updateChildrenMiscellaneousFields();
+            item->updateChildMiscellaneousFields();
         }
         WaterfallView::clearAllItems();
     }
@@ -147,10 +147,9 @@ namespace d14engine::uikit
         for (auto& item : m_items) item->updateContentHorzIndent();
     }
 
-    void TreeView::setItemIndexRangeActive(bool value)
+    void TreeView::visibleItemsUpdateFunc(bool value)
     {
-        auto& range = m_activeItemIndexRange;
-
+        auto& range = m_visibleItemIndexRange;
         if (range.index1.has_value() && range.index2.has_value())
         {
             if (value)
@@ -191,7 +190,7 @@ namespace d14engine::uikit
         for (size_t i = 0; i < rootIndex; ++i)
         {
             if (globalIndex >= m_items.size()) return std::nullopt;
-            globalIndex += m_items[globalIndex]->getExpandedChildrenCount() + 1;
+            globalIndex += m_items[globalIndex]->getExpandedChildCount() + 1;
         }
 #pragma warning(push)
 #pragma warning(disable : 26816)

@@ -132,8 +132,8 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
             geoInfo.axis.y = { 0, 1 };
             content->addElement(ui_stickBoy, geoInfo);
 
-            ui_pixelViewer->appendTab({ caption, content });
-            ui_pixelViewer->selectTab(0);
+            ui_pixelViewer->appendTab({{ caption, content }});
+            ui_pixelViewer->setSelectedTab(0);
 
             for (int i = 0; i < fanim.frames.size(); ++i)
             {
@@ -153,7 +153,7 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
                 geoInfo.axis.y = { 0, 1 };
                 content->addElement(ui_stickBoyFrame, geoInfo);
 
-                ui_pixelViewer->appendTab({ caption, content });
+                ui_pixelViewer->appendTab({{ caption, content }});
             }
         }
         auto ui_sideLayout = makeManagedUIObject<GridLayout>(ui_clientArea);
@@ -325,10 +325,12 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
             {
                 if (!wk_pixelViewer.expired())
                 {
-                    auto& selected = wk_pixelViewer.lock()->activeCardTabIndex();
-                    if (selected.valid())
+                    auto sh_pixelViewer = wk_pixelViewer.lock();
+                    auto& index = sh_pixelViewer->selectedTabIndex();
+                    if (index.has_value())
                     {
-                        auto layout = std::dynamic_pointer_cast<GridLayout>(selected->content);
+                        auto& item = sh_pixelViewer->tabs()[index.value()];
+                        auto layout = std::dynamic_pointer_cast<GridLayout>(item.content);
                         if (layout)
                         {
                             auto itor = layout->children().begin();
@@ -341,12 +343,13 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
                     }
                 }
             };
-            ui_pixelViewer->f_onSelectedTabIndexChange = [=]
-            (TabGroup * tg, TabGroup::TabIndexParam index)
+            ui_pixelViewer->f_onSelectedTabChange = [=]
+            (TabGroup * tg, OptRefer<size_t> index)
             {
-                if (index.valid() && !wk_frameSizeSlider.expired())
+                if (index.has_value() && !wk_frameSizeSlider.expired())
                 {
-                    auto layout = std::dynamic_pointer_cast<GridLayout>(index->content);
+                    auto& item = tg->tabs()[index.value()];
+                    auto layout = std::dynamic_pointer_cast<GridLayout>(item.content);
                     if (layout)
                     {
                         auto itor = layout->children().begin();

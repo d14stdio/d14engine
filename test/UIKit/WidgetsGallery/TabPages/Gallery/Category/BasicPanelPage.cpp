@@ -63,10 +63,10 @@ SharedPtr<TreeViewItem> createBasicPanelPage
         ui_layout->addElement(ui_synopsisLabel, geoInfo);
     }
     DEF_CATEGORY_ITEM(MASTER, BasicPanel, Basic Panel, 26X26)
-    START_ADD_CHILDREN_ITEMS
+    START_ADD_CHILD_ITEMS
     ADD_CHILD_ITEM_PAGE(ClickablePanel, Clickable Panel),
     ADD_CHILD_ITEM_PAGE(DraggablePanel, Draggable Panel),
     ADD_CHILD_ITEM_PAGE(ResizablePanel, Resizable Panel)
-    END_ADD_CHILDREN_ITEMS
+    END_ADD_CHILD_ITEMS
     RET_CATEGORY_ITEM
 }

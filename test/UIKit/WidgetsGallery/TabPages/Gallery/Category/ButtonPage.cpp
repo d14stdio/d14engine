@@ -64,12 +64,12 @@ SharedPtr<TreeViewItem> createButtonPage
         ui_layout->addElement(ui_synopsisLabel, geoInfo);
     }
     DEF_CATEGORY_ITEM(MASTER, Button, Button, 30X18)
-    START_ADD_CHILDREN_ITEMS
+    START_ADD_CHILD_ITEMS
     ADD_CHILD_ITEM_PAGE(FlatButton, Flat Button),
     ADD_CHILD_ITEM_PAGE(OutlinedButton, Outlined Button),
     ADD_CHILD_ITEM_PAGE(FilledButton, Filled Button),
     ADD_CHILD_ITEM_PAGE(ElevatedButton, Elevated Button),
     ADD_CHILD_ITEM_PAGE(ToggleButton, Toggle Button),
-    END_ADD_CHILDREN_ITEMS
+    END_ADD_CHILD_ITEMS
     RET_CATEGORY_ITEM
 }

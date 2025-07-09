@@ -153,22 +153,22 @@ namespace d14engine::uikit
         return m_parentItem;
     }
 
-    const TreeViewItem::ChildItemImplArray& TreeViewItem::childrenItems() const
+    const TreeViewItem::ChildItemImplArray& TreeViewItem::childItems() const
     {
-        return m_childrenItems;
+        return m_childItems;
     }
 
     void TreeViewItem::insertItem(const ChildItemArray& items, size_t index)
     {
-        index = std::clamp(index, 0_uz, m_childrenItems.size());
+        index = std::clamp(index, 0_uz, m_childItems.size());
 
         // Updating parentView requires the global insertion index:
         //
-        // 1. Insert after parentItem (this item) if m_childrenItems is empty.
-        // 2. Insert before m_childrenItems[index]->ptr otherwise.
+        // 1. Insert after parentItem (this item) if m_childItems is empty.
+        // 2. Insert before m_childItems[index]->ptr otherwise.
         //
         // Note that we need to compute the global insertion index in advance,
-        // because it depends on m_childrenItems (which will be modified).
+        // because it depends on m_childItems (which will be modified).
 
         auto parentItem = std::static_pointer_cast<TreeViewItem>(shared_from_this());
 
@@ -176,7 +176,7 @@ namespace d14engine::uikit
         if (!m_parentView.expired())
         {
             auto parentView = m_parentView.lock();
-            if (m_childrenItems.empty())
+            if (m_childItems.empty())
             {
                 insertIndex = parentView->getItemIndex(parentItem);
 
@@ -186,7 +186,7 @@ namespace d14engine::uikit
             }
             else // follows scenario 2
             {
-                auto& childItem = m_childrenItems[index]->ptr;
+                auto& childItem = m_childItems[index]->ptr;
                 insertIndex = parentView->getItemIndex(childItem);
             }
         }
@@ -197,7 +197,11 @@ namespace d14engine::uikit
         // Update Parent Item //
         ////////////////////////
 
-        for (auto& item : items)
+        auto backInserter = std::inserter
+        (
+            m_childItems, m_childItems.begin() + index
+        );
+        auto makeItemImpl = [&](auto& item)
         {
             item->m_parentItem = parentItem;
             item->updateMiscellaneousFields();
@@ -205,15 +209,8 @@ namespace d14engine::uikit
             if (item->m_stateDetail.ancestorFolded())
             {
                 item->setSize(item->width(), 0.0f);
-                item->notifyHideChildrenItems();
+                item->notifyHideChildItems();
             }
-        }
-        auto backInserter = std::inserter
-        (
-            m_childrenItems, m_childrenItems.begin() + index
-        );
-        auto makeItemImpl = [](auto& item)
-        {
             auto itemImpl = std::make_shared<ChildItemImpl>(item);
             item->m_itemImplPtr = itemImpl; return itemImpl;
         };
@@ -238,13 +235,13 @@ namespace d14engine::uikit
 
     void TreeViewItem::appendItem(const ChildItemArray& items)
     {
-        insertItem(items, m_childrenItems.size());
+        insertItem(items, m_childItems.size());
     }
 
     void TreeViewItem::removeItem(size_t index, size_t count)
     {
-        index = std::clamp(index, 0_uz, m_childrenItems.size());
-        count = std::min(count, m_childrenItems.size() - index);
+        index = std::clamp(index, 0_uz, m_childItems.size());
+        count = std::min(count, m_childItems.size() - index);
         size_t endIndex = index + count;
 
         // Refer to the comments in insertItem above;
@@ -255,14 +252,14 @@ namespace d14engine::uikit
         {
             auto parentView = m_parentView.lock();
 
-            auto& childItem = m_childrenItems[index]->ptr;
+            auto& childItem = m_childItems[index]->ptr;
             removeIndex = parentView->getItemIndex(childItem);
 
             for (size_t i = index; i < endIndex; ++i)
             {
-                auto& childItem = m_childrenItems[i]->ptr;
+                auto& childItem = m_childItems[i]->ptr;
                 // We need to add 1 for childItem itself.
-                removeCount += (childItem->getExpandedChildrenCount() + 1);
+                removeCount += (childItem->getExpandedChildCount() + 1);
             }
         }
         // We must update parentItem first before updating parentView,
@@ -274,14 +271,14 @@ namespace d14engine::uikit
 
         for (size_t i = index; i < endIndex; ++i)
         {
-            auto& childItem = m_childrenItems[i]->ptr;
+            auto& childItem = m_childItems[i]->ptr;
 
             childItem->m_parentItem.reset();
             childItem->m_itemImplPtr.reset();
             childItem->updateMiscellaneousFields();
         }
-        auto childItor = m_childrenItems.begin() + index;
-        m_childrenItems.erase(childItor, childItor + count);
+        auto childItor = m_childItems.begin() + index;
+        m_childItems.erase(childItor, childItor + count);
 
         ////////////////////////
         // Update Parent View //
@@ -302,7 +299,7 @@ namespace d14engine::uikit
     void TreeViewItem::clearAllItems()
     {
         // There is no trivial clearing since we do not know their indices in parentView.
-        removeItem(0, m_childrenItems.size());
+        removeItem(0, m_childItems.size());
     }
 
     WeakPtrRefer<TreeViewItem::ChildItemImpl> TreeViewItem::itemImplPtr() const
@@ -312,48 +309,48 @@ namespace d14engine::uikit
 
     void TreeViewItem::fold()
     {
-        notifyHideChildrenItems();
+        notifyHideChildItems();
         updateMasterViewConstraints();
     }
 
-    void TreeViewItem::notifyHideChildrenItems()
+    void TreeViewItem::notifyHideChildItems()
     {
-        for (auto& item : m_childrenItems)
+        for (auto& item : m_childItems)
         {
             item->ptr->setSize(item->ptr->width(), 0.0f);
             item->ptr->m_stateDetail.ancestorFlag = FOLDED;
 
-            item->ptr->notifyHideChildrenItems();
+            item->ptr->notifyHideChildItems();
         }
     }
 
     void TreeViewItem::unfold()
     {
-        notifyShowChildrenItems();
+        notifyShowChildItems();
         updateMasterViewConstraints();
     }
 
-    void TreeViewItem::notifyShowChildrenItems()
+    void TreeViewItem::notifyShowChildItems()
     {
-        for (auto& item : m_childrenItems)
+        for (auto& item : m_childItems)
         {
             item->ptr->setSize(item->ptr->width(), item->m_unfoldedHeight);
             item->ptr->m_stateDetail.ancestorFlag = UNFOLDED;
 
             if (item->ptr->m_stateDetail.folded())
             {
-                item->ptr->notifyHideChildrenItems();
+                item->ptr->notifyHideChildItems();
             }
             else // expanded item encountered
             {
-                item->ptr->notifyShowChildrenItems();
+                item->ptr->notifyShowChildItems();
             }
         }
     }
 
-    size_t TreeViewItem::getExpandedChildrenCount() const
+    size_t TreeViewItem::getExpandedChildCount() const
     {
-        return getExpandedTreeViewItemCount(m_childrenItems);
+        return getExpandedTreeViewItemCount(m_childItems);
     }
 
     size_t getExpandedTreeViewItemCount(const TreeViewItem::ChildItemArray& items)
@@ -361,7 +358,7 @@ namespace d14engine::uikit
         size_t count = items.size();
         for (auto& item : items)
         {
-            count += item->getExpandedChildrenCount();
+            count += item->getExpandedChildCount();
         }
         return count;
     }
@@ -371,14 +368,14 @@ namespace d14engine::uikit
         size_t count = items.size();
         for (auto& item : items)
         {
-            count += item->ptr->getExpandedChildrenCount();
+            count += item->ptr->getExpandedChildCount();
         }
         return count;
     }
 
-    TreeViewItem::ChildItemArray TreeViewItem::getExpandedChildrenItems() const
+    TreeViewItem::ChildItemArray TreeViewItem::getExpandedChildItems() const
     {
-        return getExpandedTreeViewItems(m_childrenItems);
+        return getExpandedTreeViewItems(m_childItems);
     }
 
     TreeViewItem::ChildItemArray getExpandedTreeViewItems(const TreeViewItem::ChildItemArray& items)
@@ -388,7 +385,7 @@ namespace d14engine::uikit
         {
             expandedItems.push_back(item);
 
-            auto children = item->getExpandedChildrenItems();
+            auto children = item->getExpandedChildItems();
             expandedItems.insert(expandedItems.end(), children.begin(), children.end());
         }
         return expandedItems;
@@ -401,7 +398,7 @@ namespace d14engine::uikit
         {
             expandedItems.push_back(item->ptr);
 
-            auto children = item->ptr->getExpandedChildrenItems();
+            auto children = item->ptr->getExpandedChildItems();
             expandedItems.insert(expandedItems.end(), children.begin(), children.end());
         }
         return expandedItems;
@@ -410,7 +407,7 @@ namespace d14engine::uikit
     void TreeViewItem::updateContentHorzIndent()
     {
         updateSelfContentHorzIndent();
-        updateChildrenContentHorzIndents();
+        updateChildContentHorzIndents();
     }
 
     void TreeViewItem::updateSelfContentHorzIndent()
@@ -435,9 +432,9 @@ namespace d14engine::uikit
         }
     }
 
-    void TreeViewItem::updateChildrenContentHorzIndents()
+    void TreeViewItem::updateChildContentHorzIndents()
     {
-        for (auto& item : m_childrenItems)
+        for (auto& item : m_childItems)
         {
             item->ptr->updateContentHorzIndent();
         }
@@ -446,7 +443,7 @@ namespace d14engine::uikit
     void TreeViewItem::updateMiscellaneousFields()
     {
         updateSelfMiscellaneousFields();
-        updateChildrenMiscellaneousFields();
+        updateChildMiscellaneousFields();
     }
 
     void TreeViewItem::updateSelfMiscellaneousFields()
@@ -475,9 +472,9 @@ namespace d14engine::uikit
         updateSelfContentHorzIndent();
     }
 
-    void TreeViewItem::updateChildrenMiscellaneousFields()
+    void TreeViewItem::updateChildMiscellaneousFields()
     {
-        for (auto& item : m_childrenItems)
+        for (auto& item : m_childItems)
         {
             item->ptr->updateMiscellaneousFields();
         }
@@ -506,7 +503,7 @@ namespace d14engine::uikit
         // Fold/Unfold Arrow //
         ///////////////////////
 
-        if (!m_childrenItems.empty() && !m_parentView.expired())
+        if (!m_childItems.empty() && !m_parentView.expired())
         {
             auto& arrowSetting = appearance().arrow;
             auto& arrowGeometry = arrowSetting.geometry[StatefulObject::m_state.index()];
@@ -600,7 +597,7 @@ namespace d14engine::uikit
         if (!m_parentView.expired())
         {
             auto parentView = m_parentView.lock();
-            parentView->updateItemIndexRangeActivity();
+            parentView->updateVisibleItems();
         }
     }
 }

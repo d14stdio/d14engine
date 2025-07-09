@@ -45,7 +45,7 @@ namespace d14engine::uikit
         using WaterfallView::insertItem;
         using WaterfallView::removeItem;
 
-        void setItemIndexRangeActive(bool value) override;
+        void visibleItemsUpdateFunc(bool value) override;
 
         Optional<size_t> getRootItemGlobalIndex(
             size_t rootIndex, // startIndex in global field

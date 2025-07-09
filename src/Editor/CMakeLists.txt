@@ -11,7 +11,7 @@ set(
     # (2) Add the module source here:
     #----------------------------------------------------------
     "HOME.cpp"
-    "TabPages/BasicWorks/BasicWorks.cpp"
+    "TabPages/Basic/Basic.cpp"
     "TabPages/Settings/Settings.cpp"
 )
 list(TRANSFORM ${ModuleName}Source PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")

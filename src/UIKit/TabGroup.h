@@ -3,7 +3,6 @@
 #include "Common/Precompile.h"
 
 #include "Common/CppLangUtils/EnableMasterPtr.h"
-#include "Common/CppLangUtils/IndexIterator.h"
 
 #include "UIKit/Appearances/TabGroup.h"
 #include "UIKit/ResizablePanel.h"
@@ -18,46 +17,80 @@ namespace d14engine::uikit
 
     struct TabGroup : appearance::TabGroup, ResizablePanel
     {
+        friend Window;
+
         explicit TabGroup(const D2D1_RECT_F& rect = {});
 
         virtual ~TabGroup();
 
-        struct Tab { SharedPtr<TabCaption> caption; SharedPtr<Panel> content; };
-
         void onInitializeFinish() override;
+
+        _D14_SET_APPEARANCE_PROPERTY(TabGroup)
+
+        //////////////////////
+        // Cached Resources //
+        //////////////////////
 
         using MasterPtr = cpp_lang_utils::EnableMasterPtr<TabGroup>;
 
-        struct ActiveCard : MasterPtr
+        struct SelectedTabRes : MasterPtr
         {
             using MasterPtr::MasterPtr;
 
             ShadowMask mask = {};
-            ComPtr<ID2D1PathGeometry> pathGeo = {};
-
             void loadMask();
+
+            ComPtr<ID2D1PathGeometry> pathGeo = {};
             void loadPathGeo();
         }
-        activeCard{ this };
+        selectedTabRes{ this };
 
-        struct MoreCards : MasterPtr
+        struct OverflowButtonRes : MasterPtr
         {
             using MasterPtr::MasterPtr;
 
             MaskObject mask = {};
-            ComPtr<ID2D1PathGeometry> pathGeo = {};
-
             void loadMask();
+
+            ComPtr<ID2D1PathGeometry> pathGeo = {};
             void loadPathGeo();
         }
-        moreCards{ this };
+        overflowButtonRes{ this };
 
-        D2D1_RECT_F cardBarExtendedAbsoluteRect() const;
-        D2D1_RECT_F cardBarExtendedCardBarAbsoluteRect() const;
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
-        _D14_SET_APPEARANCE_PROPERTY(TabGroup)
+        //------------------------------------------------------------------
+        // Public Interfaces
+        //------------------------------------------------------------------
+    public:
+        void onSelectedTabChange(OptRefer<size_t> index);
 
-        float minimalWidth() const override;
+        Function<void(TabGroup*, OptRefer<size_t>)> f_onSelectedTabChange = {};
+
+        Function<void(TabGroup*, Window*)> f_onTriggerTabPromoting = {};
+
+        //------------------------------------------------------------------
+        // Protected Helpers
+        //------------------------------------------------------------------
+    protected:
+        virtual void onSelectedTabChangeHelper(OptRefer<size_t> index);
+
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
+
+        //------------------------------------------------------------------
+        // Tabs
+        //------------------------------------------------------------------
+    public:
+        struct Tab
+        {
+            SharedPtr<TabCaption> caption = {};
+            SharedPtr<Panel> content = {};
+        };
+        using TabArray = std::vector<Tab>;
 
     protected:
         struct TabImpl : Tab
@@ -67,103 +100,104 @@ namespace d14engine::uikit
             TabImpl(const Tab& tab) : Tab(tab) { }
 
         private:
-            SharedPtr<MenuItem> m_previewItem = {};
-
-            D2D1_RECT_F m_cardAbsoluteRectCache = {};
+            Optional<D2D1_RECT_F> m_visibleRect = {};
+            SharedPtr<MenuItem> m_overflowItem = {};
         };
-        using TabList = std::list<TabImpl>;
+        using TabImplArray = std::vector<TabImpl>;
 
-        TabList m_tabs = {};
-
-        // Only the candidate tabs can be displayed in the card-bar, and the
-        // remaining cards are listed in the more-cards preview-panel.
-        size_t m_candidateTabCount = 0;
-
-        using TabIndex = cpp_lang_utils::IndexIterator<TabList>;
-
-        TabIndex selfcoordOffsetToCardTabIndex(float offset) const;
+        TabImplArray m_tabs = {};
 
     public:
-        using TabIndexParam = const TabIndex&;
+        const TabImplArray& tabs() const;
 
-        void onSelectedTabIndexChange(TabIndexParam index);
-
-        Function<void(TabGroup*, TabIndexParam)> f_onSelectedTabIndexChange = {};
-
-    protected:
-        virtual void onSelectedTabIndexChangeHelper(TabIndexParam index);
-
-    public:
-        const TabList& tabs() const;
-
-        void insertTab(const Tab& tab, size_t index = 0);
-        void appendTab(const Tab& tab);
+        void insertTab(const TabArray& tabs, size_t index = 0);
+        void appendTab(const TabArray& tabs);
 
         void removeTab(size_t index, size_t count = 1);
         void clearAllTabs();
 
-        void selectTab(size_t index);
-
-        void swapTab(size_t index1, size_t index2);
-
+        //------------------------------------------------------------------
+        // Overflow Button
+        //------------------------------------------------------------------
     protected:
-        void insertTab(const Tab& tab, TabIndexParam tabIndex);
+        bool m_isOverflowButtonHovered = false;
+        bool m_isOverflowButtonPressed = false;
 
-        void removeTab(TabIndexParam tabIndex, size_t count);
+        ButtonState getOverflowButtonState() const;
 
-        void selectTab(TabIndexParam tabIndex);
-
-        void swapTab(TabIndexParam tabIndex1, TabIndexParam tabIndex2);
-
+        //------------------------------------------------------------------
+        // Overflow Menu
+        //------------------------------------------------------------------
     protected:
-        TabIndex m_activeCardTabIndex{};
-        TabIndex m_hoverCardTabIndex{};
-
-        CardState getCardState(TabIndexParam tabIndex) const;
+        SharedPtr<PopupMenu> m_overflowMenu = {};
 
     public:
-        const TabIndex& activeCardTabIndex() const;
+        ShrdPtrRefer<PopupMenu> overflowMenu() const;
 
+        //------------------------------------------------------------------
+        // Drawing Properties
+        //------------------------------------------------------------------
     protected:
-        bool m_isMoreCardsButtonHover = false;
-        bool m_isMoreCardsButtonDown = false;
+        D2D1_RECT_F hitTestAbsoluteRect() const;
 
-        ButtonState getMoreCardsButtonState() const;
+        D2D1_RECT_F draggingTestAbsoluteRect() const;
 
-    protected:
-        SharedPtr<PopupMenu> m_previewPanel = {};
-
-    public:
-        const SharedPtr<PopupMenu>& previewPanel() const;
-
-        // Call these when the card-geometry-environment changes.
-        void updateCandidateTabInfo();
-        void updatePreviewPanelItems();
-
-    protected:
-        D2D1_RECT_F cardBarAbsoluteRect() const;
+        D2D1_RECT_F tabBarAbsoluteRect() const;
 
         // Returns the cached value directly.
-        D2D1_RECT_F cardAbsoluteRect(TabIndexParam tabIndex) const;
+        D2D1_RECT_F tabAbsoluteRect(OptRefer<size_t> index) const;
 
-        D2D1_RECT_F cardCaptionAbsoluteRect(TabIndexParam tabIndex) const;
+        D2D1_RECT_F tabCaptionAbsoluteRect(OptRefer<size_t> index) const;
 
-        D2D1_RECT_F separatorAbsoluteRect(TabIndexParam tabIndex) const;
+        D2D1_RECT_F separatorAbsoluteRect(OptRefer<size_t> index) const;
 
-        D2D1_RECT_F moreCardsButtonAbsoluteRect() const;
+        D2D1_RECT_F overflowButtonAbsoluteRect() const;
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Tab Updating
+        //------------------------------------------------------------------
     protected:
-        TabIndex m_draggedCardTabIndex{};
+        Optional<size_t> m_hoveredTabIndex = {};
+        Optional<size_t> m_selectedTabIndex = {};
 
     public:
-        SharedPtr<Window> promoteTabToWindow(size_t index);
+        OptRefer<size_t> selectedTabIndex() const;
+        void setSelectedTab(OptRefer<size_t> index);
 
     protected:
-        SharedPtr<Window> promoteTabToWindow(TabIndexParam tabIndex);
+        TabState getTabState(OptRefer<size_t> index) const;
+
+        // Only the visible tabs can be displayed in the tab-bar,
+        // and the overflow tabs are listed in the overflow-menu.
+        size_t m_visibleTabCount = 0;
+
+        size_t getVisibleTabCount() const;
+
+        size_t selfcoordOffsetToTabIndex(float offset) const;
 
     public:
-        Function<void(TabGroup*, Window*)> f_onTriggerTabPromoting = {};
+        void updateAllTabs();
 
+        //------------------------------------------------------------------
+        // Tab Dragging
+        //------------------------------------------------------------------
+    protected:
+        Optional<size_t> m_draggedTabIndex = {};
+
+        bool m_isDraggingTab = false;
+        D2D1_POINT_2F m_draggingPoint = {};
+
+        D2D1_RECT_F m_draggingVisibleRect = {};
+        D2D1_RECT_F m_draggingCaptionRect = {};
+
+        //------------------------------------------------------------------
+        // Tab Promoting
+        //------------------------------------------------------------------
+    public:
         // When a window is being dragged, all of the tab-groups that have
         // been registered for the window will be associated with it, and if
         // the window is then released above any associated tab-group, its
@@ -172,27 +206,42 @@ namespace d14engine::uikit
 
         WeakPtr<Window> associatedWindow = {};
 
+        SharedPtr<Window> promoteTabToWindow(size_t index);
+
     protected:
         void triggerTabPromoting(MouseMoveEvent& e);
 
-        bool isAssociatedWindowDraggedAbove() const;
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
+    public:
+        //------------------------------------------------------------------
+        // Panel
+        //------------------------------------------------------------------
+
+        float minimalWidth() const override;
 
     protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
-        void onRendererUpdateObject2DHelper(renderer::Renderer* rndr) override;
+        //------------------------------------------------------------------
 
-        void onRendererDrawD2d1LayerHelper(renderer::Renderer* rndr) override;
+        void onRendererUpdateObject2DHelper(Renderer* rndr) override;
 
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1LayerHelper(Renderer* rndr) override;
 
-        void drawD2d1ObjectPosterior(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
+        void drawD2d1ObjectPosterior(Renderer* rndr) override;
+
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         bool isHitHelper(const Event::Point& p) const override;
 
         void onSizeHelper(SizeEvent& e) override;
-
-        void onMoveHelper(MoveEvent& e) override;
 
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;
 

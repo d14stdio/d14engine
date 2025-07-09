@@ -2,8 +2,6 @@
 
 #include "Common/Precompile.h"
 
-// Do NOT remove this header for code tidy
-// as the UI creation helper relies on it.
 #include "Common/RuntimeError.h"
 
 #include "Renderer/Interfaces/IDrawObject2D.h"
@@ -187,11 +185,11 @@ namespace d14engine::uikit
     protected:
         using Renderer = renderer::Renderer;
 
-        void updateChildrenObjects(Renderer* rndr);
+        void updateChildObjects(Renderer* rndr);
 
-        void drawChildrenLayers(Renderer* rndr);
+        void drawChildLayers(Renderer* rndr);
         void drawBackground(Renderer* rndr);
-        void drawChildrenObjects(Renderer* rndr);
+        void drawChildObjects(Renderer* rndr);
 
     public:
         virtual void drawD2d1ObjectPreceding(Renderer* rndr);
@@ -525,8 +523,8 @@ namespace d14engine::uikit
         virtual void onMouseMoveHelper(MouseMoveEvent& e);
         virtual void onMouseLeaveHelper(MouseMoveEvent& e);
 
-        bool m_enableChildrenMouseMoveEvent = true;
-        Optional<D2D1_RECT_F> m_childrenHitTestRect = {};
+        bool m_enableChildMouseMoveEvent = true;
+        Optional<D2D1_RECT_F> m_childHitTestRect = {};
 
         virtual void onMouseButtonHelper(MouseButtonEvent& e);
         virtual void onMouseWheelHelper(MouseWheelEvent& e);

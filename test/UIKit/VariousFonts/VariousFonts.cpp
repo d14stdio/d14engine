@@ -94,23 +94,23 @@ D14_SET_APP_ENTRY(mainVariousFonts)
         {
             ui_textViewer->transform(0.0f, 50.0f, 800.0f, 300.0f);
 
-#define SET_CARD_SIZE(State, Width, Height) \
-    ui_textViewer->appearance().tabBar.card.main \
-    [(size_t)TabGroup::CardState::State].geometry.size = { Width, Height }
+#define SET_TAB_SIZE(State, Width, Height) \
+    ui_textViewer->appearance().tabBar.tab.main \
+    [(size_t)TabGroup::TabState::State].geometry.size = { Width, Height }
 
-            SET_CARD_SIZE(Dormant, 250.0f, 32.0f);
-            SET_CARD_SIZE(Hover, 250.0f, 32.0f);
-            SET_CARD_SIZE(Active, 266.0f, 40.0f);
+            SET_TAB_SIZE(Idle, 250.0f, 32.0f);
+            SET_TAB_SIZE(Hovered, 250.0f, 32.0f);
+            SET_TAB_SIZE(Selected, 266.0f, 40.0f);
 
-#undef SET_CARD_SIZE
-            ui_textViewer->activeCard.loadMask();
-            ui_textViewer->activeCard.loadPathGeo();
+#undef SET_TAB_SIZE
+            ui_textViewer->selectedTabRes.loadMask();
+            ui_textViewer->selectedTabRes.loadPathGeo();
 
             auto& barAppear = ui_textViewer->appearance().tabBar;
 
             barAppear.geometry.height = 40.0f;
             barAppear.separator.geometry.size.height = 24.0f;
-            barAppear.moreCards.control.button.geometry.offset.y = 7.0f;
+            barAppear.overflow.button.geometry.offset.y = 7.0f;
         }
         Wstring excerptDir = L"Test/UIKit/VariousFonts/";
 
@@ -190,10 +190,10 @@ D14_SET_APP_ENTRY(mainVariousFonts)
             //        sh_block->keepHiliteRange = false;
             //    }
             //};
-            ui_textViewer->appendTab({ ui_caption, ui_content });
+            ui_textViewer->appendTab({{ ui_caption, ui_content }});
             return false;
         });
-        ui_textViewer->selectTab(0);
+        ui_textViewer->setSelectedTab(0);
 
         // Load dependent text formats.
 
@@ -431,12 +431,13 @@ D14_SET_APP_ENTRY(mainVariousFonts)
             if (!wk_textViewer.expired())
             {
                 auto sh_textViewer = wk_textViewer.lock();
-                if (sh_textViewer->activeCardTabIndex().valid())
+                auto& index = sh_textViewer->selectedTabIndex();
+                if (index.has_value())
                 {
-                    auto& tabItor = sh_textViewer->activeCardTabIndex().iterator;
+                    auto& tab = sh_textViewer->tabs()[index.value()];
 
-                    if (tabItor->content->children().empty()) return;
-                    auto layout = tabItor->content->children().begin();
+                    if (tab.content->children().empty()) return;
+                    auto layout = tab.content->children().begin();
 
                     if ((*layout)->children().empty()) return;
                     auto element = (*layout)->children().begin();
@@ -449,7 +450,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
                     (*layout)->setSize(800.0f, tblock->textMetrics().height + 100.0f);
 
                     // Update the viewport offset of the scroll view to fix display bug.
-                    auto content = std::dynamic_pointer_cast<ScrollView>(tabItor->content);
+                    auto content = std::dynamic_pointer_cast<ScrollView>(tab.content);
                     if (content != nullptr)
                     {
                         content->setViewportOffset(content->viewportOffset());

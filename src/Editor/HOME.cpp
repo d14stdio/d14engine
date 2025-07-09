@@ -14,7 +14,7 @@
 using namespace d14engine;
 using namespace d14engine::uikit;
 
-#include "TabPages/BasicWorks/BasicWorks.h"
+#include "TabPages/Basic/Basic.h"
 #include "TabPages/Settings/Settings.h"
 
 D14_SET_APP_ENTRY(mainEditor)
@@ -103,8 +103,8 @@ D14_SET_APP_ENTRY(mainEditor)
 #define SET_TAB_PAGE(Name, Title) \
         create##Name##TabPage(appendTabPage(L#Title).get())
 
-        SET_TAB_PAGE(BasicWorks, Basic Works);
-        SET_TAB_PAGE(Settings,   Settings);
+        SET_TAB_PAGE(Basic,    Basic);
+        SET_TAB_PAGE(Settings, Settings);
 
 #undef SET_TAB_PAGE
         ui_tabGroup->selectTab(0);

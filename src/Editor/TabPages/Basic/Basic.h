@@ -4,4 +4,4 @@
 
 #include "UIKit/ConstraintLayout.h"
 
-void createBasicWorksTabPage(d14engine::uikit::ConstraintLayout* page);
+void createBasicTabPage(d14engine::uikit::ConstraintLayout* page);

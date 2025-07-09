@@ -25,12 +25,12 @@ namespace d14engine::uikit
 
         _D14_SET_APPEARANCE_PROPERTY(Button)
 
-        /////////////////////////
-        // Graphics Components //
-        /////////////////////////
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
         //------------------------------------------------------------------
-        // Children Objects
+        // Child Objects
         //------------------------------------------------------------------
     protected:
         SharedPtr<IconLabel> m_content = {};

@@ -35,9 +35,9 @@ namespace d14engine::uikit
 
         sideTriangleRes.loadPathGeo();
 
-        ///////////////////////////
-        // Init Children Objects //
-        ///////////////////////////
+        ////////////////////////
+        // Init Child Objects //
+        ////////////////////////
 
         m_valueLabel = makeUIObject<Label>();
         {
@@ -357,9 +357,9 @@ namespace d14engine::uikit
 
         sideTriangleRes.loadPathGeo();
 
-        /////////////////////////////
-        // Update Children Objects //
-        /////////////////////////////
+        //////////////////////////
+        // Update Child Objects //
+        //////////////////////////
 
         m_valueLabel->transform(valueLabelSelfCoordRect());
     }
@@ -375,9 +375,9 @@ namespace d14engine::uikit
     {
         ValuefulObject::onValueChangeHelper(value);
 
-        /////////////////////////////
-        // Update Children Objects //
-        /////////////////////////////
+        //////////////////////////
+        // Update Child Objects //
+        //////////////////////////
 
         m_valueLabel->transform(valueLabelSelfCoordRect());
 

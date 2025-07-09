@@ -103,7 +103,7 @@ namespace d14engine::uikit
             // Note an expandable menu-item should not trigger any command.
             if (!m_associatedMenu && isInstant && isTriggerItem && !m_parentMenu.expired())
             {
-                m_parentMenu.lock()->setActivatedIncludingParents(false);
+                m_parentMenu.lock()->setActivatedWithAncestors(false);
             }
         }
     }

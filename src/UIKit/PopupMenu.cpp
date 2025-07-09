@@ -124,24 +124,24 @@ namespace d14engine::uikit
         onChangeActivity(value);
     }
 
-    void PopupMenu::setActivatedIncludingParents(bool value)
+    void PopupMenu::setActivatedWithAncestors(bool value)
     {
         setActivated(value);
 
         if (!m_associatedItem.expired() && !m_associatedItem.lock()->m_parentMenu.expired())
         {
-            m_associatedItem.lock()->m_parentMenu.lock()->setActivatedIncludingParents(value);
+            m_associatedItem.lock()->m_parentMenu.lock()->setActivatedWithAncestors(value);
         }
     }
 
-    void PopupMenu::setActivatedIncludingChildren(bool value)
+    void PopupMenu::setActivatedWithDescendants(bool value)
     {
         if (m_lastHoverItemIndex.has_value())
         {
             auto& item = m_items[m_lastHoverItemIndex.value()];
             if (item->m_associatedMenu != nullptr)
             {
-                item->m_associatedMenu->setActivatedIncludingChildren(value);
+                item->m_associatedMenu->setActivatedWithDescendants(value);
             }
         }
         setActivated(value); // Note m_lastHoverItemIndex may be invalidated in setActivated.
@@ -195,7 +195,7 @@ namespace d14engine::uikit
             m_backgroundTriggerPanel->f_onMouseButton = [this]
             (Panel* p, MouseButtonEvent& e)
             {
-                setActivatedIncludingChildren(false);
+                setActivatedWithDescendants(false);
             };
         }
         else // release the background trigger panel

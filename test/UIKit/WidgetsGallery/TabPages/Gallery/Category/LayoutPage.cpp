@@ -61,9 +61,9 @@ SharedPtr<TreeViewItem> createLayoutPage
         ui_layout->addElement(ui_synopsisLabel, geoInfo);
     }
     DEF_CATEGORY_ITEM(MASTER, Layout, Layout, 26X26)
-    START_ADD_CHILDREN_ITEMS
+    START_ADD_CHILD_ITEMS
     ADD_CHILD_ITEM_PAGE(ConstraintLayout, Constraint Layout),
     ADD_CHILD_ITEM_PAGE(GridLayout, Grid Layout)
-    END_ADD_CHILDREN_ITEMS
+    END_ADD_CHILD_ITEMS
     RET_CATEGORY_ITEM
 }

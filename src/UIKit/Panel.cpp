@@ -381,7 +381,7 @@ namespace d14engine::uikit
         }
     }
 
-    void Panel::updateChildrenObjects(Renderer* rndr)
+    void Panel::updateChildObjects(Renderer* rndr)
     {
         for (auto& drawobj : m_drawObjects)
         {
@@ -392,7 +392,7 @@ namespace d14engine::uikit
         }
     }
 
-    void Panel::drawChildrenLayers(Renderer* rndr)
+    void Panel::drawChildLayers(Renderer* rndr)
     {
         for (auto& drawobj : m_drawObjects)
         {
@@ -432,7 +432,7 @@ namespace d14engine::uikit
         }
     }
 
-    void Panel::drawChildrenObjects(Renderer* rndr)
+    void Panel::drawChildObjects(Renderer* rndr)
     {
         for (auto& drawobj : m_drawObjects)
         {
@@ -994,7 +994,7 @@ namespace d14engine::uikit
         {
             f_onRendererUpdateObject2DBefore(this, rndr);
         }
-        updateChildrenObjects(rndr);
+        updateChildObjects(rndr);
 
         onRendererUpdateObject2DHelper(rndr);
 
@@ -1010,7 +1010,7 @@ namespace d14engine::uikit
         {
             f_onRendererDrawD2d1LayerBefore(this, rndr);
         }
-        drawChildrenLayers(rndr);
+        drawChildLayers(rndr);
 
         onRendererDrawD2d1LayerHelper(rndr);
 
@@ -1030,7 +1030,7 @@ namespace d14engine::uikit
 
         onRendererDrawD2d1ObjectHelper(rndr);
 
-        drawChildrenObjects(rndr);
+        drawChildObjects(rndr);
 
         drawD2d1ObjectPosterior(rndr);
 
@@ -1120,13 +1120,13 @@ namespace d14engine::uikit
             }
             return child->appEventTransparency.mouse.move;
         });
-        if (!m_enableChildrenMouseMoveEvent) return;
+        if (!m_enableChildMouseMoveEvent) return;
 
         ChildObjectTempSet hitChildren = {};
 
-        if (!m_childrenHitTestRect.has_value() || math_utils::isOverlapped
+        if (!m_childHitTestRect.has_value() || math_utils::isOverlapped
             (
-                absoluteToSelfCoord(e.cursorPoint), m_childrenHitTestRect.value()
+                absoluteToSelfCoord(e.cursorPoint), m_childHitTestRect.value()
             ))
         {
             for (auto& child : m_children)

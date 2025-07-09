@@ -38,9 +38,9 @@ namespace d14engine::uikit
     {
         Panel::onInitializeFinish();
 
-        ///////////////////////////
-        // Init Children Objects //
-        ///////////////////////////
+        ////////////////////////
+        // Init Child Objects //
+        ////////////////////////
 
         registerUIEvents(m_content);
 
@@ -278,9 +278,9 @@ namespace d14engine::uikit
 
         drawBufferRes.loadMask();
 
-        /////////////////////////////
-        // Update Children Objects //
-        /////////////////////////////
+        //////////////////////////
+        // Update Child Objects //
+        //////////////////////////
 
         if (m_content) m_content->transform(selfCoordRect());
     }

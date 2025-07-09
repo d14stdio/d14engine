@@ -49,23 +49,23 @@ D14_SET_APP_ENTRY(mainWidgetsGallery)
 
             ui_centerLayout->addElement(ui_tabGroup, geoInfo);
 
-#define SET_CARD_SIZE(State, Width, Height) \
-    ui_tabGroup->appearance().tabBar.card.main \
-    [(size_t)TabGroup::CardState::State].geometry.size = { Width, Height }
+#define SET_TAB_SIZE(State, Width, Height) \
+    ui_tabGroup->appearance().tabBar.tab.main \
+    [(size_t)TabGroup::TabState::State].geometry.size = { Width, Height }
 
-            SET_CARD_SIZE(Dormant, 250.0f,  32.0f);
-            SET_CARD_SIZE(Hover,   250.0f,  32.0f);
-            SET_CARD_SIZE(Active,  266.0f,  40.0f);
+            SET_TAB_SIZE(Idle,     250.0f, 32.0f);
+            SET_TAB_SIZE(Hovered,  250.0f, 32.0f);
+            SET_TAB_SIZE(Selected, 266.0f, 40.0f);
 
-#undef SET_CARD_SIZE
-            ui_tabGroup->activeCard.loadMask();
-            ui_tabGroup->activeCard.loadPathGeo();
+#undef SET_TAB_SIZE
+            ui_tabGroup->selectedTabRes.loadMask();
+            ui_tabGroup->selectedTabRes.loadPathGeo();
 
             auto& barAppear = ui_tabGroup->appearance().tabBar;
 
             barAppear.geometry.height = 40.0f;
             barAppear.separator.geometry.size.height = 24.0f;
-            barAppear.moreCards.control.button.geometry.offset.y = 7.0f;
+            barAppear.overflow.button.geometry.offset.y = 7.0f;
         }
         auto appendTabPage = [&](WstrRefer title)
         {
@@ -77,14 +77,14 @@ D14_SET_APP_ENTRY(mainWidgetsGallery)
             ui_caption->closable = false;
             ui_caption->draggable = false;
 
-            ui_tabGroup->appendTab({ ui_caption, ui_content });
+            ui_tabGroup->appendTab({{ ui_caption, ui_content }});
 
             return ui_content;
         };
         createGalleryTabPage(appendTabPage(L"Gallery").get());
         createSettingsTabPage(appendTabPage(L"Settings").get());
 
-        ui_tabGroup->selectTab(0);
+        ui_tabGroup->setSelectedTab(0);
 
         app->win32WindowSettings.geometry.minTrackSize = { 1280, 720 };
 

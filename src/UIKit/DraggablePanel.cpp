@@ -50,7 +50,7 @@ namespace d14engine::uikit
 
         auto& app = Application::g_app;
 
-        m_enableChildrenMouseMoveEvent = false;
+        m_enableChildMouseMoveEvent = false;
 
         app->focusUIObject
         (
@@ -69,7 +69,7 @@ namespace d14engine::uikit
 
         auto& app = Application::g_app;
 
-        m_enableChildrenMouseMoveEvent = true;
+        m_enableChildMouseMoveEvent = true;
 
         app->focusUIObject
         (

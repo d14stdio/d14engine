@@ -63,10 +63,10 @@ SharedPtr<TreeViewItem> createViewPanelPage
         ui_layout->addElement(ui_synopsisLabel, geoInfo);
     }
     DEF_CATEGORY_ITEM(MASTER, ViewPanel, View Panel, 26X26)
-    START_ADD_CHILDREN_ITEMS
+    START_ADD_CHILD_ITEMS
     ADD_CHILD_ITEM_PAGE(ScrollView, Scroll View),
     ADD_CHILD_ITEM_PAGE(ListView, List View),
     ADD_CHILD_ITEM_PAGE(TreeView, Tree View)
-    END_ADD_CHILDREN_ITEMS
+    END_ADD_CHILD_ITEMS
     RET_CATEGORY_ITEM
 }

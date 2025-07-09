@@ -50,10 +50,6 @@ namespace d14engine::uikit
                 // The viewport offset may be invalid after resizing.
                 setViewportOffset(m_viewportOffset);
             };
-            m_layout->f_onParentSize = [](Panel* p, SizeEvent& e)
-            {
-                p->setSize(e.size.width, p->height());
-            };
         }
 
         ////////////////////////
@@ -83,12 +79,12 @@ namespace d14engine::uikit
             // This method intentionally left blank.
         }
 
-        /////////////////////////
-        // Graphics Components //
-        /////////////////////////
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
         //------------------------------------------------------------------
-        // Children Objects
+        // Child Objects
         //------------------------------------------------------------------
     protected:
         SharedPtr<ConstraintLayout> m_layout = {};
@@ -226,12 +222,12 @@ do { \
             UPDATE_ITEM_INDEX(m_lastSelectedItemIndex);
             UPDATE_ITEM_INDEX(m_extendedSelectItemIndex);
 
-            UPDATE_ITEM_INDEX(m_activeItemIndexRange.index1);
-            UPDATE_ITEM_INDEX(m_activeItemIndexRange.index2);
+            UPDATE_ITEM_INDEX(m_visibleItemIndexRange.index1);
+            UPDATE_ITEM_INDEX(m_visibleItemIndexRange.index2);
 
 #undef UPDATE_ITEM_INDEX
 
-            updateItemIndexRangeActivity();
+            updateVisibleItems();
         }
 
         virtual void removeItem(size_t index, size_t count = 1)
@@ -325,12 +321,12 @@ do { \
                 UPDATE_ITEM_INDEX(m_lastSelectedItemIndex);
                 UPDATE_ITEM_INDEX(m_extendedSelectItemIndex);
 
-                UPDATE_ITEM_INDEX(m_activeItemIndexRange.index1);
-                UPDATE_ITEM_INDEX(m_activeItemIndexRange.index2);
+                UPDATE_ITEM_INDEX(m_visibleItemIndexRange.index1);
+                UPDATE_ITEM_INDEX(m_visibleItemIndexRange.index2);
 
 #undef UPDATE_ITEM_INDEX
 
-                updateItemIndexRangeActivity();
+                updateVisibleItems();
             }
         }
 
@@ -346,8 +342,8 @@ do { \
             m_lastSelectedItemIndex.reset();
             m_extendedSelectItemIndex.reset();
 
-            m_activeItemIndexRange.index1.reset();
-            m_activeItemIndexRange.index2.reset();
+            m_visibleItemIndexRange.index1.reset();
+            m_visibleItemIndexRange.index2.reset();
         }
 
         ///////////////////////
@@ -432,35 +428,34 @@ do { \
             }
         }
 
+        void triggerShiftKeySelect(size_t itemIndex)
+        {
+            if (m_extendedSelectItemIndex.has_value())
+            {
+                auto& extIndex = m_extendedSelectItemIndex.value();
+                auto range = std::minmax(itemIndex, extIndex);
+
+                for (auto i = range.first; i <= range.second; ++i)
+                {
+                    m_selectedItemIndices.insert(i);
+
+                    m_items[i]->triggerCheckStateTrans();
+                    if (i != itemIndex)
+                    {
+                        // Highlight only the last selected item.
+                        m_items[i]->triggerLeaveStateTrans();
+                    }
+                }
+                m_lastSelectedItemIndex = itemIndex;
+            }
+            else triggerSingleSelect(itemIndex);
+        }
+
         void triggerExtendedSelect(size_t itemIndex)
         {
             if (KeyboardEvent::SHIFT())
             {
-                if (m_extendedSelectItemIndex.has_value())
-                {
-                    for (auto& i : m_selectedItemIndices)
-                    {
-                        m_items[i]->triggerUnchkStateTrans();
-                    }
-                    m_selectedItemIndices.clear();
-
-                    auto& extIndex = m_extendedSelectItemIndex.value();
-                    auto range = std::minmax(itemIndex, extIndex);
-
-                    for (auto i = range.first; i <= range.second; ++i)
-                    {
-                        m_items[i]->triggerCheckStateTrans();
-
-                        if (i != itemIndex)
-                        {
-                            // Highlight only the last selected item.
-                            m_items[i]->triggerLeaveStateTrans();
-                        }
-                        m_selectedItemIndices.insert(i);
-                    }
-                    m_lastSelectedItemIndex = itemIndex;
-                }
-                else triggerSingleSelect(itemIndex);
+                triggerShiftKeySelect(itemIndex);
             }
             else if (KeyboardEvent::CTRL())
             {
@@ -500,18 +495,18 @@ do { \
         }
 
         //------------------------------------------------------------------
-        // Active Item Index Range
+        // Visible Item Index Range
         //------------------------------------------------------------------
     protected:
         struct ItemIndexRange
         {
             Optional<size_t> index1 = {}, index2 = {};
         }
-        m_activeItemIndexRange = {};
+        m_visibleItemIndexRange = {};
 
-        virtual void setItemIndexRangeActive(bool value)
+        virtual void visibleItemsUpdateFunc(bool value)
         {
-            auto& range = m_activeItemIndexRange;
+            auto& range = m_visibleItemIndexRange;
             if (range.index1.has_value() && range.index2.has_value())
             {
                 auto& index1 = range.index1.value();
@@ -520,6 +515,7 @@ do { \
                 for (auto i = index1; i <= index2; ++i)
                 {
                     auto& item = m_items[i];
+
                     item->setPrivateVisible(value);
                     item->appEventReactability.hitTest = value;
                 }
@@ -527,11 +523,11 @@ do { \
         }
 
     public:
-        void updateItemIndexRangeActivity()
+        void updateVisibleItems()
         {
-            setItemIndexRangeActive(false);
+            visibleItemsUpdateFunc(false);
 
-            auto& range = m_activeItemIndexRange;
+            auto& range = m_visibleItemIndexRange;
             range.index1 = viewportOffsetToItemIndex(m_viewportOffset.y);
             range.index2 = viewportOffsetToItemIndex(m_viewportOffset.y + height());
 
@@ -540,7 +536,7 @@ do { \
             {
                 range.index2 = m_items.size() - 1;
             }
-            setItemIndexRangeActive(true);
+            visibleItemsUpdateFunc(true);
         }
 
         /////////////////////////
@@ -569,6 +565,26 @@ do { \
             for (auto& i : m_selectedItemIndices)
             {
                 m_items[i]->triggerLosfcStateTrans();
+            }
+        }
+
+        void onSizeHelper(SizeEvent& e) override
+        {
+            auto originalViewportOffset = m_viewportOffset;
+
+            ScrollView::onSizeHelper(e);
+
+            m_layout->setSize(e.size.width, m_layout->height());
+
+            // NOTE: The unchanged viewportOffset indicates
+            // onViewportOffsetChange didn't be triggered above.
+            // So, we must manually call updateVisibleItems
+            // (As the original update resides in the callback).
+
+            if (m_viewportOffset.x == originalViewportOffset.x &&
+                m_viewportOffset.y == originalViewportOffset.y)
+            {
+                updateVisibleItems();
             }
         }
 
@@ -653,7 +669,7 @@ do { \
         {
             ScrollView::onViewportOffsetChangeHelper(offset);
 
-            updateItemIndexRangeActivity();
+            updateVisibleItems();
         }
     };
 }

@@ -398,7 +398,7 @@ D14_SET_APP_ENTRY(mainListTreeView)
                         {
                             size_t index = 0;
                             auto parentItem = selectedItem->parentItem().lock();
-                            for (auto& item : parentItem->childrenItems())
+                            for (auto& item : parentItem->childItems())
                             {
                                 if (cpp_lang_utils::isMostDerivedEqual(item->ptr, selectedItem))
                                 {
@@ -488,7 +488,7 @@ D14_SET_APP_ENTRY(mainListTreeView)
                         selectedItem->setSize(selectedItem->width(), value);
                     }
                     sh_listView->updateItemConstraints();
-                    sh_listView->updateItemIndexRangeActivity();
+                    sh_listView->updateVisibleItems();
                 }
                 if (!wk_treeView.expired())
                 {
@@ -503,7 +503,7 @@ D14_SET_APP_ENTRY(mainListTreeView)
                         else selectedItem->setSize(selectedItem->width(), value);
                     }
                     sh_treeView->updateItemConstraints();
-                    sh_treeView->updateItemIndexRangeActivity();
+                    sh_treeView->updateVisibleItems();
                 }
             };
         }

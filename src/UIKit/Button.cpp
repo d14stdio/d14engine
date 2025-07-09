@@ -100,7 +100,7 @@ namespace d14engine::uikit
         m_content->icon.bitmap.opacity = foreground.opacity;
         m_content->label()->appearance().foreground = foreground;
 
-        drawChildrenObjects(rndr);
+        drawChildObjects(rndr);
 
         /////////////
         // Outline //

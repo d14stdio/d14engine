@@ -12,12 +12,12 @@ namespace d14engine::pipeline
 
         XMStoreFloat4x4(&worldMatrix, XMMatrixTransformation
         (
-            /* ScalingOrigin      */ XMVectorZero(),
-            /* ScalingOrientation */ XMQuaternionIdentity(),
-            /* Scaling            */ scalingVec3,
-            /* RotationOrigin     */ XMVectorZero(),
-            /* Rotation           */ XMQuaternionRotationRollPitchYawFromVector(rotationVec3),
-            /* Translation        */ positionVec3)
-        );
+        /* ScalingOrigin      */ XMVectorZero(),
+        /* ScalingOrientation */ XMQuaternionIdentity(),
+        /* Scaling            */ scalingVec3,
+        /* RotationOrigin     */ XMVectorZero(),
+        /* Rotation           */ XMQuaternionRotationRollPitchYawFromVector(rotationVec3),
+        /* Translation        */ positionVec3
+        ));
     }
 }

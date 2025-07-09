@@ -24,7 +24,7 @@ namespace d14engine::uikit
         contentMask(size()),
         m_content(content)
     {
-        m_childrenHitTestRect = m_rect;
+        m_childHitTestRect = m_rect;
 
         setResizable(false);
     }
@@ -63,7 +63,7 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        m_enableChildrenMouseMoveEvent = false;
+        m_enableChildMouseMoveEvent = false;
 
         auto focus = Application::FocusType::Mouse;
         Application::g_app->focusUIObject(focus, shared_from_this());
@@ -73,7 +73,7 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        m_enableChildrenMouseMoveEvent = true;
+        m_enableChildMouseMoveEvent = true;
 
         auto focus = Application::FocusType::Mouse;
         Application::g_app->focusUIObject(focus, nullptr);
@@ -423,7 +423,7 @@ namespace d14engine::uikit
         //////////////////////////////
 
         // This has been initialized in the ctor and is guaranteed to be valid.
-        auto& hitTestRect = m_childrenHitTestRect.value();
+        auto& hitTestRect = m_childHitTestRect.value();
 
         if (isHorzBarEnabled)
         {
@@ -433,7 +433,7 @@ namespace d14engine::uikit
             auto rect = horzBarSelfcoordRect(state);
             rect = math_utils::overrideBottom(rect, FLT_MAX);
 
-            // Since the judgment of m_childrenHitTestRect uses isOverlapped,
+            // Since the judgment of m_childHitTestRect uses isOverlapped,
             // using isOverlapped here may cause conflicts when the cursor
             // moves to the boundary between the scroll bar and the hit-test rect.
             // However, the probability of this situation occurring is very low,
@@ -464,7 +464,7 @@ namespace d14engine::uikit
         }
         else hitTestRect.right = m_rect.right;
 
-        // Call helper here to ensure the updated m_childrenHitTestRect is used.
+        // Call helper here to ensure the updated m_childHitTestRect is used.
         ResizablePanel::onMouseMoveHelper(e);
 
         //////////////////////////////

@@ -18,9 +18,9 @@ namespace d14engine::uikit::appearance
             struct Geometry
             {
                 // Call loadShadowBitmap after changing this field.
-                float extension = 10.0f;
+                float extension = 5.0f;
 
-                float roundRadius = 10.0f;
+                float roundRadius = 5.0f;
             }
             geometry = {};
 

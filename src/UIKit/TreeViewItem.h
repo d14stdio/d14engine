@@ -101,7 +101,7 @@ namespace d14engine::uikit
         };
         using ChildItemImplArray = std::vector<SharedPtr<ChildItemImpl>>;
 
-        ChildItemImplArray m_childrenItems = {};
+        ChildItemImplArray m_childItems = {};
 
         // Points to ChildItemImpl maintained in ChildItemImplArray of the
         // parent item (however, always equals nullptr for any root-item).
@@ -116,7 +116,7 @@ namespace d14engine::uikit
 
         const WeakPtr<TreeViewItem>& parentItem() const;
 
-        const ChildItemImplArray& childrenItems() const;
+        const ChildItemImplArray& childItems() const;
 
         void insertItem(const ChildItemArray& items, size_t index = 0);
         void appendItem(const ChildItemArray& items);
@@ -127,8 +127,8 @@ namespace d14engine::uikit
         WeakPtrRefer<ChildItemImpl> itemImplPtr() const;
 
     protected:
-        void fold(); void notifyHideChildrenItems();
-        void unfold(); void notifyShowChildrenItems();
+        void fold(); void notifyHideChildItems();
+        void unfold(); void notifyShowChildItems();
 
         // Convert item-tree to item-list:
         //
@@ -142,23 +142,23 @@ namespace d14engine::uikit
         //
         // Root---Child_0---Child_00---Child_01---Child_1---Child_10---Child_2
 
-        size_t getExpandedChildrenCount() const;
+        size_t getExpandedChildCount() const;
 
         friend size_t getExpandedTreeViewItemCount(const ChildItemArray& items);
         friend size_t getExpandedTreeViewItemCount(const ChildItemImplArray& items);
 
-        ChildItemArray getExpandedChildrenItems() const;
+        ChildItemArray getExpandedChildItems() const;
 
         friend ChildItemArray getExpandedTreeViewItems(const ChildItemArray& items);
         friend ChildItemArray getExpandedTreeViewItems(const ChildItemImplArray& items);
 
         void updateContentHorzIndent();
         void updateSelfContentHorzIndent();
-        void updateChildrenContentHorzIndents();
+        void updateChildContentHorzIndents();
 
         void updateMiscellaneousFields();
         void updateSelfMiscellaneousFields();
-        void updateChildrenMiscellaneousFields();
+        void updateChildMiscellaneousFields();
 
     public:
         constexpr static auto FOLDED = StatefulObject::State::Flag::Folded;

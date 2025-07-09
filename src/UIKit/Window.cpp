@@ -57,9 +57,9 @@ namespace d14engine::uikit
     {
         Panel::onInitializeFinish();
 
-        ///////////////////////////
-        // Init Children Objects //
-        ///////////////////////////
+        ///////////////////////
+        // Init Child Object //
+        ///////////////////////
 
         if (!m_caption)
         {
@@ -452,7 +452,7 @@ namespace d14engine::uikit
             if (!tgItor->expired())
             {
                 auto tabGroup = tgItor->lock();
-                if (math_utils::isInside(e.cursorPoint, tabGroup->cardBarExtendedCardBarAbsoluteRect()))
+                if (math_utils::isInside(e.cursorPoint, tabGroup->draggingTestAbsoluteRect()))
                 {
                     associatedTabGroup = tabGroup;
                     tabGroup->associatedWindow = std::dynamic_pointer_cast<Window>(shared_from_this());
@@ -484,8 +484,11 @@ namespace d14engine::uikit
                     auto caption = makeUIObject<TabCaption>(m_caption);
                     caption->promotable = true;
 
-                    tabGroup->insertTab({ caption, m_content });
-                    tabGroup->selectTab(0);
+                    auto offset = tabGroup->absoluteToSelfCoord(e.cursorPoint).x;
+                    auto index = tabGroup->selfcoordOffsetToTabIndex(offset);
+
+                    tabGroup->insertTab({TabGroup::Tab{ caption, m_content }}, index);
+                    tabGroup->setSelectedTab(index);
 
                     if (f_onTriggerTabDemoting) f_onTriggerTabDemoting(this, tabGroup.get());
                 }
@@ -535,7 +538,7 @@ namespace d14engine::uikit
 
     void Window::onRendererDrawD2d1LayerHelper(Renderer* rndr)
     {
-        Panel::drawChildrenLayers(rndr);
+        Panel::drawChildLayers(rndr);
         {
             if (m_caption->isD2d1ObjectVisible())
             {
@@ -765,7 +768,7 @@ namespace d14engine::uikit
             // Children //
             //////////////
             {
-                Panel::drawChildrenObjects(rndr);
+                Panel::drawChildObjects(rndr);
             }
         }
         mask.endDraw(rndr->d2d1DeviceContext());
@@ -870,9 +873,9 @@ namespace d14engine::uikit
         drawBufferRes.loadShadowMask();
         drawBufferRes.loadBrush();
 
-        /////////////////////////////
-        // Update Children Objects //
-        /////////////////////////////
+        //////////////////////////
+        // Update Child Objects //
+        //////////////////////////
 
         m_caption->transform(captionTitleSelfcoordRect());
         if (m_content) m_content->transform(clientAreaSelfcoordRect());

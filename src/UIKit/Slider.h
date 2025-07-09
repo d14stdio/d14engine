@@ -60,12 +60,12 @@ namespace d14engine::uikit
         }
         sideTriangleRes{ this };
 
-        /////////////////////////
-        // Graphics Components //
-        /////////////////////////
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
         //------------------------------------------------------------------
-        // Children Objects
+        // Child Objects
         //------------------------------------------------------------------
     protected:
         SharedPtr<Label> m_valueLabel = {};

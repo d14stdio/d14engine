@@ -56,8 +56,8 @@ namespace d14engine::uikit
 
         void setActivated(bool value);
 
-        void setActivatedIncludingParents(bool value);
-        void setActivatedIncludingChildren(bool value);
+        void setActivatedWithAncestors(bool value);
+        void setActivatedWithDescendants(bool value);
 
     public:
         D2D1_RECT_F constrainedRectangle = math_utils::infiniteRectF();

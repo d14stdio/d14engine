@@ -5,9 +5,7 @@
 #include "Common/CppLangUtils/PointerCompare.h"
 #include "Common/DirectXError.h"
 
-#include "UIKit/Application.h"
 #include "UIKit/PopupMenu.h"
-#include "UIKit/ResourceUtils.h"
 #include "UIKit/TabCaption.h"
 #include "UIKit/Window.h"
 
@@ -20,136 +18,55 @@ namespace d14engine::uikit
         Panel(rect, resource_utils::solidColorBrush()),
         ResizablePanel(rect, resource_utils::solidColorBrush())
     {
-        setResizable(false);
-
-        transform(math_utils::adaptMaxSize(rect, minimalSize()));
-
-        m_previewPanel = makeRootUIObject<PopupMenu>();
-        m_previewPanel->setBackgroundTriggerPanel(true);
+        // Here left blank intentionally.
     }
 
     TabGroup::~TabGroup()
     {
         // No need to do the clearing if the application already destroyed.
-        if (Application::g_app != nullptr) m_previewPanel->release();
+        if (Application::g_app != nullptr) m_overflowMenu->release();
     }
 
     void TabGroup::onInitializeFinish()
     {
         ResizablePanel::onInitializeFinish();
 
-        activeCard.loadMask();
-        activeCard.loadPathGeo();
+        ////////////////////
+        // Initialization //
+        ////////////////////
 
-        moreCards.loadMask();
-        moreCards.loadPathGeo();
+        transform(math_utils::adaptMaxSize(m_rect, minimalSize()));
+        setResizable(false);
+
+        //////////////////////
+        // Cached Resources //
+        //////////////////////
+
+        selectedTabRes.loadMask();
+        selectedTabRes.loadPathGeo();
+
+        overflowButtonRes.loadMask();
+        overflowButtonRes.loadPathGeo();
+
+        ///////////////////
+        // Overflow Menu //
+        ///////////////////
+
+        m_overflowMenu = makeRootUIObject<PopupMenu>();
+        m_overflowMenu->setBackgroundTriggerPanel(true);
     }
 
-    void TabGroup::ActiveCard::loadMask()
+    void TabGroup::SelectedTabRes::loadMask()
     {
         TabGroup* tg = m_master;
         THROW_IF_NULL(tg);
 
-        auto& setting = tg->appearance().tabBar.card.main[(size_t)CardState::Active];
+        auto& setting = tg->appearance().tabBar.tab.main[(size_t)TabState::Selected];
 
         mask.loadBitmap(setting.geometry.size);
     }
 
-    void TabGroup::ActiveCard::loadPathGeo()
-    {
-        TabGroup* tg = m_master;
-        THROW_IF_NULL(tg);
-
-        THROW_IF_NULL(Application::g_app);
-
-        auto factory = Application::g_app->renderer()->d2d1Factory();
-        THROW_IF_FAILED(factory->CreatePathGeometry(&pathGeo));
-
-        auto& setting = tg->appearance().tabBar.card.main[(size_t)CardState::Active];
-
-        float cardWidth = setting.geometry.size.width;
-        float cardHeight = setting.geometry.size.height;
-
-        float cardRoundRadius = setting.geometry.roundRadius;
-        D2D1_SIZE_F cardCornerSize = { cardRoundRadius, cardRoundRadius };
-
-        ComPtr<ID2D1GeometrySink> geoSink = {};
-        THROW_IF_FAILED(pathGeo->Open(&geoSink));
-        {
-            geoSink->BeginFigure({ 0.0f, cardHeight }, D2D1_FIGURE_BEGIN_FILLED);
-
-            ////////////////////////
-            // Left Bottom Corner //
-            ////////////////////////
-
-            geoSink->AddArc(
-            {
-            /* point            */ { cardRoundRadius, cardHeight - cardRoundRadius },
-            /* size             */ cardCornerSize,
-            /* rotation degrees */ 90.0f,
-            /* sweep direction  */ D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE,
-            /* arc size         */ D2D1_ARC_SIZE_SMALL
-            });
-            geoSink->AddLine({ cardRoundRadius, cardRoundRadius });
-
-            /////////////////////
-            // Left Top Corner //
-            /////////////////////
-
-            geoSink->AddArc(
-            {
-            /* point            */ { cardRoundRadius * 2.0f, 0.0f },
-            /* size             */ cardCornerSize,
-            /* rotation degrees */ 90.0f,
-            /* sweep direction  */ D2D1_SWEEP_DIRECTION_CLOCKWISE,
-            /* arc size         */ D2D1_ARC_SIZE_SMALL
-            });
-            geoSink->AddLine({ cardWidth -  cardRoundRadius * 2.0f, 0.0f });
-
-            //////////////////////
-            // Right Top Corner //
-            //////////////////////
-
-            geoSink->AddArc(
-            {
-            /* point            */ { cardWidth - cardRoundRadius, cardRoundRadius },
-            /* size             */ cardCornerSize,
-            /* rotation degrees */ 90.0f,
-            /* sweep direction  */ D2D1_SWEEP_DIRECTION_CLOCKWISE,
-            /* arc size         */ D2D1_ARC_SIZE_SMALL
-            });
-            geoSink->AddLine({ cardWidth - cardRoundRadius, cardHeight - cardRoundRadius });
-
-            /////////////////////////
-            // Right Bottom Corner //
-            /////////////////////////
-
-            geoSink->AddArc(
-            {
-            /* point            */ { cardWidth, cardHeight },
-            /* size             */ cardCornerSize,
-            /* rotation degrees */ 90.0f,
-            /* sweep direction  */ D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE,
-            /* arc size         */ D2D1_ARC_SIZE_SMALL
-            });
-            geoSink->AddLine({ 0.0f, cardHeight });
-
-            geoSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-        }
-        THROW_IF_FAILED(geoSink->Close());
-    }
-
-    void TabGroup::MoreCards::loadMask()
-    {
-        TabGroup* tg = m_master;
-        THROW_IF_NULL(tg);
-
-        auto& setting = tg->appearance().tabBar.moreCards.control.button;
-
-        mask.loadBitmap(setting.geometry.size);
-    }
-
-    void TabGroup::MoreCards::loadPathGeo()
+    void TabGroup::SelectedTabRes::loadPathGeo()
     {
         TabGroup* tg = m_master;
         THROW_IF_NULL(tg);
@@ -162,101 +79,233 @@ namespace d14engine::uikit
         ComPtr<ID2D1GeometrySink> geoSink = {};
         THROW_IF_FAILED(pathGeo->Open(&geoSink));
         {
-            auto& setting = tg->appearance().tabBar.moreCards.control.icon;
-            auto& triangleVertices = setting.geometry.bottomTriangle.points;
+            auto& setting = tg->appearance().tabBar.tab.main[(size_t)TabState::Selected];
 
-            geoSink->BeginFigure(triangleVertices[0], D2D1_FIGURE_BEGIN_FILLED);
+            auto& tabWidth = setting.geometry.size.width;
+            auto& tabHeight = setting.geometry.size.height;
+            auto& tabRoundRadius = setting.geometry.roundRadius;
 
-            geoSink->AddLines(triangleVertices, _countof(triangleVertices));
+            geoSink->BeginFigure({ 0.0f, tabHeight }, D2D1_FIGURE_BEGIN_FILLED);
+
+            //------------------------------------------------------------------
+            // Left Bottom Corner
+            //------------------------------------------------------------------
+
+            geoSink->AddArc(
+            {
+                .point          = { tabRoundRadius, tabHeight - tabRoundRadius },
+                .size           = { tabRoundRadius, tabRoundRadius },
+                .rotationAngle  = 90.0f,
+                .sweepDirection = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE,
+                .arcSize        = D2D1_ARC_SIZE_SMALL
+            });
+            geoSink->AddLine({ tabRoundRadius, tabRoundRadius });
+
+            //------------------------------------------------------------------
+            // Left Top Corner
+            //------------------------------------------------------------------
+
+            geoSink->AddArc(
+            {
+                .point          = { tabRoundRadius * 2.0f, 0.0f },
+                .size           = { tabRoundRadius, tabRoundRadius },
+                .rotationAngle  = 90.0f,
+                .sweepDirection = D2D1_SWEEP_DIRECTION_CLOCKWISE,
+                .arcSize        = D2D1_ARC_SIZE_SMALL
+            });
+            geoSink->AddLine({ tabWidth -  tabRoundRadius * 2.0f, 0.0f });
+
+            //------------------------------------------------------------------
+            // Right Top Corner
+            //------------------------------------------------------------------
+
+            geoSink->AddArc(
+            {
+                .point          = { tabWidth - tabRoundRadius, tabRoundRadius },
+                .size           = { tabRoundRadius, tabRoundRadius },
+                .rotationAngle  = 90.0f,
+                .sweepDirection = D2D1_SWEEP_DIRECTION_CLOCKWISE,
+                .arcSize        = D2D1_ARC_SIZE_SMALL
+            });
+            geoSink->AddLine({ tabWidth - tabRoundRadius, tabHeight - tabRoundRadius });
+
+            //------------------------------------------------------------------
+            // Right Bottom Corner
+            //------------------------------------------------------------------
+
+            geoSink->AddArc(
+            {
+                .point          = { tabWidth, tabHeight },
+                .size           = { tabRoundRadius, tabRoundRadius },
+                .rotationAngle  = 90.0f,
+                .sweepDirection = D2D1_SWEEP_DIRECTION_COUNTER_CLOCKWISE,
+                .arcSize        = D2D1_ARC_SIZE_SMALL
+            });
+            geoSink->AddLine({ 0.0f, tabHeight });
 
             geoSink->EndFigure(D2D1_FIGURE_END_CLOSED);
         }
         THROW_IF_FAILED(geoSink->Close());
     }
 
-    D2D1_RECT_F TabGroup::cardBarExtendedAbsoluteRect() const
+    void TabGroup::OverflowButtonRes::loadMask()
     {
-        return math_utils::increaseTop(
-            m_absoluteRect,
-            -appearance().tabBar.geometry.height);
+        TabGroup* tg = m_master;
+        THROW_IF_NULL(tg);
+
+        auto& setting = tg->appearance().tabBar.overflow.button;
+
+        mask.loadBitmap(setting.geometry.size);
     }
 
-    D2D1_RECT_F TabGroup::cardBarExtendedCardBarAbsoluteRect() const
+    void TabGroup::OverflowButtonRes::loadPathGeo()
     {
-        auto& setting = appearance().tabBar.geometry;
+        TabGroup* tg = m_master;
+        THROW_IF_NULL(tg);
 
-        float top = m_absoluteRect.top - setting.height;
-        return math_utils::rect(
-            m_absoluteRect.left, top,
-            width(), setting.height);
-    }
+        THROW_IF_NULL(Application::g_app);
 
-    float TabGroup::minimalWidth() const
-    {
-        float minWidth = appearance().tabBar.geometry.rightPadding;
+        auto factory = Application::g_app->renderer()->d2d1Factory();
+        THROW_IF_FAILED(factory->CreatePathGeometry(&pathGeo));
 
-        if (m_activeCardTabIndex.valid())
+        ComPtr<ID2D1GeometrySink> geoSink = {};
+        THROW_IF_FAILED(pathGeo->Open(&geoSink));
         {
-            auto rect = cardAbsoluteRect(m_activeCardTabIndex);
-            minWidth += absoluteToSelfCoord(rect).right;
+            auto& setting = tg->appearance().tabBar.overflow.icon;
+            auto& points = setting.geometry.bottomTriangle.points;
+
+            geoSink->BeginFigure(points[0], D2D1_FIGURE_BEGIN_FILLED);
+
+            geoSink->AddLines(points, _countof(points));
+
+            geoSink->EndFigure(D2D1_FIGURE_END_CLOSED);
         }
-        return minWidth;
+        THROW_IF_FAILED(geoSink->Close());
     }
 
-    TabGroup::TabIndex TabGroup::selfcoordOffsetToCardTabIndex(float offset) const
+    void TabGroup::onSelectedTabChange(OptRefer<size_t> index)
     {
-        float cardLength = 0.0f;
-        for (TabIndex tabIndex = { (TabList*)&m_tabs, 0 };
-             tabIndex < m_candidateTabCount; ++tabIndex)
-        {
-            auto state = getCardState(tabIndex);
-            auto& setting = appearance().tabBar.card.main[(size_t)state];
+        onSelectedTabChangeHelper(index);
 
-            cardLength += setting.geometry.size.width;
-            if (cardLength > offset) return tabIndex;
-        }
-        return TabIndex{};
+        if (f_onSelectedTabChange) f_onSelectedTabChange(this, index);
     }
 
-    void TabGroup::onSelectedTabIndexChange(TabIndexParam index)
-    {
-        onSelectedTabIndexChangeHelper(index);
-
-        if (f_onSelectedTabIndexChange) f_onSelectedTabIndexChange(this, index);
-    }
-
-    void TabGroup::onSelectedTabIndexChangeHelper(TabIndexParam index)
+    void TabGroup::onSelectedTabChangeHelper(OptRefer<size_t> index)
     {
         // This method intentionally left blank.
     }
 
-    const TabGroup::TabList& TabGroup::tabs() const
+    const TabGroup::TabImplArray& TabGroup::tabs() const
     {
         return m_tabs;
     }
 
-    void TabGroup::insertTab(const Tab& tab, size_t index)
+    void TabGroup::insertTab(const TabArray& tabs, size_t index)
     {
-        if (!tab.caption || !tab.content) return;
-
-        // "index == m_tabs.size()" ---> append
         index = std::clamp(index, 0_uz, m_tabs.size());
 
-        insertTab(tab, { &m_tabs, index });
+        auto backInserter = std::inserter
+        (
+            m_tabs, m_tabs.begin() + index
+        );
+        auto makeTabImpl = [&](auto& tab)
+        {
+            tab.caption->m_parentTabGroup = std::dynamic_pointer_cast<TabGroup>(shared_from_this());
+
+            registerUIEvents(tab.content);
+
+            tab.content->setPrivateEnabled(false);
+            tab.content->transform(selfCoordRect());
+
+            TabImpl tabImpl = tab;
+
+            tabImpl.m_overflowItem = makeUIObject<MenuItem>(nullUIObj());
+            tabImpl.m_overflowItem->isInstant = false;
+
+            return tabImpl;
+        };
+        std::transform(tabs.begin(), tabs.end(), backInserter, makeTabImpl);
+
+        auto originalSelectedIndex = m_selectedTabIndex;
+#define UPDATE_TAB_INDEX(Tab_Index) \
+do { \
+    if (Tab_Index.has_value()) \
+    { \
+        if (Tab_Index.value() >= index) \
+        { \
+            Tab_Index.value() += tabs.size(); \
+        } \
+    } \
+} while (0)
+        UPDATE_TAB_INDEX(m_hoveredTabIndex);
+        UPDATE_TAB_INDEX(m_selectedTabIndex);
+        UPDATE_TAB_INDEX(m_draggedTabIndex);
+
+#undef UPDATE_TAB_INDEX
+
+        updateAllTabs();
+
+        if (m_selectedTabIndex != originalSelectedIndex)
+        {
+            onSelectedTabChange(m_selectedTabIndex);
+        }
     }
 
-    void TabGroup::appendTab(const Tab& tab)
+    void TabGroup::appendTab(const TabArray& tabs)
     {
-        insertTab(tab, m_tabs.size());
+        insertTab(tabs, m_tabs.size());
     }
 
     void TabGroup::removeTab(size_t index, size_t count)
     {
-        if (index >= 0 && index < m_tabs.size() && count > 0)
+        if (index < m_tabs.size())
         {
             count = std::min(count, m_tabs.size() - index);
+            size_t endIndex = index + count;
 
-            removeTab({ &m_tabs, index }, count);
+            for (size_t i = index; i < endIndex; ++i)
+            {
+                auto& tab = m_tabs[i];
+
+                tab.caption->m_parentTabGroup.reset();
+
+                // Its parent could be either tab-group or overflow-menu item,
+                // so using release here ensures that it is properly cleaned up.
+                tab.caption->release();
+
+                unregisterUIEvents(tab.content);
+
+                tab.m_overflowItem->release();
+            }
+            m_tabs.erase(m_tabs.begin() + index, m_tabs.begin() + endIndex);
+
+            auto originalSelectedIndex = m_selectedTabIndex;
+#define UPDATE_TAB_INDEX(Tab_Index) \
+do { \
+    if (Tab_Index.has_value()) \
+    { \
+        if (Tab_Index.value() >= endIndex) \
+        { \
+            Tab_Index.value() -= count; \
+        } \
+        else if (Tab_Index.value() >= index) \
+        { \
+            Tab_Index.reset(); \
+        } \
+    } \
+} while (0)
+            UPDATE_TAB_INDEX(m_hoveredTabIndex);
+            UPDATE_TAB_INDEX(m_selectedTabIndex);
+            UPDATE_TAB_INDEX(m_draggedTabIndex);
+
+#undef UPDATE_TAB_INDEX
+
+            updateAllTabs();
+
+            if (m_selectedTabIndex != originalSelectedIndex)
+            {
+                onSelectedTabChange(m_selectedTabIndex);
+            }
         }
     }
 
@@ -266,337 +315,47 @@ namespace d14engine::uikit
         removeTab(0, m_tabs.size());
     }
 
-    void TabGroup::selectTab(size_t index)
+    TabGroup::ButtonState TabGroup::getOverflowButtonState() const
     {
-        if (index >= 0 && index < m_tabs.size())
+        if (m_isOverflowButtonPressed)
         {
-            selectTab({ &m_tabs, index });
+            return ButtonState::Pressed;
         }
-        else if (m_activeCardTabIndex.valid())
+        if (m_isOverflowButtonHovered)
         {
-            m_activeCardTabIndex->content->setPrivateEnabled(false);
-            m_activeCardTabIndex.invalidate();
-
-            updateCandidateTabInfo();
-            updatePreviewPanelItems();
+            return ButtonState::Hovered;
         }
+        return ButtonState::Idle;
     }
 
-    void TabGroup::swapTab(size_t index1, size_t index2)
+    const SharedPtr<PopupMenu>& TabGroup::overflowMenu() const
     {
-        if (index1 >= 0 && index1 < m_tabs.size() &&
-            index2 >= 0 && index2 < m_tabs.size() && index1 != index2)
-        {
-            TabIndex tabIndex1, tabIndex2;
-            for (TabIndex tabIndex = { &m_tabs, 0 }; tabIndex.valid(); ++tabIndex)
-            {
-                if (tabIndex.index == index1) tabIndex1 = tabIndex;
-                if (tabIndex.index == index2) tabIndex2 = tabIndex;
-
-                if (tabIndex1.valid() && tabIndex2.valid()) break; // both found
-            }
-            swapTab(tabIndex1, tabIndex2);
-        }
+        return m_overflowMenu;
     }
 
-    void TabGroup::insertTab(const Tab& tab, TabIndexParam tabIndex)
+    D2D1_RECT_F TabGroup::hitTestAbsoluteRect() const
     {
-        if (!tab.caption || !tab.content) return;
+        auto& geometry = appearance().tabBar.geometry;
 
-        registerUIEvents(tab.content);
-
-        tab.caption->m_parentTabGroup = std::dynamic_pointer_cast<TabGroup>(shared_from_this());
-
-        tab.content->setPrivateEnabled(false);
-        tab.content->transform(selfCoordRect());
-
-        auto tabItor = m_tabs.insert(tabIndex.iterator, tab);
-
-        tabItor->m_previewItem = makeUIObject<MenuItem>(nullUIObj());
-        tabItor->m_previewItem->isInstant = false;
-
-#define UPDATE_TAB_INDEX(Tab_Index) \
-do { \
-    if (Tab_Index.generalValid()) \
-    { \
-        if (insertedIndex <= Tab_Index) \
-        { \
-            Tab_Index.moveIndexNext(); \
-        } \
-    } \
-} while (0)
-        // Note tabIndex may be invalidated if it is one of the following.
-        size_t insertedIndex = tabIndex.index;
-
-        UPDATE_TAB_INDEX(m_hoverCardTabIndex);
-        UPDATE_TAB_INDEX(m_activeCardTabIndex);
-        UPDATE_TAB_INDEX(m_draggedCardTabIndex);
-
-#undef UPDATE_TAB_INDEX
-
-        updateCandidateTabInfo();
-        if (tabIndex < m_candidateTabCount)
-        {
-            registerUIEvents(tabItor->caption);
-        }
-        else // not a candidate tab
-        {
-            tabItor->m_previewItem->setContent(tabItor->caption);
-        }
-        updatePreviewPanelItems();
+        return math_utils::increaseTop(m_absoluteRect, -geometry.height);
     }
 
-    void TabGroup::removeTab(TabIndexParam tabIndex, size_t count)
+    D2D1_RECT_F TabGroup::draggingTestAbsoluteRect() const
     {
-        size_t orgActiveCardIndex = m_activeCardTabIndex.index;
+        auto& geometry = appearance().tabBar.geometry;
 
-        TabList::iterator tabItor = tabIndex.iterator;
-
-        for (size_t i = 0; i < count; ++i)
-        {
-            // Its parent could be either tab-group or preview-menu,
-            // so using release here ensures that it is properly cleaned up.
-            tabItor->caption->release();
-
-            unregisterUIEvents(tabItor->content);
-            tabItor->m_previewItem->release();
-
-            tabItor->caption->m_parentTabGroup.reset();
-
-            tabItor = m_tabs.erase(tabItor);
-        }
-        size_t endIndex = tabIndex.index + count;
-
-#define UPDATE_TAB_INDEX(Tab_Index) \
-do { \
-    if (Tab_Index.generalValid()) \
-    { \
-        if (Tab_Index >= endIndex) \
-        { \
-            Tab_Index.moveIndexPrev(count); \
-        } \
-        else if (Tab_Index >= removedIndex) \
-        { \
-            Tab_Index.invalidate(); \
-        } \
-    } \
-} while (0)
-        // Note tabIndex may be invalidated if it is one of the following.
-        size_t removedIndex = tabIndex.index;
-
-        UPDATE_TAB_INDEX(m_hoverCardTabIndex);
-        UPDATE_TAB_INDEX(m_activeCardTabIndex);
-        UPDATE_TAB_INDEX(m_draggedCardTabIndex);
-
-#undef UPDATE_TAB_INDEX
-
-        updateCandidateTabInfo();
-
-        if (m_activeCardTabIndex != orgActiveCardIndex)
-        {
-            onSelectedTabIndexChange(m_activeCardTabIndex);
-        }
-        updatePreviewPanelItems();
+        return math_utils::rect
+        (
+        /* x      */ m_absoluteRect.left,
+        /* y      */ m_absoluteRect.top - geometry.height,
+        /* width  */ width(),
+        /* height */ geometry.height
+        );
     }
 
-    void TabGroup::selectTab(TabIndexParam tabIndex)
+    D2D1_RECT_F TabGroup::tabBarAbsoluteRect() const
     {
-        size_t orgActiveCardIndex = m_activeCardTabIndex.index;
-
-        if (tabIndex != m_activeCardTabIndex)
-        {
-            if (m_activeCardTabIndex.valid())
-            {
-                m_activeCardTabIndex->content->setPrivateEnabled(false);
-            }
-        }
-        if (tabIndex >= m_candidateTabCount)
-        {
-            if (!m_activeCardTabIndex.valid())
-            {
-                m_activeCardTabIndex = TabIndex::begin(&m_tabs);
-            }
-            swapTab(tabIndex, m_activeCardTabIndex);
-        }
-        else m_activeCardTabIndex = tabIndex;
-
-        updateCandidateTabInfo();
-
-        if (m_candidateTabCount > 0)
-        {
-            m_activeCardTabIndex->content->setPrivateEnabled(true);
-        }
-        else m_activeCardTabIndex.invalidate();
-
-        if (m_activeCardTabIndex.valid())
-        {
-            m_activeCardTabIndex->content->transform(selfCoordRect());
-        }
-        if (m_activeCardTabIndex != orgActiveCardIndex)
-        {
-            onSelectedTabIndexChange(m_activeCardTabIndex);
-        }
-        updatePreviewPanelItems();
-    }
-
-    void TabGroup::swapTab(TabIndexParam tabIndex1, TabIndexParam tabIndex2)
-    {
-        if (tabIndex1 != tabIndex2)
-        {
-            std::swap(*tabIndex1.iterator, *tabIndex2.iterator);
-
-            if (m_activeCardTabIndex == tabIndex1 ||
-                m_activeCardTabIndex == tabIndex2)
-            {
-                onSelectedTabIndexChange(m_activeCardTabIndex);
-            }
-        }
-    }
-
-    TabGroup::CardState TabGroup::getCardState(TabIndexParam tabIndex) const
-    {
-        if (tabIndex.valid())
-        {
-            if (tabIndex == m_activeCardTabIndex)
-            {
-                return CardState::Active;
-            }
-            else if (tabIndex == m_hoverCardTabIndex)
-            {
-                return CardState::Hover;
-            }
-            // fall through
-        }
-        return CardState::Dormant;
-    }
-
-    const TabGroup::TabIndex& TabGroup::activeCardTabIndex() const
-    {
-        return m_activeCardTabIndex;
-    }
-
-    TabGroup::ButtonState TabGroup::getMoreCardsButtonState() const
-    {
-        if (m_isMoreCardsButtonDown)
-        {
-            return ButtonState::Down;
-        }
-        else if (m_isMoreCardsButtonHover)
-        {
-            return ButtonState::Hover;
-        }
-        else return ButtonState::Idle;
-    }
-
-    const SharedPtr<PopupMenu>& TabGroup::previewPanel() const
-    {
-        return m_previewPanel;
-    }
-
-    void TabGroup::updateCandidateTabInfo()
-    {
-        TabIndex orgIndex = { &m_tabs, 0 };
-        for (; orgIndex < m_candidateTabCount && orgIndex.valid(); ++orgIndex)
-        {
-            orgIndex->caption->release();
-            orgIndex->m_previewItem->setContent(orgIndex->caption);
-        }
-        m_candidateTabCount = m_tabs.size();
-
-        float cardLength = 0.0f;
-        float maxCardLegnth = width() - appearance().tabBar.geometry.rightPadding;
-
-        for (TabIndex tabIndex = { &m_tabs, 0 }; tabIndex.valid(); ++tabIndex)
-        {
-            auto state = getCardState(tabIndex);
-            auto& setting = appearance().tabBar.card.main[(size_t)state];
-
-            float temporaryLength = cardLength + setting.geometry.size.width;
-            if (temporaryLength > maxCardLegnth)
-            {
-                m_candidateTabCount = tabIndex.index;
-                break;
-            }
-            tabIndex->m_cardAbsoluteRectCache =
-            {
-                m_absoluteRect.left + cardLength,
-                m_absoluteRect.top - setting.geometry.size.height,
-                m_absoluteRect.left + temporaryLength,
-                m_absoluteRect.top + ((state == CardState::Active) ? 0.0f : setting.geometry.roundRadius)
-            };
-            cardLength = temporaryLength;
-
-            tabIndex->caption->release();
-            registerUIEvents(tabIndex->caption);
-
-            // The tab-caption may be disabled when the preview-panel
-            // calls updateItemIndexRangeActivity() to optimize performance.
-            tabIndex->caption->setPrivateEnabled(true);
-
-            tabIndex->caption->transform(absoluteToSelfCoord(cardCaptionAbsoluteRect(tabIndex)));
-        }
-    }
-
-    void TabGroup::updatePreviewPanelItems()
-    {
-        D2D1_POINT_2F orgViewportOffset = m_previewPanel->viewportOffset();
-
-        TabIndex tabIndex = { &m_tabs, 0 };
-        for ( ; tabIndex < m_candidateTabCount; ++tabIndex )
-        {
-            tabIndex->caption->release();
-            registerUIEvents(tabIndex->caption);
-
-            // The tab-caption may be disabled when the preview-panel
-            // calls updateItemIndexRangeActivity() to optimize performance.
-            tabIndex->caption->setPrivateEnabled(true);
-        }
-        m_previewPanel->clearAllItems();
-
-        auto& cardSetting = appearance().tabBar.card;
-        auto& prvwSrc = appearance().tabBar.moreCards.previewPanel;
-
-        auto& prvwDst = m_previewPanel->appearance();
-        // LoadShadowBitmap will be called when resizing the preview-panel.
-        prvwDst.geometry = prvwSrc.geometry;
-        prvwDst.shadow.offset = prvwSrc.shadow.offset;
-        prvwDst.shadow.standardDeviation = prvwSrc.shadow.standardDeviation;
-
-        PopupMenu::ItemArray prvwItems = {};
-
-        // Insert the non-candidate tabs into the preview-panel.
-        for ( ; tabIndex.valid(); ++tabIndex )
-        {
-            tabIndex->m_previewItem->transform(math_utils::heightOnlyRect(prvwSrc.itemHeight));
-            tabIndex->caption->release();
-            tabIndex->m_previewItem->setContent(tabIndex->caption);
-            tabIndex->m_previewItem->state = ViewItem::State::Idle;
-
-            prvwItems.push_back(tabIndex->m_previewItem);
-        }
-        m_previewPanel->insertItem(prvwItems);
-
-        float prvwWidth = cardSetting.main[(size_t)CardState::Dormant].geometry.size.width;
-        float prvwHeight = (float)(m_tabs.size() - m_candidateTabCount) * prvwSrc.itemHeight;
-
-        // Keep the preview-panel is within the area of the tab-group.
-        auto prvwSize = m_previewPanel->extendedSize({ prvwWidth, prvwHeight });
-        if (prvwSize.height > height())
-        {
-            m_previewPanel->setSize(m_previewPanel->narrowedSize({ prvwSize.width, height() }));
-        }
-        else m_previewPanel->setSize({ prvwWidth, prvwHeight });
-
-        m_previewPanel->setPosition(math_utils::offset(
-            math_utils::rightTop(m_absoluteRect),
-            math_utils::increaseX(prvwSrc.offset, -m_previewPanel->width())));
-
-        m_previewPanel->setViewportOffset(orgViewportOffset);
-    }
-
-    D2D1_RECT_F TabGroup::cardBarAbsoluteRect() const
-    {
-        auto& setting = appearance().tabBar.card.main[(size_t)CardState::Dormant];
+        auto& setting = appearance().tabBar.tab.main[(size_t)TabState::Idle];
         return
         {
             m_absoluteRect.left,
@@ -606,64 +365,317 @@ do { \
         };
     }
 
-    D2D1_RECT_F TabGroup::cardAbsoluteRect(TabIndexParam tabIndex) const
+    D2D1_RECT_F TabGroup::tabAbsoluteRect(OptRefer<size_t> index) const
     {
-        return tabIndex.valid() ? tabIndex->m_cardAbsoluteRectCache : D2D1_RECT_F{};
-    }
-
-    D2D1_RECT_F TabGroup::cardCaptionAbsoluteRect(TabIndexParam tabIndex) const
-    {
-        auto state = getCardState(tabIndex);
-        float roundRaidus = appearance().tabBar.card.main[(size_t)state].geometry.roundRadius;
-
-        if (state == CardState::Active) // Clip margins.
+        if (index.has_value())
         {
-            return math_utils::stretch(cardAbsoluteRect(tabIndex), { -roundRaidus, 0.0f });
+            auto& rect = m_tabs[index.value()].m_visibleRect;
+            if (rect.has_value()) return rect.value();
         }
-        else // Dormant, Hover: Crop only the upper half.
+        return math_utils::zeroRectF();
+    }
+
+    D2D1_RECT_F TabGroup::tabCaptionAbsoluteRect(OptRefer<size_t> index) const
+    {
+        auto state = getTabState(index);
+
+        auto& setting = appearance().tabBar.tab.main[(size_t)state];
+        auto& tabRoundRadius = setting.geometry.roundRadius;
+
+        if (state == TabState::Selected)
         {
-            return math_utils::increaseBottom(cardAbsoluteRect(tabIndex), -roundRaidus);
+            D2D1_POINT_2F extension = { -tabRoundRadius, 0.0f };
+            return math_utils::stretch(tabAbsoluteRect(index), extension);
+        }
+        else return math_utils::increaseBottom(tabAbsoluteRect(index), -tabRoundRadius);
+    }
+
+    D2D1_RECT_F TabGroup::separatorAbsoluteRect(OptRefer<size_t> index) const
+    {
+        auto& geometry = appearance().tabBar.separator.geometry;
+
+        auto tabRightTop = math_utils::rightTop(tabAbsoluteRect(index));
+        auto separatorLeftTop = math_utils::offset(tabRightTop, geometry.offset);
+
+        return math_utils::rect(separatorLeftTop, geometry.size);
+    }
+
+    D2D1_RECT_F TabGroup::overflowButtonAbsoluteRect() const
+    {
+        auto& geometry = appearance().tabBar.overflow.button.geometry;
+
+        auto tabBarRightTop = math_utils::rightTop(tabBarAbsoluteRect());
+        auto overflowButtonLeftTop = math_utils::offset(tabBarRightTop, geometry.offset);
+
+        return math_utils::rect(overflowButtonLeftTop, geometry.size);
+    }
+
+    OptRefer<size_t> TabGroup::selectedTabIndex() const
+    {
+        return m_selectedTabIndex;
+    }
+
+    void TabGroup::setSelectedTab(OptRefer<size_t> index)
+    {
+        if (index.has_value() && index.value() >= m_tabs.size()) return;
+
+        auto originalSelectedIndex = m_selectedTabIndex;
+
+        /////////////////////////////
+        // Step 1 - Reset Original //
+        /////////////////////////////
+
+        if (index != m_selectedTabIndex && m_selectedTabIndex.has_value())
+        {
+            auto& tab = m_tabs[m_selectedTabIndex.value()];
+            tab.content->setPrivateEnabled(false);
+        }
+        ///////////////////////////////
+        // Step 2 - Swap Target Tabs //
+        ///////////////////////////////
+
+        if (index.has_value() && index.value() >= m_visibleTabCount)
+        {
+            if (!m_selectedTabIndex.has_value())
+            {
+                m_selectedTabIndex = 0;
+            }
+            auto& tab1 = m_tabs[index.value()];
+            auto& tab2 = m_tabs[m_selectedTabIndex.value()];
+            std::swap(tab1, tab2);
+        }
+        else m_selectedTabIndex = index;
+
+        ////////////////////////////
+        // Step 3 - Set Candidate //
+        ////////////////////////////
+
+        if (getVisibleTabCount() > 0 && m_selectedTabIndex.has_value())
+        {
+            auto& tab = m_tabs[m_selectedTabIndex.value()];
+            tab.content->setPrivateEnabled(true);
+            tab.content->transform(selfCoordRect());
+        }
+        else m_selectedTabIndex.reset();
+
+        updateAllTabs();
+
+        ///////////////////////////////
+        // Step 4 - Trigger Callback //
+        ///////////////////////////////
+
+        if (m_selectedTabIndex != originalSelectedIndex)
+        {
+            onSelectedTabChange(m_selectedTabIndex);
         }
     }
 
-    D2D1_RECT_F TabGroup::separatorAbsoluteRect(TabIndexParam tabIndex) const
+    TabGroup::TabState TabGroup::getTabState(OptRefer<size_t> index) const
     {
-        auto& setting = appearance().tabBar.separator.geometry;
-
-        return math_utils::rect(math_utils::offset(
-            math_utils::rightTop(cardAbsoluteRect(tabIndex)), setting.offset), setting.size);
+        if (index.has_value())
+        {
+            if (index == m_selectedTabIndex)
+            {
+                return TabState::Selected;
+            }
+            if (index == m_hoveredTabIndex)
+            {
+                return TabState::Hovered;
+            }
+            // fall through to idle tab
+        }
+        return TabState::Idle;
     }
 
-    D2D1_RECT_F TabGroup::moreCardsButtonAbsoluteRect() const
+    size_t TabGroup::getVisibleTabCount() const
     {
-        auto& setting = appearance().tabBar.moreCards.control.button.geometry;
+        auto& geometry = appearance().tabBar.geometry;
+        float maxTabLegnth = width() - geometry.rightPadding;
 
-        return math_utils::rect(math_utils::offset(
-            math_utils::rightTop(cardBarAbsoluteRect()), setting.offset), setting.size);
+        float tabLength = 0.0f;
+        for (size_t i = 0; i < m_tabs.size(); ++i)
+        {
+            auto state = getTabState(i);
+
+            auto& setting = appearance().tabBar.tab.main;
+            auto& geometry = setting[(size_t)state].geometry;
+
+            auto& tabWidth = geometry.size.width;
+
+            tabLength += tabWidth;
+            if (tabLength > maxTabLegnth) return i;
+        }
+        return m_tabs.size();
+    }
+
+    size_t TabGroup::selfcoordOffsetToTabIndex(float offset) const
+    {
+        if (m_visibleTabCount == 0) return 0;
+
+        float tabLength = 0.0f;
+        for (size_t i = 0; i < m_visibleTabCount; ++i)
+        {
+            auto state = getTabState(i);
+
+            auto& setting = appearance().tabBar.tab.main;
+            auto& geometry = setting[(size_t)state].geometry;
+
+            auto& tabWidth = geometry.size.width;
+
+            tabLength += tabWidth;
+            if (tabLength > offset) return i;
+        }
+        return m_visibleTabCount - 1;
+    }
+
+    void TabGroup::updateAllTabs()
+    {
+        m_visibleTabCount = m_tabs.size();
+
+        auto originalViewportOffset = m_overflowMenu->viewportOffset();
+        m_overflowMenu->clearAllItems();
+
+        /////////////////////////
+        // Update Visible Tabs //
+        /////////////////////////
+        {
+            auto& geometry = appearance().tabBar.geometry;
+            float maxTabLegnth = width() - geometry.rightPadding;
+
+            float tabLength = 0.0f;
+            for (size_t i = 0; i < m_tabs.size(); ++i)
+            {
+                auto state = getTabState(i);
+
+                auto& setting = appearance().tabBar.tab.main;
+                auto& geometry = setting[(size_t)state].geometry;
+
+                auto& tabWidth = geometry.size.width;
+                auto& tabHeight = geometry.size.height;
+                auto& tabRoundRadius = geometry.roundRadius;
+
+                float tabLength2 = tabLength + tabWidth;
+
+                //------------------------------------------------------------------
+                // Visible Tab Count
+                //------------------------------------------------------------------
+
+                if (tabLength2 > maxTabLegnth)
+                {
+                    m_visibleTabCount = i; break;
+                }
+                //------------------------------------------------------------------
+                // Visible Tab Rect
+                //------------------------------------------------------------------
+
+                auto& tabRect = m_tabs[i].m_visibleRect;
+                tabRect =
+                {
+                    m_absoluteRect.left + tabLength,
+                    m_absoluteRect.top - tabHeight,
+                    m_absoluteRect.left + tabLength2,
+                    m_absoluteRect.top
+                };
+                if (state != TabState::Selected)
+                {
+                    tabRect.value().bottom += tabRoundRadius;
+                }
+                tabLength = tabLength2;
+
+                //------------------------------------------------------------------
+                // Tab Caption Rect
+                //------------------------------------------------------------------
+
+                auto& tabCaption = m_tabs[i].caption;
+
+                tabCaption->release();
+                registerUIEvents(tabCaption);
+
+                // The tab-caption may be disabled if it was an overflow-item.
+                tabCaption->setPrivateEnabled(true);
+
+                auto captionRect = tabCaptionAbsoluteRect(i);
+                captionRect = absoluteToSelfCoord(captionRect);
+
+                tabCaption->transform(captionRect);
+            }
+        }
+        //////////////////////////
+        // Update Overflow Menu //
+        //////////////////////////
+        {
+            auto& setting = appearance().tabBar.tab.main[(size_t)TabState::Idle];
+            auto& itemSize = setting.geometry.size;
+
+            //------------------------------------------------------------------
+            // Overflow Items
+            //------------------------------------------------------------------
+
+            auto itemRect = math_utils::heightOnlyRect(itemSize.height);
+
+            PopupMenu::ItemArray menuItems = {};
+            for (size_t i = m_visibleTabCount; i < m_tabs.size(); ++i)
+            {
+                auto& tab = m_tabs[i];
+
+                // Its parent could be either tab-group or overflow-menu item,
+                // so using release here ensures that it is properly cleaned up.
+                tab.caption->release();
+                tab.m_overflowItem->setContent(tab.caption);
+
+                // These tabs are displayed within overflow-menu.
+                tab.m_visibleRect.reset();
+
+                tab.m_overflowItem->transform(itemRect);
+                tab.m_overflowItem->state = ViewItem::State::Idle;
+
+                menuItems.push_back(tab.m_overflowItem);
+            }
+            m_overflowMenu->insertItem(menuItems);
+
+            //------------------------------------------------------------------
+            // Constrained Size
+            //------------------------------------------------------------------
+
+            auto& menuWidth = itemSize.width;
+            float menuHeight = (float)(m_tabs.size() - m_visibleTabCount) * itemSize.height;
+
+            // Keeps the overflow-menu within the tab-group.
+            menuHeight = std::min(menuHeight, height());
+
+            m_overflowMenu->setSize({ menuWidth, menuHeight });
+
+            //------------------------------------------------------------------
+            // Viewport Offset
+            //------------------------------------------------------------------
+
+            m_overflowMenu->setViewportOffset(originalViewportOffset);
+        }
     }
 
     SharedPtr<Window> TabGroup::promoteTabToWindow(size_t index)
     {
-        if (index >= 0 && index < m_tabs.size())
-        {
-            return promoteTabToWindow({ &m_tabs, index });
-        }
-        else return nullptr;
-    }
+        if (index >= m_tabs.size()) return nullptr;
 
-    SharedPtr<Window> TabGroup::promoteTabToWindow(TabIndexParam tabIndex)
-    {
+        // We need to make a copy here, otherwise after calling removeTab,
+        // its reference count may drop to zero, causing unexpected deallocation.
+        auto tab = m_tabs[index];
+
+        removeTab(index);
+
+        // Some UI interactions of TabGroup may trigger setPrivateEnabled(false).
+        tab.content->setPrivateEnabled(true);
+
         auto rect = math_utils::increaseTop
         (
-            tabIndex->content->absoluteRect(), -Window::nonClientAreaDefaultHeight()
+            tab.content->absoluteRect(), -Window::nonClientAreaDefaultHeight()
         );
-        auto w = makeUIObject<Window>(tabIndex->caption->title(), rect);
+        auto w = makeUIObject<Window>(tab.caption->title(), rect);
 
-        tabIndex->content->setPrivateEnabled(true);
+        w->setContent(tab.content);
 
-        w->setContent(tabIndex->content);
-
-        removeTab(tabIndex, 1);
+        // By default, the promoted window follows the original size constraints.
+        // These can be adjusted in the subsequent f_onTriggerTabPromoting callback.
 
         w->minimalWidthHint = std::max(minimalWidth(), Window::nonClientAreaMinimalWidth());
         w->minimalHeightHint = minimalHeight() + Window::nonClientAreaDefaultHeight();
@@ -678,12 +690,17 @@ do { \
     {
         THROW_IF_NULL(Application::g_app);
 
-        if (m_draggedCardTabIndex.valid() && m_draggedCardTabIndex->caption->promotable)
+        if (m_draggedTabIndex.has_value() &&
+            m_tabs[m_draggedTabIndex.value()].caption->promotable)
         {
-            auto w = promoteTabToWindow(m_draggedCardTabIndex);
+            auto w = promoteTabToWindow(m_draggedTabIndex.value());
 
-            // Ensure the cursor is within the caption of the promoted window,
-            // so we can send a pseudo mouse-button event to trigger dragging.
+            // To maintain UI interaction coherence, we need to ensure that
+            // users can directly drag the window after the promotion completes.
+            // Therefore, here we:
+            // 1. Move the window to ensure the cursor is within its non-client area.
+            // 2. Make the window mouse-focused to prepare window dragging.
+            // 3. Set a pseudo mouse-button event to trigger window dragging.
 
             D2D1_POINT_2F offset =
             {
@@ -707,16 +724,16 @@ do { \
         }
     }
 
-    bool TabGroup::isAssociatedWindowDraggedAbove() const
+    float TabGroup::minimalWidth() const
     {
-        if (!associatedWindow.expired())
-        {
-            auto targetWindow = associatedWindow.lock();
-            auto targetTabGroup = targetWindow->associatedTabGroup.lock();
+        float minWidth = appearance().tabBar.geometry.rightPadding;
 
-            return cpp_lang_utils::isMostDerivedEqual(targetTabGroup, shared_from_this());
+        if (m_selectedTabIndex.has_value())
+        {
+            auto rect = tabAbsoluteRect(m_selectedTabIndex);
+            minWidth += absoluteToSelfCoord(rect).right;
         }
-        else return false;
+        return minWidth;
     }
 
     void TabGroup::onRendererUpdateObject2DHelper(Renderer* rndr)
@@ -738,102 +755,103 @@ do { \
 
     void TabGroup::onRendererDrawD2d1LayerHelper(Renderer* rndr)
     {
-        if (m_activeCardTabIndex.valid())
+        if (m_selectedTabIndex.has_value())
         {
-            if (m_activeCardTabIndex->content->isD2d1ObjectVisible())
+            auto& tab = m_tabs[m_selectedTabIndex.value()];
+            if (tab.content->isD2d1ObjectVisible())
             {
-                m_activeCardTabIndex->content->onRendererDrawD2d1Layer(rndr);
+                tab.content->onRendererDrawD2d1Layer(rndr);
             }
-            if (m_activeCardTabIndex.index < m_candidateTabCount)
-            {
-                //////////////////////
-                // Active-Card Mask //
-                //////////////////////
+            ///////////////////////
+            // Selected-Tab Mask //
+            ///////////////////////
 
-                activeCard.mask.beginDraw(rndr->d2d1DeviceContext());
+            if (m_selectedTabIndex.value() < m_visibleTabCount)
+            {
+                selectedTabRes.mask.beginDraw(rndr->d2d1DeviceContext());
                 {
-                    auto& setting = appearance().tabBar.card.main[(size_t)CardState::Active];
+                    auto& setting = appearance().tabBar.tab.main[(size_t)TabState::Selected];
 
                     resource_utils::solidColorBrush()->SetColor(setting.background.color);
                     resource_utils::solidColorBrush()->SetOpacity(setting.background.opacity);
 
                     rndr->d2d1DeviceContext()->FillGeometry
                     (
-                    /* geometry */ activeCard.pathGeo.Get(),
+                    /* geometry */ selectedTabRes.pathGeo.Get(),
                     /* brush    */ resource_utils::solidColorBrush()
                     );
                 }
-                activeCard.mask.endDraw(rndr->d2d1DeviceContext());
-
-                /////////////////////
-                // More-Cards Mask //
-                /////////////////////
-
-                moreCards.mask.beginDraw(rndr->d2d1DeviceContext());
-                {
-                    auto state = getMoreCardsButtonState();
-                    auto& setting = appearance().tabBar.moreCards.control;
-
-                    //-------------------------------------------------------------------------
-                    // Button
-                    //-------------------------------------------------------------------------
-
-                    auto& buttonBackground = setting.button.background[(size_t)state];
-
-                    resource_utils::solidColorBrush()->SetColor(buttonBackground.color);
-                    resource_utils::solidColorBrush()->SetOpacity(buttonBackground.opacity);
-
-                    D2D1_ROUNDED_RECT roundedRect =
-                    {
-                        math_utils::sizeOnlyRect(setting.button.geometry.size),
-                        setting.button.geometry.roundRadius,
-                        setting.button.geometry.roundRadius
-                    };
-                    rndr->d2d1DeviceContext()->FillRoundedRectangle
-                    (
-                    /* roundedRect */ roundedRect,
-                    /* brush       */ resource_utils::solidColorBrush()
-                    );
-                    //-------------------------------------------------------------------------
-                    // Icon
-                    //-------------------------------------------------------------------------
-
-                    auto& iconBackground = setting.icon.background[(size_t)state];
-
-                    resource_utils::solidColorBrush()->SetColor(iconBackground.color);
-                    resource_utils::solidColorBrush()->SetOpacity(iconBackground.opacity);
-
-                    auto& topRect = setting.icon.geometry.topRect;
-                    rndr->d2d1DeviceContext()->FillRectangle
-                    (
-                    /* rect  */ math_utils::rect(topRect.offset, topRect.size),
-                    /* brush */ resource_utils::solidColorBrush()
-                    );
-                    rndr->d2d1DeviceContext()->FillGeometry
-                    (
-                    /* geometry */ moreCards.pathGeo.Get(),
-                    /* brush    */ resource_utils::solidColorBrush()
-                    );
-                }
-                moreCards.mask.endDraw(rndr->d2d1DeviceContext());
+                selectedTabRes.mask.endDraw(rndr->d2d1DeviceContext());
             }
         }
+        //////////////////////////
+        // Overflow-Button Mask //
+        //////////////////////////
+
+        overflowButtonRes.mask.beginDraw(rndr->d2d1DeviceContext());
+        {
+            auto state = getOverflowButtonState();
+            auto& setting = appearance().tabBar.overflow;
+
+            //-------------------------------------------------------------------------
+            // Button
+            //-------------------------------------------------------------------------
+
+            auto& buttonBackground = setting.button.background[(size_t)state];
+
+            resource_utils::solidColorBrush()->SetColor(buttonBackground.color);
+            resource_utils::solidColorBrush()->SetOpacity(buttonBackground.opacity);
+
+            D2D1_ROUNDED_RECT roundedRect =
+            {
+                math_utils::sizeOnlyRect(setting.button.geometry.size),
+                setting.button.geometry.roundRadius,
+                setting.button.geometry.roundRadius
+            };
+            rndr->d2d1DeviceContext()->FillRoundedRectangle
+            (
+            /* roundedRect */ roundedRect,
+            /* brush       */ resource_utils::solidColorBrush()
+            );
+            //-------------------------------------------------------------------------
+            // Icon
+            //-------------------------------------------------------------------------
+
+            auto& iconBackground = setting.icon.background[(size_t)state];
+
+            resource_utils::solidColorBrush()->SetColor(iconBackground.color);
+            resource_utils::solidColorBrush()->SetOpacity(iconBackground.opacity);
+
+            auto& topRect = setting.icon.geometry.topRect;
+
+            rndr->d2d1DeviceContext()->FillRectangle
+            (
+            /* rect  */ math_utils::rect(topRect.offset, topRect.size),
+            /* brush */ resource_utils::solidColorBrush()
+            );
+            rndr->d2d1DeviceContext()->FillGeometry
+            (
+            /* geometry */ overflowButtonRes.pathGeo.Get(),
+            /* brush    */ resource_utils::solidColorBrush()
+            );
+        }
+        overflowButtonRes.mask.endDraw(rndr->d2d1DeviceContext());
     }
 
     void TabGroup::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
     {
-        ////////////////////
-        // Card-Bar Panel //
-        ////////////////////
+        ///////////////////
+        // Tab-Bar Panel //
+        ///////////////////
         {
-            auto& setting = appearance().tabBar.card.main[(size_t)CardState::Dormant];
+            auto& setting = appearance().tabBar.tab.main[(size_t)TabState::Idle];
 
             resource_utils::solidColorBrush()->SetColor(setting.background.color);
             resource_utils::solidColorBrush()->SetOpacity(setting.background.opacity);
 
             D2D1_ROUNDED_RECT roundedRect =
             {
-                cardBarAbsoluteRect(),
+                tabBarAbsoluteRect(),
                 setting.geometry.roundRadius,
                 setting.geometry.roundRadius
             };
@@ -843,22 +861,22 @@ do { \
             /* brush       */ resource_utils::solidColorBrush()
             );
         }
-        ////////////////
-        // Hover-Card //
-        ////////////////
+        /////////////////
+        // Hovered-Tab //
+        /////////////////
 
-        if (m_hoverCardTabIndex.valid())
+        if (m_hoveredTabIndex.has_value())
         {
-            if (m_hoverCardTabIndex != m_activeCardTabIndex)
+            if (m_hoveredTabIndex != m_selectedTabIndex)
             {
-                auto& setting = appearance().tabBar.card.main[(size_t)CardState::Hover];
+                auto& setting = appearance().tabBar.tab.main[(size_t)TabState::Hovered];
 
                 resource_utils::solidColorBrush()->SetColor(setting.background.color);
                 resource_utils::solidColorBrush()->SetOpacity(setting.background.opacity);
 
                 D2D1_ROUNDED_RECT roundedRect =
                 {
-                    cardAbsoluteRect(m_hoverCardTabIndex),
+                    tabAbsoluteRect(m_hoveredTabIndex),
                     setting.geometry.roundRadius,
                     setting.geometry.roundRadius
                 };
@@ -869,39 +887,24 @@ do { \
                 );
             }
         }
-        /////////////////
-        // Active-Card //
-        /////////////////
+        /////////////////////////
+        // Selected-Tab Shadow //
+        /////////////////////////
 
-        if (m_activeCardTabIndex.valid() && m_activeCardTabIndex.index < m_candidateTabCount)
+        if (m_selectedTabIndex.has_value() &&
+            m_selectedTabIndex.value() < m_visibleTabCount)
         {
-            //-------------------------------------------------------------------------
-            // Shadow
-            //-------------------------------------------------------------------------
+            selectedTabRes.mask.color = appearance().tabBar.tab.activeShadowColor;
 
-            activeCard.mask.color = appearance().tabBar.card.activeShadowColor;
+            selectedTabRes.mask.configEffectInput(resource_utils::shadowEffect());
 
-            activeCard.mask.configEffectInput(resource_utils::shadowEffect());
-
-            auto shadowPosition = math_utils::leftTop(cardAbsoluteRect(m_activeCardTabIndex));
+            auto tabRect = tabAbsoluteRect(m_selectedTabIndex);
+            auto shadowPosition = math_utils::leftTop(tabRect);
 
             rndr->d2d1DeviceContext()->DrawImage
             (
             /* effect       */ resource_utils::shadowEffect(),
             /* targetOffset */ shadowPosition
-            );
-            //-------------------------------------------------------------------------
-            // Entity
-            //-------------------------------------------------------------------------
-
-            auto& setting = appearance().tabBar.card.main[(size_t)CardState::Active];
-
-            rndr->d2d1DeviceContext()->DrawBitmap
-            (
-            /* bitmap               */ activeCard.mask.data.Get(),
-            /* destinationRectangle */ cardAbsoluteRect(m_activeCardTabIndex),
-            /* opacity              */ setting.background.opacity,
-            /* interpolationMode    */ activeCard.mask.getInterpolationMode()
             );
         }
         ////////////////
@@ -919,77 +922,116 @@ do { \
         // Content //
         /////////////
 
-        if (m_activeCardTabIndex.valid())
+        if (m_selectedTabIndex.has_value())
         {
-            if (m_activeCardTabIndex->content->isD2d1ObjectVisible())
+            auto& tab = m_tabs[m_selectedTabIndex.value()];
+            if (tab.content->isD2d1ObjectVisible())
             {
-                m_activeCardTabIndex->content->onRendererDrawD2d1Object(rndr);
+                tab.content->onRendererDrawD2d1Object(rndr);
             }
         }
         ///////////////////
         // Miscellaneous //
         ///////////////////
         {
-            for (TabIndex tabIndex = { &m_tabs, 0 }; tabIndex < m_candidateTabCount; ++tabIndex)
+            for (size_t i = 0; i < m_visibleTabCount; ++i)
             {
-                auto currState = getCardState(tabIndex);
-                auto nextState = getCardState(tabIndex.getNext());
+                if (i == m_selectedTabIndex) continue;
 
                 //-------------------------------------------------------------------------
                 // Caption
                 //-------------------------------------------------------------------------
-                if (tabIndex->caption->isD2d1ObjectVisible())
+                auto& caption = m_tabs[i].caption;
+
+                if (caption->isD2d1ObjectVisible())
                 {
-                    tabIndex->caption->onRendererDrawD2d1Object(rndr);
+                    caption->onRendererDrawD2d1Object(rndr);
                 }
                 //-------------------------------------------------------------------------
-                // Separators
+                // Separator
                 //-------------------------------------------------------------------------
-                if (currState == CardState::Dormant && nextState == CardState::Dormant)
+                auto currState = getTabState(i);
+                auto nextState = getTabState(i + 1);
+
+                if (currState == TabState::Idle &&
+                    nextState == TabState::Idle &&
+                    i != m_visibleTabCount - 1)
                 {
-                    if (tabIndex != m_candidateTabCount - 1)
-                    {
-                        auto& setting = appearance().tabBar.separator;
+                    auto& setting = appearance().tabBar.separator;
 
-                        resource_utils::solidColorBrush()->SetColor(setting.background.color);
-                        resource_utils::solidColorBrush()->SetOpacity(setting.background.opacity);
+                    resource_utils::solidColorBrush()->SetColor(setting.background.color);
+                    resource_utils::solidColorBrush()->SetOpacity(setting.background.opacity);
 
-                        rndr->d2d1DeviceContext()->FillRectangle
-                        (
-                        /* rect  */ separatorAbsoluteRect(tabIndex),
-                        /* brush */ resource_utils::solidColorBrush()
-                        );
-                    }
+                    rndr->d2d1DeviceContext()->FillRectangle
+                    (
+                    /* rect  */ separatorAbsoluteRect(i),
+                    /* brush */ resource_utils::solidColorBrush()
+                    );
                 }
             }
             //-------------------------------------------------------------------------
-            // More-Cards
+            // Overflow-Button
             //-------------------------------------------------------------------------
 
             rndr->d2d1DeviceContext()->DrawBitmap
             (
-            /* bitmap               */ moreCards.mask.data.Get(),
-            /* destinationRectangle */ moreCardsButtonAbsoluteRect(),
-            /* opacity              */ moreCards.mask.opacity,
-            /* interpolationMode    */ moreCards.mask.getInterpolationMode()
+            /* bitmap               */ overflowButtonRes.mask.data.Get(),
+            /* destinationRectangle */ overflowButtonAbsoluteRect(),
+            /* opacity              */ overflowButtonRes.mask.opacity,
+            /* interpolationMode    */ overflowButtonRes.mask.getInterpolationMode()
             );
         }
-        ////////////////////////
+        /////////////////////////
+        // Selected-Tab Object //
+        /////////////////////////
+
+        if (m_selectedTabIndex.has_value() &&
+            m_selectedTabIndex.value() < m_visibleTabCount)
+        {
+            //-------------------------------------------------------------------------
+            // Entity
+            //-------------------------------------------------------------------------
+            auto& setting = appearance().tabBar.tab.main[(size_t)TabState::Selected];
+
+            rndr->d2d1DeviceContext()->DrawBitmap
+            (
+            /* bitmap               */ selectedTabRes.mask.data.Get(),
+            /* destinationRectangle */ tabAbsoluteRect(m_selectedTabIndex),
+            /* opacity              */ setting.background.opacity,
+            /* interpolationMode    */ selectedTabRes.mask.getInterpolationMode()
+            );
+            //-------------------------------------------------------------------------
+            // Caption
+            //-------------------------------------------------------------------------
+            auto& caption = m_tabs[m_selectedTabIndex.value()].caption;
+
+            if (caption->isD2d1ObjectVisible())
+            {
+                caption->onRendererDrawD2d1Object(rndr);
+            }
+        }
+        ///////////////////////
         // Mask below Window //
         ///////////////////////
 
-        if (isAssociatedWindowDraggedAbove())
+        if (!associatedWindow.expired())
         {
-            auto& maskSetting = appearance().maskWhenBelowDragWindow;
+            auto targetWindow = associatedWindow.lock();
+            auto targetTabGroup = targetWindow->associatedTabGroup.lock();
 
-            resource_utils::solidColorBrush()->SetColor(maskSetting.color);
-            resource_utils::solidColorBrush()->SetOpacity(maskSetting.opacity);
+            if (cpp_lang_utils::isMostDerivedEqual(targetTabGroup, shared_from_this()))
+            {
+                auto& maskSetting = appearance().maskWhenBelowDemotingWindow;
 
-            rndr->d2d1DeviceContext()->FillRoundedRectangle
-            (
-            /* roundedRect */ { m_absoluteRect, roundRadiusX, roundRadiusY },
-            /* brush       */ resource_utils::solidColorBrush()
-            );
+                resource_utils::solidColorBrush()->SetColor(maskSetting.color);
+                resource_utils::solidColorBrush()->SetOpacity(maskSetting.opacity);
+
+                rndr->d2d1DeviceContext()->FillRoundedRectangle
+                (
+                /* roundedRect */ { m_absoluteRect, roundRadiusX, roundRadiusY },
+                /* brush       */ resource_utils::solidColorBrush()
+                );
+            }
         }
     }
 
@@ -999,8 +1041,10 @@ do { \
         // Outline //
         /////////////
 
-        resource_utils::solidColorBrush()->SetColor(appearance().stroke.color);
-        resource_utils::solidColorBrush()->SetOpacity(appearance().stroke.opacity);
+        auto& stroke = appearance().stroke;
+
+        resource_utils::solidColorBrush()->SetColor(stroke.color);
+        resource_utils::solidColorBrush()->SetOpacity(stroke.opacity);
 
         // In general, the round-radius of the tab-group is 0, so we can draw
         // left, right and bottom lines separately to hide the topmost border.
@@ -1010,17 +1054,36 @@ do { \
         float selfWidth = width();
         float selfHeight = height();
 
-        auto& stroke = appearance().stroke;
-
-        auto point00 = math_utils::offset(leftTop, { stroke.width * 0.5f, 0.0f });
-        auto point01 = math_utils::offset(point00, { 0.0f, selfHeight });
-
-        auto point10 = math_utils::offset(leftTop, { selfWidth - stroke.width * 0.5f, 0.0f });
-        auto point11 = math_utils::offset(point10, { 0.0f, selfHeight });
-
-        auto point20 = math_utils::offset(leftTop, { 0.0f, selfHeight - stroke.width * 0.5f });
-        auto point21 = math_utils::offset(point20, { selfWidth, 0.0f });
-
+        auto point00 = math_utils::offset
+        (
+        /* point  */ leftTop,
+        /* offset */ { stroke.width * 0.5f, 0.0f }
+        );
+        auto point01 = math_utils::offset
+        (
+        /* point  */ point00,
+        /* offset */ { 0.0f, selfHeight }
+        );
+        auto point10 = math_utils::offset
+        (
+        /* point  */ leftTop,
+        /* offset */ { selfWidth - stroke.width * 0.5f, 0.0f }
+        );
+        auto point11 = math_utils::offset
+        (
+        /* point  */ point10,
+        /* offset */ { 0.0f, selfHeight }
+        );
+        auto point20 = math_utils::offset
+        (
+        /* point  */ leftTop,
+        /* offset */ { 0.0f, selfHeight - stroke.width * 0.5f }
+        );
+        auto point21 = math_utils::offset
+        (
+        /* point  */ point20,
+        /* offset */ { selfWidth, 0.0f }
+        );
         rndr->d2d1DeviceContext()->DrawLine
         (
         /* point0      */ point00,
@@ -1044,13 +1107,14 @@ do { \
         );
         ///////////////////////
         // Content Posterior //
-        //////////////////////
+        ///////////////////////
 
-        if (m_activeCardTabIndex.valid())
+        if (m_selectedTabIndex.has_value())
         {
-            if (m_activeCardTabIndex->content->isD2d1ObjectVisible())
+            auto& tab = m_tabs[m_selectedTabIndex.value()];
+            if (tab.content->isD2d1ObjectVisible())
             {
-                m_activeCardTabIndex->content->drawD2d1ObjectPosterior(rndr);
+                tab.content->drawD2d1ObjectPosterior(rndr);
             }
         }
         ResizablePanel::drawD2d1ObjectPosterior(rndr);
@@ -1058,25 +1122,20 @@ do { \
 
     bool TabGroup::isHitHelper(const Event::Point& p) const
     {
-        return math_utils::isOverlapped(p, sizingFrameExtendedRect(cardBarExtendedAbsoluteRect()));
+        return math_utils::isOverlapped(p, sizingFrameExtendedRect(hitTestAbsoluteRect()));
     }
 
     void TabGroup::onSizeHelper(SizeEvent& e)
     {
         ResizablePanel::onSizeHelper(e);
 
-        if (m_activeCardTabIndex.valid())
+        if (getVisibleTabCount() != m_visibleTabCount) updateAllTabs();
+
+        if (m_selectedTabIndex.has_value())
         {
-            m_activeCardTabIndex->content->setSize(size());
+            auto& tab = m_tabs[m_selectedTabIndex.value()];
+            tab.content->setSize(size());
         }
-        updateCandidateTabInfo();
-    }
-
-    void TabGroup::onMoveHelper(MoveEvent& e)
-    {
-        ResizablePanel::onMoveHelper(e);
-
-        updateCandidateTabInfo();
     }
 
     void TabGroup::onChangeThemeStyleHelper(const ThemeStyle& style)
@@ -1087,11 +1146,15 @@ do { \
 
         for (auto& tab : m_tabs)
         {
-            if (tab.m_previewItem->parent().expired())
+            // For those overflow items with non-expired parents,
+            // the appearance is updated by their shared overflow menu;
+            // others require manual updates (as they are not managed).
+
+            if (tab.m_overflowItem->parent().expired())
             {
-                tab.m_previewItem->onChangeThemeStyle(style);
+                tab.m_overflowItem->onChangeThemeStyle(style);
             }
-        } // The managed preview-items will be updated by the preview-panel.
+        }
     }
 
     void TabGroup::onMouseMoveHelper(MouseMoveEvent& e)
@@ -1100,55 +1163,101 @@ do { \
 
         auto& p = e.cursorPoint;
 
-        if (math_utils::isOverlapped(p, cardBarExtendedCardBarAbsoluteRect()))
+        if (math_utils::isOverlapped(p, draggingTestAbsoluteRect()))
         {
-            if (m_draggedCardTabIndex.valid())
+            if (m_draggedTabIndex.has_value())
             {
-                if (e.buttonState.leftPressed)
+                auto& setting = appearance().tabBar;
+                auto& draggingThreshold = setting.tab.draggingThreshold;
+
+                float draggingDelta = p.x - m_draggingPoint.x;
+                if (std::abs(draggingDelta) >= draggingThreshold)
                 {
-                    auto nextCardTabIndex = selfcoordOffsetToCardTabIndex(absoluteToSelfCoord(p).x);
+                    m_isDraggingTab = true;
+                }
+                // During the initial dragging attempt,
+                // the tab only starts moving after draggingDelta exceeds draggingThreshold.
+                // In subsequent dragging operations, draggingThreshold is no longer considered,
+                // and the tab should keep moving continuously.
+                if (m_isDraggingTab)
+                {
+                    //////////////////////////////
+                    // Calculate Dragging Delta //
+                    //////////////////////////////
 
-                    if (nextCardTabIndex.valid() && nextCardTabIndex != m_draggedCardTabIndex)
+                    auto nextTabIndex = selfcoordOffsetToTabIndex(absoluteToSelfCoord(p).x);
+                    if (nextTabIndex != m_draggedTabIndex)
                     {
-                        swapTab(m_draggedCardTabIndex, nextCardTabIndex);
+                        auto& tabWidth = setting.tab.main[(size_t)TabState::Idle].geometry.size.width;
+                        m_draggingPoint.x += tabWidth * ((float)nextTabIndex - (float)m_draggedTabIndex.value());
 
-                        selectTab(nextCardTabIndex); // m_activeCardTabIndex is updated in this.
+                        draggingDelta = p.x - m_draggingPoint.x;
 
-                        m_hoverCardTabIndex = m_draggedCardTabIndex = nextCardTabIndex;
+                        std::swap(m_tabs[m_draggedTabIndex.value()], m_tabs[nextTabIndex]);
+                        m_hoveredTabIndex = m_selectedTabIndex = m_draggedTabIndex = nextTabIndex;
+
+                        updateAllTabs();
+
+                        auto& tab = m_tabs[m_draggedTabIndex.value()];
+                        m_draggingVisibleRect = tab.m_visibleRect.value_or(math_utils::zeroRectF());
+                        m_draggingCaptionRect = tab.caption->relativeRect();
                     }
+                    float maxTabLegnth = width() - setting.geometry.rightPadding;
+
+                    auto draggingLeftmost = -m_draggingVisibleRect.left;
+                    auto draggingRightmost = maxTabLegnth - m_draggingVisibleRect.right;
+
+                    draggingDelta = std::clamp(draggingDelta, draggingLeftmost, draggingRightmost);
+
+                    //////////////////////////////
+                    // Update Tab Geometry Data //
+                    //////////////////////////////
+
+                    auto& tab = m_tabs[m_draggedTabIndex.value()];
+                    tab.m_visibleRect = math_utils::offset(m_draggingVisibleRect, { draggingDelta, 0.0f });
+                    tab.caption->transform(math_utils::offset(m_draggingCaptionRect, { draggingDelta, 0.0f }));
                 }
             }
-            else // No card being dragged.
+            else // No candidate dragged tab.
             {
-                m_hoverCardTabIndex.invalidate();
+                m_hoveredTabIndex.reset();
 
-                for (TabIndex tabIndex = { &m_tabs, 0 }; tabIndex < m_candidateTabCount; ++tabIndex)
+                for (size_t i = 0; i < m_visibleTabCount; ++i)
                 {
-                    if (math_utils::isInside(p, cardAbsoluteRect(tabIndex)))
+                    if (math_utils::isInside(p, tabAbsoluteRect(i)))
                     {
-                        m_hoverCardTabIndex = tabIndex;
+                        m_hoveredTabIndex = i; break;
                     }
                 }
-                if (!math_utils::isInside(p, moreCardsButtonAbsoluteRect()))
+                if (!math_utils::isInside(p, overflowButtonAbsoluteRect()))
                 {
-                    m_isMoreCardsButtonHover = false;
-                    m_isMoreCardsButtonDown = false;
+                    m_isOverflowButtonHovered = false;
+                    m_isOverflowButtonPressed = false;
                 }
-                else m_isMoreCardsButtonHover = true;
+                else m_isOverflowButtonHovered = true;
             }
         }
-        else // Not above the card-bar.
+        else // Out of the dragging area.
         {
-            m_hoverCardTabIndex.invalidate();
+            m_hoveredTabIndex.reset();
 
             if (e.buttonState.leftPressed)
             {
                 triggerTabPromoting(e);
             }
-            m_draggedCardTabIndex.invalidate();
+            // Note: The reset of tab-rect and caption-rect must be placed after
+            // calling triggerTabPromoting, as promotion may update m_draggedTabIndex.
+            if (m_draggedTabIndex.has_value())
+            {
+                auto& tab = m_tabs[m_draggedTabIndex.value()];
+                tab.m_visibleRect = m_draggingVisibleRect;
+                tab.caption->transform(m_draggingCaptionRect);
+                m_draggedTabIndex.reset();
+            }
+            m_isDraggingTab = false;
 
-            m_isMoreCardsButtonHover = false;
-            m_isMoreCardsButtonDown = false;
+            m_isOverflowButtonHovered = false;
+            m_isOverflowButtonPressed = false;
         }
     }
 
@@ -1156,16 +1265,25 @@ do { \
     {
         ResizablePanel::onMouseLeaveHelper(e);
 
-        m_hoverCardTabIndex.invalidate();
+        m_hoveredTabIndex.reset();
 
         if (e.buttonState.leftPressed)
         {
             triggerTabPromoting(e);
         }
-        m_draggedCardTabIndex.invalidate();
+        // Note: The reset of tab-rect and caption-rect must be placed after
+        // calling triggerTabPromoting, as promotion may update m_draggedTabIndex.
+        if (m_draggedTabIndex.has_value())
+        {
+            auto& tab = m_tabs[m_draggedTabIndex.value()];
+            tab.m_visibleRect = m_draggingVisibleRect;
+            tab.caption->transform(m_draggingCaptionRect);
+            m_draggedTabIndex.reset();
+        }
+        m_isDraggingTab = false;
 
-        m_isMoreCardsButtonHover = false;
-        m_isMoreCardsButtonDown = false;
+        m_isOverflowButtonHovered = false;
+        m_isOverflowButtonPressed = false;
     }
 
     void TabGroup::onMouseButtonHelper(MouseButtonEvent& e)
@@ -1176,27 +1294,46 @@ do { \
 
         if (e.state.leftDown() || e.state.leftDblclk())
         {
-            if (m_hoverCardTabIndex.valid())
+            if (m_hoveredTabIndex.has_value())
             {
-                if (m_hoverCardTabIndex->caption->draggable &&
-                   (!m_hoverCardTabIndex->caption->closable ||
-                    !m_hoverCardTabIndex->caption->m_isCloseButtonHover))
+                auto& tab = m_tabs[m_hoveredTabIndex.value()];
+
+                if (!(tab.caption->closable && tab.caption->m_isCloseButtonHover))
                 {
-                    m_draggedCardTabIndex = m_hoverCardTabIndex;
+                    if (tab.caption->draggable)
+                    {
+                        m_draggedTabIndex = m_hoveredTabIndex;
+
+                        m_draggingPoint = p;
+                        m_draggingVisibleRect = tab.m_visibleRect.value_or(math_utils::zeroRectF());
+                        m_draggingCaptionRect = tab.caption->relativeRect();
+                    }
                 }
             }
-            m_isMoreCardsButtonDown = m_isMoreCardsButtonHover;
+            m_isOverflowButtonPressed = m_isOverflowButtonHovered;
         }
         else if (e.state.leftUp())
         {
-            if (m_isMoreCardsButtonDown)
+            if (m_draggedTabIndex.has_value())
             {
-                m_isMoreCardsButtonDown = false;
-
-                updatePreviewPanelItems();
-                m_previewPanel->setActivated(true);
+                auto& tab = m_tabs[m_draggedTabIndex.value()];
+                tab.m_visibleRect = m_draggingVisibleRect;
+                tab.caption->transform(m_draggingCaptionRect);
+                m_draggedTabIndex.reset();
             }
-            m_draggedCardTabIndex.invalidate();
+            m_isDraggingTab = false;
+
+            if (m_isOverflowButtonPressed)
+            {
+                m_isOverflowButtonPressed = false;
+
+                m_overflowMenu->setPosition(math_utils::offset(
+                    math_utils::rightTop(m_absoluteRect),
+                    { -m_overflowMenu->width(), 0.0f }));
+
+                m_overflowMenu->setViewportOffset({ 0.0f, 0.0f });
+                m_overflowMenu->setActivated(true);
+            }
         }
     }
 }

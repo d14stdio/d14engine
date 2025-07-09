@@ -85,7 +85,7 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        m_enableChildrenMouseMoveEvent = false;
+        m_enableChildMouseMoveEvent = false;
 
         auto focus = Application::FocusType::Mouse;
         Application::g_app->focusUIObject(focus, shared_from_this());
@@ -95,7 +95,7 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        m_enableChildrenMouseMoveEvent = true;
+        m_enableChildMouseMoveEvent = true;
 
         auto focus = Application::FocusType::Mouse;
         Application::g_app->focusUIObject(focus, nullptr);

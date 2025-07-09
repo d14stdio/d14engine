@@ -111,8 +111,8 @@ D14_SET_APP_ENTRY(mainImageViewer)
             THROW_IF_FAILED(content->textLayout()->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER));
             content->drawTextOptions = D2D1_DRAW_TEXT_OPTIONS_CLIP;
 
-            ui_tabGroup->insertTab({ caption, content });
-            ui_tabGroup->selectTab(0);
+            ui_tabGroup->insertTab({TabGroup::Tab{ caption, content }});
+            ui_tabGroup->setSelectedTab(0);
         }
         auto ui_sideLayout = makeManagedUIObject<GridLayout>(ui_clientArea);
         {
@@ -185,9 +185,9 @@ D14_SET_APP_ENTRY(mainImageViewer)
                     auto content = makeUIObject<Panel>(imageRect, nullptr, images[index].second);
                     auto wrapper = makeUIObject<ScrollView>(content);
 
-                    size_t currTabIndex = sh_tabGroup->activeCardTabIndex().index;
-                    sh_tabGroup->insertTab({ caption, wrapper }, currTabIndex);
-                    sh_tabGroup->selectTab(currTabIndex);
+                    size_t currTabIndex = sh_tabGroup->selectedTabIndex().value_or(0);
+                    sh_tabGroup->insertTab({TabGroup::Tab{ caption, wrapper }}, currTabIndex);
+                    sh_tabGroup->setSelectedTab(currTabIndex);
 
                     wrapper->f_onMouseWheel =
                     [wk_content = (WeakPtr<Panel>)content](Panel* p, MouseWheelEvent& e)
@@ -298,8 +298,8 @@ D14_SET_APP_ENTRY(mainImageViewer)
             {
                 if (!wk_tabGroup.expired())
                 {
-                    auto& selected = wk_tabGroup.lock()->activeCardTabIndex();
-                    if (selected.valid()) selected->caption->title()->label()->setText(text);
+                    auto& index = wk_tabGroup.lock()->selectedTabIndex();
+                    if (index.has_value()) wk_tabGroup.lock()->tabs()[index.value()].caption->title()->label()->setText(text);
                 }
             };
         }
@@ -326,8 +326,8 @@ D14_SET_APP_ENTRY(mainImageViewer)
             {
                 if (!wk_tabGroup.expired())
                 {
-                    auto& selected = wk_tabGroup.lock()->activeCardTabIndex();
-                    if (selected.valid()) selected->caption->closable = e.checked();
+                    auto& index = wk_tabGroup.lock()->selectedTabIndex();
+                    if (index.has_value()) wk_tabGroup.lock()->tabs()[index.value()].caption->closable = e.checked();
                 }
             };
         }
@@ -354,8 +354,8 @@ D14_SET_APP_ENTRY(mainImageViewer)
             {
                 if (!wk_tabGroup.expired())
                 {
-                    auto& selected = wk_tabGroup.lock()->activeCardTabIndex();
-                    if (selected.valid()) selected->caption->draggable = e.checked();
+                    auto& index = wk_tabGroup.lock()->selectedTabIndex();
+                    if (index.has_value()) wk_tabGroup.lock()->tabs()[index.value()].caption->draggable = e.checked();
                 }
             };
         }
@@ -382,14 +382,14 @@ D14_SET_APP_ENTRY(mainImageViewer)
             {
                 if (!wk_tabGroup.expired())
                 {
-                    auto& selected = wk_tabGroup.lock()->activeCardTabIndex();
-                    if (selected.valid()) selected->caption->promotable = e.checked();
+                    auto& index = wk_tabGroup.lock()->selectedTabIndex();
+                    if (index.has_value()) wk_tabGroup.lock()->tabs()[index.value()].caption->promotable = e.checked();
                 }
             };
         }
         // Update tab-property-inspectors dynamically.
         {
-            ui_tabGroup->f_onSelectedTabIndexChange =
+            ui_tabGroup->f_onSelectedTabChange =
             [
                 wk_titleEditor = (WeakPtr<TextBox>)ui_titleEditor,
 
@@ -397,12 +397,12 @@ D14_SET_APP_ENTRY(mainImageViewer)
                 wk_checkBox2 = (WeakPtr<CheckBox>)ui_checkBox2,
                 wk_checkBox3 = (WeakPtr<CheckBox>)ui_checkBox3
             ]
-            (TabGroup* tg, TabGroup::TabIndexParam index)
+            (TabGroup* tg, OptRefer<size_t> index)
             {
                 if (!wk_titleEditor.expired())
                 {
-                    wk_titleEditor.lock()->setText(index.valid() ?
-                        index->caption->title()->label()->text() : L"");
+                    wk_titleEditor.lock()->setText(index.has_value() ?
+                        tg->tabs()[index.value()].caption->title()->label()->text() : L"");
                 }
                 // We should use setCheckStateSilently here:
                 //
@@ -417,21 +417,21 @@ D14_SET_APP_ENTRY(mainImageViewer)
                 if (!wk_checkBox1.expired())
                 {
                     wk_checkBox1.lock()->setCheckStateSilently(
-                        index.valid() && index->caption->closable ?
+                        index.has_value() && tg->tabs()[index.value()].caption->closable ?
                         CheckBox::Checked :
                         CheckBox::Unchecked);
                 }
                 if (!wk_checkBox2.expired())
                 {
                     wk_checkBox2.lock()->setCheckStateSilently(
-                        index.valid() && index->caption->draggable ?
+                        index.has_value() && tg->tabs()[index.value()].caption->draggable ?
                         CheckBox::Checked :
                         CheckBox::Unchecked);
                 }
                 if (!wk_checkBox3.expired())
                 {
                     wk_checkBox3.lock()->setCheckStateSilently(
-                        index.valid() && index->caption->promotable ?
+                        index.has_value() && tg->tabs()[index.value()].caption->promotable ?
                         CheckBox::Checked :
                         CheckBox::Unchecked);
                 }

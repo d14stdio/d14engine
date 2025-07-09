@@ -93,12 +93,12 @@ namespace d14engine::uikit
         virtual void onRestoreHelper();
         virtual void onCloseHelper();
 
-        /////////////////////////
-        // Graphics Components //
-        /////////////////////////
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
         //------------------------------------------------------------------
-        // Children Objects
+        // Child Objects
         //------------------------------------------------------------------
     protected:
         SharedPtr<IconLabel> m_caption = {};

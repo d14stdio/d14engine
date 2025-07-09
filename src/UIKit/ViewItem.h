@@ -41,12 +41,12 @@ namespace d14engine::uikit
         }
         drawBufferRes{ this };
 
-        /////////////////////////
-        // Graphics Components //
-        /////////////////////////
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
         //------------------------------------------------------------------
-        // Children Objects
+        // Child Objects
         //------------------------------------------------------------------
     protected:
         // NO WeakPtr here as we provide a content-param in the ctor.

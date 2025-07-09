@@ -53,9 +53,9 @@ namespace d14engine::uikit
     protected:
         void onSelectedChangeHelper(OptRefer<size_t> index);
 
-        /////////////////////////
-        // Graphics Components //
-        /////////////////////////
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
         //------------------------------------------------------------------
         // Drop-Down Menu

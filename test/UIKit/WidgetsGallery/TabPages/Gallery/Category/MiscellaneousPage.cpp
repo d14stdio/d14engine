@@ -62,12 +62,12 @@ SharedPtr<TreeViewItem> createMiscellaneousPage
         ui_layout->addElement(ui_synopsisLabel, geoInfo);
     }
     DEF_CATEGORY_ITEM(MASTER, Miscellaneous, Miscellaneous, 18X12)
-    START_ADD_CHILDREN_ITEMS
+    START_ADD_CHILD_ITEMS
     ADD_CHILD_ITEM_PAGE(CheckBox, Check Box),
     ADD_CHILD_ITEM_PAGE(OnOffSwitch, On-Off Switch),
     ADD_CHILD_ITEM_PAGE(Slider, Slider),
     ADD_CHILD_ITEM_PAGE(TabGroup, Tab Group),
     ADD_CHILD_ITEM_PAGE(Window, Window)
-    END_ADD_CHILDREN_ITEMS
+    END_ADD_CHILD_ITEMS
     RET_CATEGORY_ITEM
 }

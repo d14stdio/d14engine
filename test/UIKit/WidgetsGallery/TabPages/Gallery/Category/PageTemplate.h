@@ -63,13 +63,13 @@ item->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style) \
     content->updateLayout(); \
 };
 
-#define START_ADD_CHILDREN_ITEMS \
-TreeViewItem::ChildItemArray childrenItems = \
+#define START_ADD_CHILD_ITEMS \
+TreeViewItem::ChildItemArray childItems = \
 {
 #define ADD_CHILD_ITEM_PAGE(Id, Name) \
 create##Id##Page((pages[L#Name] = makeUIObject<ConstraintLayout>()).get())
 
-#define END_ADD_CHILDREN_ITEMS \
+#define END_ADD_CHILD_ITEMS \
 }; \
-item->appendItem(childrenItems); \
+item->appendItem(childItems); \
 item->setFolded(TreeViewItem::FOLDED);
