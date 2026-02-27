@@ -29,9 +29,9 @@ namespace d14engine::uikit
         setResizable(false);
     }
 
-    void ScrollView::onInitializeFinish()
+    void ScrollView::initialize()
     {
-        ResizablePanel::onInitializeFinish();
+        ResizablePanel::initialize();
 
         registerUIEvents(m_content);
 
@@ -266,15 +266,20 @@ namespace d14engine::uikit
         {
             m_content->onRendererDrawD2d1Layer(rndr);
 
-            //--------------------------------------------------------------
-            // 1. Grayscale text anti-aliasing:
-            // The rendering result is independent of the target background,
-            // so opacity can be set as needed (any value from 0 ~ 1 is OK).
-            //--------------------------------------------------------------
-            // 2. ClearType text anti-aliasing:
-            // The rendering result depends on the target background color,
-            // so you must set an opaque background (better a value >= 0.5).
-            //--------------------------------------------------------------
+            //------------------------------------------------------------------
+            // Note the difference between these two text anti-aliasing modes:
+            //------------------------------------------------------------------
+            // 1. Grayscale:
+            //    The rendering result is independent of the target background,
+            //    so opacity can be set as needed (any value from 0 ~ 1 is OK).
+            //
+            // 2. ClearType:
+            //    The rendering result depends on the target background color,
+            //    so you must set an opaque background (better a value >= 0.5).
+            //
+            //------------------------------------------------------------------
+            // Set alpha channel carefully so that text can display correctly.
+            //------------------------------------------------------------------
             auto& bkgn = appearance().background;
 
             contentMask.color = bkgn.color;
@@ -329,17 +334,17 @@ namespace d14engine::uikit
         resource_utils::solidColorBrush()->SetOpacity(stroke.opacity);
 
         auto frame = math_utils::inner(m_absoluteRect, stroke.width);
-        D2D1_ROUNDED_RECT outlineRect = { frame, roundRadiusX, roundRadiusY };
+        D2D1_ROUNDED_RECT roundedRect = { frame, roundRadiusX, roundRadiusY };
 
         rndr->d2d1DeviceContext()->DrawRoundedRectangle
         (
-        /* roundedRect */ outlineRect,
+        /* roundedRect */ roundedRect,
         /* brush       */ resource_utils::solidColorBrush(),
         /* strokeWidth */ stroke.width
         );
     }
 
-    void ScrollView::drawD2d1ObjectPosterior(renderer::Renderer* rndr)
+    void ScrollView::drawD2d1ObjectPosterior(Renderer* rndr)
     {
         //////////////
         // Horz Bar //

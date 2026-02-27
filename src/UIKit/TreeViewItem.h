@@ -24,7 +24,7 @@ namespace d14engine::uikit
 
         using ChildItemArray = std::vector<SharedPtr<TreeViewItem>>;
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         struct ArrowIcon
         {
@@ -168,7 +168,7 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
         void onSizeHelper(SizeEvent& e) override;

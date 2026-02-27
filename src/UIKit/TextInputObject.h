@@ -6,6 +6,10 @@ namespace d14engine::uikit
 {
     struct TextInputObject
     {
+        //////////////////////////
+        // IME Composition Form //
+        //////////////////////////
+    public:
         virtual Optional<LOGFONT> getCompositionFont() const
         {
             return std::nullopt;
@@ -15,26 +19,46 @@ namespace d14engine::uikit
             return std::nullopt;
         }
 
-        void OnInputString(WstrRefer str)
+        //////////////////////////
+        // Text Event Callbacks //
+        //////////////////////////
+    public:
+        void onTextInput(WstrViewRefer text)
         {
-            onInputStringHelper(str);
+            onTextInputHelper(text);
 
-            if (f_onInputString) f_onInputString(this, str);
+            if (f_onTextInput) f_onTextInput(this, text);
         }
+        Function<void(TextInputObject*, WstrViewRefer)> f_onTextInput = {};
 
-        Function<void(TextInputObject*, WstrRefer)> f_onInputString = {};
-
-        void onTextChange(WstrRefer text)
+        void onTextChanged(WstrRefer text)
         {
-            onTextChangeHelper(text);
+            onTextChangedHelper(text);
 
-            if (f_onTextChange) f_onTextChange(this, text);
+            if (f_onTextChanged) f_onTextChanged(this, text);
         }
+        Function<void(TextInputObject*, WstrRefer)> f_onTextChanged = {};
 
-        Function<void(TextInputObject*, WstrRefer)> f_onTextChange = {};
+        void onTextEdited(WstrRefer text)
+        {
+            onTextEditedHelper(text);
+
+            if (f_onTextEdited) f_onTextEdited(this, text);
+        }
+        Function<void(TextInputObject*, WstrRefer)> f_onTextEdited = {};
 
     protected:
-        virtual void onInputStringHelper(WstrRefer str) { }
-        virtual void onTextChangeHelper(WstrRefer text) { }
+        virtual void onTextInputHelper(WstrViewRefer text)
+        {
+            // This method intentionally left blank.
+        }
+        virtual void onTextChangedHelper(WstrRefer text)
+        {
+            // This method intentionally left blank.
+        }
+        virtual void onTextEditedHelper(WstrRefer text)
+        {
+            // This method intentionally left blank.
+        }
     };
 }

@@ -294,7 +294,7 @@ D14_SET_APP_ENTRY(mainImageViewer)
             geoInfo.axis.y = { 4, 1 };
             ui_sideLayout->addElement(ui_titleEditor, geoInfo);
 
-            ui_titleEditor->f_onTextChange = [=](RawTextBox::TextInputObject* obj, WstrRefer text)
+            ui_titleEditor->f_onTextChanged = [=](RawTextBox::TextInputObject* obj, WstrRefer text)
             {
                 if (!wk_tabGroup.expired())
                 {

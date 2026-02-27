@@ -2,7 +2,7 @@
 
 #include "Renderer/InfoUtils.h"
 
-#include "Common/MathUtils/GDI.h"
+#include "Common/MathUtils/2D.h"
 
 namespace d14engine::renderer::info_utils
 {

@@ -19,7 +19,7 @@ namespace d14engine::uikit
             float captionPanelHeight = 32.0f,
             float decorativeBarHeight = 4.0f);
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
     protected:
         // Helps set the correct state after restored from minimized.

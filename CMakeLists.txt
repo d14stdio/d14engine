@@ -1,4 +1,4 @@
-#################
+﻿#################
 # Project Setup #
 #################
 
@@ -9,7 +9,7 @@ project(D14Engine VERSION 0.1.0)
 message(STATUS "D14Engine v${PROJECT_VERSION}")
 
 # It is not clear why this does not work on Windows.
-# We have to set -G"Ninja Multi-Config" manually in the args.
+# We have to set -G "Ninja Multi-Config" manually in the args.
 # set(CMAKE_GENERATOR "Ninja Multi-Config")
 
 ####################

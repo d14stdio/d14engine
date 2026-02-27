@@ -49,7 +49,7 @@ namespace d14engine::uikit
         StatefulObject::m_stateDetail.flag = StatefulObject::m_state.activeFlag;
     }
 
-    void ToggleButton::onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr)
+    void ToggleButton::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
     {
         if (StatefulObject::m_state.activeFlag == Activated)
         {

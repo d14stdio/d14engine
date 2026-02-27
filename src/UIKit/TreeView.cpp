@@ -9,9 +9,9 @@ namespace d14engine::uikit
         Panel(rect, resource_utils::solidColorBrush()),
         WaterfallView(rect) { }
 
-    void TreeView::onInitializeFinish()
+    void TreeView::initialize()
     {
-        WaterfallView::onInitializeFinish();
+        WaterfallView::initialize();
 
         m_layout->f_onReleaseUIObject = [this](Panel* p, ShrdPtrRefer<Panel> uiobj)
         {

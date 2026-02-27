@@ -4,7 +4,7 @@
 
 #include "Common/CppLangUtils/PointerCompare.h"
 #include "Common/DirectXError.h"
-#include "Common/MathUtils/GDI.h"
+#include "Common/MathUtils/2D.h"
 
 #include "Renderer/TickTimer.h"
 
@@ -834,7 +834,7 @@ if (app != nullptr) \
         {
             HANDLE_TEXT_INPUT_OBJECT_START(ptiobj)
 
-            ptiobj->OnInputString({ (WCHAR*)&wParam, 1 });
+            ptiobj->onTextInput({ (WCHAR*)&wParam, 1 });
             InvalidateRect(hwnd, nullptr, FALSE);
 
             HANDLE_TEXT_INPUT_OBJECT_END
@@ -881,7 +881,7 @@ if (app != nullptr) \
                         if (hLocal != nullptr)
                         {
                             ImmGetCompositionString(himc, GCS_RESULTSTR, hLocal, nSize);
-                            ptiobj->OnInputString((WCHAR*)hLocal);
+                            ptiobj->onTextInput((WCHAR*)hLocal);
                             InvalidateRect(hwnd, nullptr, FALSE);
                         }
                         LocalFree(hLocal);

@@ -14,7 +14,7 @@ namespace d14engine::uikit
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         void setEnabled(bool value) override;
 
@@ -36,6 +36,6 @@ namespace d14engine::uikit
 
     protected:
         bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
     };
 }

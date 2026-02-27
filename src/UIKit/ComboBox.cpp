@@ -20,9 +20,9 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void ComboBox::onInitializeFinish()
+    void ComboBox::initialize()
     {
-        FlatButton::onInitializeFinish();
+        FlatButton::initialize();
 
         arrowIcon.loadStrokeStyle();
 

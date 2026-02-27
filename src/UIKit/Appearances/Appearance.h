@@ -14,7 +14,7 @@ namespace d14engine::uikit::appearance
         {
             Wstring name = {}; D2D1_COLOR_F color = {};
 
-            bool operator==(const ThemeStyle& rhs)
+            bool operator==(const ThemeStyle& rhs) const
             {
                 return name == rhs.name &&
                     color.r == rhs.color.r &&

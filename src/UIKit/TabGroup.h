@@ -17,13 +17,14 @@ namespace d14engine::uikit
 
     struct TabGroup : appearance::TabGroup, ResizablePanel
     {
+        friend TabCaption;
         friend Window;
 
         explicit TabGroup(const D2D1_RECT_F& rect = {});
 
         virtual ~TabGroup();
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         _D14_SET_APPEARANCE_PROPERTY(TabGroup)
 
@@ -89,6 +90,8 @@ namespace d14engine::uikit
         {
             SharedPtr<TabCaption> caption = {};
             SharedPtr<Panel> content = {};
+
+            bool operator==(const Tab& rhs) const;
         };
         using TabArray = std::vector<Tab>;
 
@@ -243,12 +246,12 @@ namespace d14engine::uikit
 
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
-
         void onMouseMoveHelper(MouseMoveEvent& e) override;
 
         void onMouseLeaveHelper(MouseMoveEvent& e) override;
 
         void onMouseButtonHelper(MouseButtonEvent& e) override;
+
+        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
     };
 }

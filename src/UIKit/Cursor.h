@@ -84,7 +84,7 @@ namespace d14engine::uikit
             const BasicIconThemeMap& icons = loadBasicIcons(),
             const D2D1_RECT_F& rect = { 0.0f, 0.0f, 32.0f, 32.0f });
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         ///////////////////////
         // Interaction Logic //

@@ -16,61 +16,74 @@ namespace d14engine::uikit
         _D14_SET_APPEARANCE_PROPERTY(LabelArea)
 
     protected:
-        size_t m_hiliteRangeOrigin = 0;
+        // Controls the blinking of the caret:
+        // (True) Show the caret. (False) Hide the caret.
+        bool m_caretBlinkingFlag = false;
 
-        Label::CharacterRange m_hiliteRange = { 0, 0 };
+        std::pair<D2D1_POINT_2F, D2D1_POINT_2F> m_caretGeometry = {};
+        size_t m_caretPosition = 0;
 
-        TextRangeHitTestResult m_hiliteRangeData = {};
+        virtual size_t hitTestCaretPosition(const D2D1_POINT_2F& point);
+
+        float m_caretBlinkingElapsedSecs = 0.0f;
 
     public:
-        bool keepHiliteRange = false;
+        bool keepCaretPosition = false;
 
-        const Label::CharacterRange& hiliteRange() const;
-        void setHiliteRange(const Label::CharacterRange& range);
+        D2D1_RECT_F caretConstrainedRect = math_utils::infiniteRectF();
+
+        size_t caretPosition() const;
+        virtual void setCaretPosition(size_t position);
 
     protected:
-        // Controls the blinking of the indicator.
-        bool m_showIndicator = false;
+        size_t m_selectedRangeOrigin = 0;
 
-        std::pair<D2D1_POINT_2F, D2D1_POINT_2F> m_indicatorGeometry = {};
-        size_t m_indicatorCharacterOffset = 0;
+        CharacterRange m_selectedRange = { 0, 0 };
 
-        // Returns the index result (uses isTrailingHit) of hitTestPoint.
-        virtual size_t hitTestCharacterOffset(const D2D1_POINT_2F& sfpt);
-
-        float m_indicatorBlinkElapsedSecs = 0.0f;
+        TextRangeHitTestResult m_selectedRangeData = {};
 
     public:
-        bool keepIndicatorPosition = false;
+        bool keepSelectedRange = false;
 
-        D2D1_RECT_F indicatorConstrainedRect = math_utils::infiniteRectF();
-
-        size_t indicatorPosition() const;
-        virtual void setIndicatorPosition(size_t characterOffset);
+        const CharacterRange& selectedRange() const;
+        void setSelectedRange(const CharacterRange& range);
 
     public:
-        virtual void performCommandCtrlA();
-        virtual void performCommandCtrlC();
+        virtual void setSelectedText(WstrRefer text);
+
+    protected:
+        // Returns whether m_text is changed after called.
+        bool setSelectedTextHelper(WstrRefer text);
+
+    public:
+        virtual void performCommandSelectAll();
+        virtual void performCommandCopySelection();
 
     protected:
         // IDrawObject2D
-        void onRendererUpdateObject2DHelper(renderer::Renderer* rndr) override;
+        void onRendererUpdateObject2DHelper(Renderer* rndr) override;
 
-        void drawHiliteRange(renderer::Renderer* rndr);
-        void drawIndicator(renderer::Renderer* rndr);
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
+
+        void drawCaret(Renderer* rndr);
+        void drawSelection(Renderer* rndr);
 
         // Panel
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
-
         void onGetKeyboardFocusHelper() override;
 
         void onLoseKeyboardFocusHelper() override;
+
+        void onSizeHelper(SizeEvent& e) override;
 
         void onMouseMoveHelper(MouseMoveEvent& e) override;
 
         void onMouseButtonHelper(MouseButtonEvent& e) override;
 
         void onKeyboardHelper(KeyboardEvent& e) override;
+
+        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+
+        // Label
+        void onTextLayoutChangeHelper() override;
     };
 }

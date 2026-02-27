@@ -22,7 +22,7 @@ namespace d14engine::uikit
 
         ViewItem(WstrRefer text = L"ViewItem", const D2D1_RECT_F& rect = {});
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         _D14_SET_APPEARANCE_PROPERTY(ViewItem)
 
@@ -105,9 +105,9 @@ namespace d14engine::uikit
         // IDrawObject2D
         //------------------------------------------------------------------
 
-        void onRendererDrawD2d1LayerHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1LayerHelper(Renderer* rndr) override;
 
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         //------------------------------------------------------------------
         // Panel

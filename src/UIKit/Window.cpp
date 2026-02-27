@@ -29,16 +29,7 @@ namespace d14engine::uikit
         m_captionPanelHeight(captionPanelHeight),
         m_decorativeBarHeight(decorativeBarHeight)
     {
-        transform(math_utils::adaptMaxSize(rect, minimalSize()));
-
-        ///////////////////////////
-        // Load Cached Resources //
-        ///////////////////////////
-
-        drawBufferRes.loadShadowMask();
-        drawBufferRes.loadBrush();
-
-        decorativeBarRes.loadBrush();
+        // Here left blank intentionally.
     }
 
     Window::Window(
@@ -51,15 +42,33 @@ namespace d14engine::uikit
             IconLabel::labelExpandedLayout(title),
             rect,
             captionPanelHeight,
-            decorativeBarHeight) { }
-
-    void Window::onInitializeFinish()
+            decorativeBarHeight)
     {
-        Panel::onInitializeFinish();
+        // Here left blank intentionally.
+    }
 
-        ///////////////////////
-        // Init Child Object //
-        ///////////////////////
+    void Window::initialize()
+    {
+        Panel::initialize();
+
+        ////////////////////
+        // Initialization //
+        ////////////////////
+
+        transform(math_utils::adaptMaxSize(m_rect, minimalSize()));
+
+        //////////////////////
+        // Cached Resources //
+        //////////////////////
+
+        drawBufferRes.loadShadowMask();
+        drawBufferRes.loadBrush();
+
+        decorativeBarRes.loadBrush();
+
+        ///////////////////
+        // Child Objects //
+        ///////////////////
 
         if (!m_caption)
         {

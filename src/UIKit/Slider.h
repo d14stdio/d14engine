@@ -20,7 +20,7 @@ namespace d14engine::uikit
             float minValue = 0.0f,
             float maxValue = 100.0f);
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         _D14_SET_APPEARANCE_PROPERTY(Slider)
 
@@ -102,9 +102,9 @@ namespace d14engine::uikit
         // IDrawObject2D
         //------------------------------------------------------------------
 
-        void onRendererDrawD2d1LayerHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1LayerHelper(Renderer* rndr) override;
 
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         //------------------------------------------------------------------
         // Panel

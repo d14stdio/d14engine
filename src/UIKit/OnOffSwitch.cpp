@@ -194,11 +194,11 @@ namespace d14engine::uikit
         resource_utils::solidColorBrush()->SetOpacity(setting.stroke.opacity);
 
         auto frame = math_utils::inner(m_absoluteRect, setting.stroke.width);
-        D2D1_ROUNDED_RECT outlineRect = { frame, roundRadiusX, roundRadiusY };
+        D2D1_ROUNDED_RECT roundedRect = { frame, roundRadiusX, roundRadiusY };
 
         rndr->d2d1DeviceContext()->DrawRoundedRectangle
         (
-        /* roundedRect */ outlineRect,
+        /* roundedRect */ roundedRect,
         /* brush       */ resource_utils::solidColorBrush(),
         /* strokeWidth */ setting.stroke.width
         );

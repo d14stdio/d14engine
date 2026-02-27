@@ -6,15 +6,20 @@ namespace d14engine::uikit::appearance
 {
     ScrollView::Appearance::Appearance()
     {
-        //--------------------------------------------------------------
-        // 1. Grayscale text anti-aliasing:
-        // The rendering result is independent of the target background,
-        // so opacity can be set as needed (any value from 0 ~ 1 is OK).
-        //--------------------------------------------------------------
-        // 2. ClearType text anti-aliasing:
-        // The rendering result depends on the target background color,
-        // so you must set an opaque background (better a value >= 0.5).
-        //--------------------------------------------------------------
+        //------------------------------------------------------------------
+        // Note the difference between these two text anti-aliasing modes:
+        //------------------------------------------------------------------
+        // 1. Grayscale:
+        //    The rendering result is independent of the target background,
+        //    so opacity can be set as needed (any value from 0 ~ 1 is OK).
+        //
+        // 2. ClearType:
+        //    The rendering result depends on the target background color,
+        //    so you must set an opaque background (better a value >= 0.5).
+        //
+        //------------------------------------------------------------------
+        // Set alpha channel carefully so that text can display correctly.
+        //------------------------------------------------------------------
         background.opacity = 0.0f;
         stroke.opacity = 0.0f;
 

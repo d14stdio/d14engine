@@ -11,19 +11,19 @@ namespace d14engine::math_utils
         return { std::ceil(size.width), std::ceil(size.height) };
     }
 
-    D2D1_SIZE_F floorf(const D2D1_SIZE_F& size)
-    {
-        return { std::floor(size.width), std::floor(size.height) };
-    }
-
-    D2D1_SIZE_F roundf(const D2D1_SIZE_F& size)
-    {
-        return { std::round(size.width), std::round(size.height) };
-    }
-
     D2D1_SIZE_U ceilu(const D2D1_SIZE_F& size)
     {
         return { ceil<UINT32>(size.width), ceil<UINT32>(size.height) };
+    }
+
+    D2D1_SIZE_L ceill(const D2D1_SIZE_F& size)
+    {
+        return { ceil<long>(size.width), ceil<long>(size.height) };
+    }
+
+    D2D1_SIZE_F floorf(const D2D1_SIZE_F& size)
+    {
+        return { std::floor(size.width), std::floor(size.height) };
     }
 
     D2D1_SIZE_U flooru(const D2D1_SIZE_F& size)
@@ -31,9 +31,24 @@ namespace d14engine::math_utils
         return { floor<UINT32>(size.width), floor<UINT32>(size.height) };
     }
 
+    D2D1_SIZE_L floorl(const D2D1_SIZE_F& size)
+    {
+        return { floor<long>(size.width), floor<long>(size.height) };
+    }
+
+    D2D1_SIZE_F roundf(const D2D1_SIZE_F& size)
+    {
+        return { std::round(size.width), std::round(size.height) };
+    }
+
     D2D1_SIZE_U roundu(const D2D1_SIZE_F& size)
     {
         return { round<UINT32>(size.width), round<UINT32>(size.height) };
+    }
+
+    D2D1_SIZE_L roundl(const D2D1_SIZE_F& size)
+    {
+        return { round<long>(size.width), round<long>(size.height) };
     }
 
     D2D1_SIZE_F min(const D2D1_SIZE_F& a, const D2D1_SIZE_F& b)
@@ -71,14 +86,44 @@ namespace d14engine::math_utils
         return { std::ceil(point.x), std::ceil(point.y) };
     }
 
+    D2D1_POINT_2U ceilu(const D2D1_POINT_2F& point)
+    {
+        return { ceil<UINT32>(point.x), ceil<UINT32>(point.y) };
+    }
+
+    D2D1_POINT_2L ceill(const D2D1_POINT_2F& point)
+    {
+        return { ceil<long>(point.x), ceil<long>(point.y) };
+    }
+
     D2D1_POINT_2F floorf(const D2D1_POINT_2F& point)
     {
         return { std::floor(point.x), std::floor(point.y) };
     }
 
+    D2D1_POINT_2U flooru(const D2D1_POINT_2F& point)
+    {
+        return { floor<UINT32>(point.x), floor<UINT32>(point.y) };
+    }
+
+    D2D1_POINT_2L floorl(const D2D1_POINT_2F& point)
+    {
+        return { floor<long>(point.x), floor<long>(point.y) };
+    }
+
     D2D1_POINT_2F roundf(const D2D1_POINT_2F& point)
     {
         return { std::round(point.x), std::round(point.y) };
+    }
+
+    D2D1_POINT_2U roundu(const D2D1_POINT_2F& point)
+    {
+        return { round<UINT32>(point.x), round<UINT32>(point.y) };
+    }
+
+    D2D1_POINT_2L roundl(const D2D1_POINT_2F& point)
+    {
+        return { round<long>(point.x), round<long>(point.y) };
     }
 
     D2D1_POINT_2F minus(const D2D1_POINT_2F& point)
@@ -136,9 +181,19 @@ namespace d14engine::math_utils
         return { x, y, x + width, y + height };
     }
 
+    D2D1_RECT_L rect(long x, long y, long width, long height)
+    {
+        return { x, y, x + width, y + height };
+    }
+
     D2D1_RECT_F rect(const D2D1_POINT_2F& point, const D2D1_SIZE_F& size)
     {
         return rect(point.x, point.y, size.width, size.height);
+    }
+
+    D2D1_RECT_L rect(const D2D1_POINT_2L& point, const D2D1_SIZE_L& size)
+    {
+        return rect(point.x, point.y, size.cx, size.cy);
     }
 
     D2D1_RECT_F ceilf(const D2D1_RECT_F& rect)
@@ -146,9 +201,29 @@ namespace d14engine::math_utils
         return { std::ceil(rect.left), std::ceil(rect.top), std::ceil(rect.right), std::ceil(rect.bottom) };
     }
 
+    D2D1_RECT_U ceilu(const D2D1_RECT_F& rect)
+    {
+        return { ceil<UINT32>(rect.left), ceil<UINT32>(rect.top), ceil<UINT32>(rect.right), ceil<UINT32>(rect.bottom) };
+    }
+
+    D2D1_RECT_L ceill(const D2D1_RECT_F& rect)
+    {
+        return { ceil<long>(rect.left), ceil<long>(rect.top), ceil<long>(rect.right), ceil<long>(rect.bottom) };
+    }
+
     D2D1_RECT_F floorf(const D2D1_RECT_F& rect)
     {
         return { std::floor(rect.left), std::floor(rect.top), std::floor(rect.right), std::floor(rect.bottom) };
+    }
+
+    D2D1_RECT_U flooru(const D2D1_RECT_F& rect)
+    {
+        return { floor<UINT32>(rect.left), floor<UINT32>(rect.top), floor<UINT32>(rect.right), floor<UINT32>(rect.bottom) };
+    }
+
+    D2D1_RECT_L floorl(const D2D1_RECT_F& rect)
+    {
+        return { floor<long>(rect.left), floor<long>(rect.top), floor<long>(rect.right), floor<long>(rect.bottom) };
     }
 
     D2D1_RECT_F roundf(const D2D1_RECT_F& rect)
@@ -156,7 +231,22 @@ namespace d14engine::math_utils
         return { std::round(rect.left), std::round(rect.top), std::round(rect.right), std::round(rect.bottom) };
     }
 
+    D2D1_RECT_U roundu(const D2D1_RECT_F& rect)
+    {
+        return { round<UINT32>(rect.left), round<UINT32>(rect.top), round<UINT32>(rect.right), round<UINT32>(rect.bottom) };
+    }
+
+    D2D1_RECT_L roundl(const D2D1_RECT_F& rect)
+    {
+        return { round<long>(rect.left), round<long>(rect.top), round<long>(rect.right), round<long>(rect.bottom) };
+    }
+
     float width(const D2D1_RECT_F& rect)
+    {
+        return rect.right - rect.left;
+    }
+
+    long width(const D2D1_RECT_L& rect)
     {
         return rect.right - rect.left;
     }
@@ -166,12 +256,37 @@ namespace d14engine::math_utils
         return rect.bottom - rect.top;
     }
 
+    long height(const D2D1_RECT_L& rect)
+    {
+        return rect.bottom - rect.top;
+    }
+
     D2D1_SIZE_F size(const D2D1_RECT_F& rect)
     {
         return { width(rect), height(rect) };
     }
 
+    D2D1_SIZE_L size(const D2D1_RECT_L& rect)
+    {
+        return { width(rect), height(rect) };
+    }
+
+    D2D1_POINT_2F center(const D2D1_RECT_F& rect)
+    {
+        return { (rect.left + rect.right) * 0.5f, (rect.top + rect.bottom) * 0.5f };
+    }
+
+    D2D1_POINT_2L center(const D2D1_RECT_L& rect)
+    {
+        return { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
+    }
+
     D2D1_POINT_2F leftTop(const D2D1_RECT_F& rect)
+    {
+        return { rect.left, rect.top };
+    }
+
+    D2D1_POINT_2L leftTop(const D2D1_RECT_L& rect)
     {
         return { rect.left, rect.top };
     }
@@ -181,7 +296,17 @@ namespace d14engine::math_utils
         return { rect.left, rect.bottom };
     }
 
+    D2D1_POINT_2L leftBottom(const D2D1_RECT_L& rect)
+    {
+        return { rect.left, rect.bottom };
+    }
+
     D2D1_POINT_2F rightTop(const D2D1_RECT_F& rect)
+    {
+        return { rect.right, rect.top };
+    }
+
+    D2D1_POINT_2L rightTop(const D2D1_RECT_L& rect)
     {
         return { rect.right, rect.top };
     }
@@ -191,9 +316,9 @@ namespace d14engine::math_utils
         return { rect.right, rect.bottom };
     }
 
-    D2D1_POINT_2F center(const D2D1_RECT_F& rect)
+    D2D1_POINT_2L rightBottom(const D2D1_RECT_L& rect)
     {
-        return { (rect.left + rect.right) * 0.5f, (rect.top + rect.bottom) * 0.5f };
+        return { rect.right, rect.bottom };
     }
 
     D2D1_POINT_2F leftCenter(const D2D1_RECT_F& rect)
@@ -379,6 +504,11 @@ namespace d14engine::math_utils
     D2D1_RECT_F centered(const D2D1_RECT_F& dst, const D2D1_SIZE_F& src)
     {
         return rect(dst.left + (width(dst) - src.width) * 0.5f, dst.top + (height(dst) - src.height) * 0.5f, src.width, src.height);
+    }
+
+    D2D1_RECT_L centered(const D2D1_RECT_L& dst, const D2D1_SIZE_L& src)
+    {
+        return rect(dst.left + (width(dst) - src.cx) / 2, dst.top + (height(dst) - src.cy) / 2, src.cx, src.cy);
     }
 
     D2D1_POINT_2F constrainTo(const D2D1_POINT_2F& point, const D2D1_RECT_F& rect)

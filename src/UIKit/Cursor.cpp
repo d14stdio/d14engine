@@ -21,9 +21,9 @@ namespace d14engine::uikit
         ISortable<IDrawObject2D>::m_priority = INT_MAX;
     }
 
-    void Cursor::onInitializeFinish()
+    void Cursor::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         THROW_IF_NULL(Application::g_app);
 

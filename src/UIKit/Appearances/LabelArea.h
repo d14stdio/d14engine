@@ -17,34 +17,30 @@ namespace d14engine::uikit::appearance
 
             void changeTheme(WstrRefer themeName) override;
 
-            struct HiliteRange
+            struct Caret
             {
-                SolidStyle background = {};
-                StrokeStyle stroke = {};
-            }
-            hiliteRange = {};
-
-            struct Indicator
-            {
-                bool visibility = true;
+                bool visible = true;
 
                 SolidStyle background = {};
 
                 struct Animation
                 {
-                    struct PeriodInSecs
-                    {
-                        float blink = 0.5f;
-                    }
-                    periodInSecs = {};
+                    float blinkingSecs = 0.5f;
                 }
                 animation = {};
             }
-            indicator = {};
+            caret = {};
+
+            struct Selection
+            {
+                SolidStyle background = {};
+                StrokeStyle stroke = {};
+            }
+            selection = {};
 
             struct ThemeData
             {
-                struct HiliteRange
+                struct Caret
                 {
                     struct Background
                     {
@@ -52,9 +48,9 @@ namespace d14engine::uikit::appearance
                     }
                     background = {};
                 }
-                hiliteRange = {};
+                caret = {};
 
-                struct Indicator
+                struct Selection
                 {
                     struct Background
                     {
@@ -62,7 +58,7 @@ namespace d14engine::uikit::appearance
                     }
                     background = {};
                 }
-                indicator = {};
+                selection = {};
             };
             _D14_SET_THEME_DATA_MAP_DECL
         }

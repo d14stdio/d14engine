@@ -3,7 +3,6 @@
 #include "UIKit/RawTextInput.h"
 
 #include "Common/DirectXError.h"
-#include "Common/MathUtils/Basic.h"
 
 #include "UIKit/Application.h"
 #include "UIKit/PlatformUtils.h"
@@ -26,9 +25,9 @@ namespace d14engine::uikit
         m_placeholder = makeUIObject<Label>();
     }
 
-    void RawTextInput::onInitializeFinish()
+    void RawTextInput::initialize()
     {
-        LabelArea::onInitializeFinish();
+        LabelArea::initialize();
 
         registerUIEvents(m_placeholder);
 
@@ -43,19 +42,7 @@ namespace d14engine::uikit
         setVisibleTextRect(selfCoordRect());
     }
 
-    void RawTextInput::onTextContentOffsetChange(const D2D1_POINT_2F& offset)
-    {
-        onTextContentOffsetChangeHelper(offset);
-
-        if (f_onTextContentOffsetChange) f_onTextContentOffsetChange(this, offset);
-    }
-
-    void RawTextInput::onTextContentOffsetChangeHelper(const D2D1_POINT_2F& offset)
-    {
-        // This method intentionally left blank.
-    }
-
-    Optional<Wstring> RawTextInput::preprocessInputStr(WstrRefer in)
+    Optional<Wstring> RawTextInput::normalizeRawText(WstrRefer in)
     {
         if (multiline) return std::nullopt;
 
@@ -64,17 +51,18 @@ namespace d14engine::uikit
         {
             return std::nullopt;
         }
-        // Cut off at any line break to keep single line.
+        // Cuts off at any line break to keep single line.
         return in.substr(0, lineBreakPos);
     }
 
     void RawTextInput::setText(WstrRefer text)
     {
-        if (text != m_text)
+        if (setTextHelper(text))
         {
-            LabelArea::setText(text);
+            setCaretPosition(0);
+            setSelectedRange({ 0, 0 });
 
-            onTextChange(m_text);
+            onTextChanged(m_text);
         }
     }
 
@@ -93,6 +81,9 @@ namespace d14engine::uikit
         THROW_IF_FAILED(m_textLayout->SetMaxWidth(maskWidth));
         THROW_IF_FAILED(m_textLayout->SetMaxHeight(maskHeight));
 
+        setCaretPosition(m_caretPosition);
+        setSelectedRange(m_selectedRange);
+
         m_visibleTextMask.loadBitmap(maskWidth, maskHeight);
 
         m_placeholder->transform(m_visibleTextRect);
@@ -103,9 +94,9 @@ namespace d14engine::uikit
         return m_placeholder;
     }
 
-    size_t RawTextInput::hitTestCharacterOffset(const D2D1_POINT_2F& sfpt)
+    size_t RawTextInput::hitTestCaretPosition(const D2D1_POINT_2F& sfpt)
     {
-        return LabelArea::hitTestCharacterOffset
+        return LabelArea::hitTestCaretPosition
         ({
             sfpt.x + m_textContentOffset.x - m_visibleTextRect.left,
             sfpt.y + m_textContentOffset.y - m_visibleTextRect.top
@@ -125,128 +116,106 @@ namespace d14engine::uikit
         return out;
     }
 
-    const D2D1_POINT_2F& RawTextInput::textContentOffset() const
+    void RawTextInput::setCaretPosition(size_t position)
     {
-        return m_textContentOffset;
-    }
+        LabelArea::setCaretPosition(position);
 
-    void RawTextInput::setTextContentOffset(const D2D1_POINT_2F& offset)
-    {
+        // Make a copy here as we need to modify it.
+        auto offset = m_textContentOffset;
+
+        auto width = math_utils::width(m_visibleTextRect);
+        auto height = math_utils::height(m_visibleTextRect);
+
+        if (m_caretGeometry.first.x < offset.x)
+        {
+            offset.x = m_caretGeometry.first.x;
+        }
+        else if (m_caretGeometry.second.x > offset.x + width)
+        {
+            offset.x = m_caretGeometry.second.x - width;
+        }
+        if (m_caretGeometry.first.y < offset.y)
+        {
+            offset.y = m_caretGeometry.first.y;
+        }
+        else if (m_caretGeometry.second.y > offset.y + height)
+        {
+            offset.y = m_caretGeometry.second.y - height;
+        }
         auto validOffset = validateTextContentOffset(offset);
 
-        if (validOffset.x != m_textContentOffset.x ||
-            validOffset.y != m_textContentOffset.y)
+        if (m_textContentOffset.x != validOffset.x ||
+            m_textContentOffset.y != validOffset.y)
         {
             m_textContentOffset = validOffset;
-            onTextContentOffsetChange(validOffset);
         }
     }
 
-    void RawTextInput::setTextContentOffsetDirect(const D2D1_POINT_2F& offset)
+    void RawTextInput::performCommandCutSelection()
     {
-        m_textContentOffset = validateTextContentOffset(offset);
-    }
-
-    void RawTextInput::setIndicatorPosition(size_t characterOffset)
-    {
-        LabelArea::setIndicatorPosition(characterOffset);
-
-        auto area = math_utils::size(m_visibleTextRect);
-        D2D1_POINT_2F originalOffset = m_textContentOffset;
-
-        if (m_indicatorGeometry.first.x < originalOffset.x)
-        {
-            originalOffset.x = m_indicatorGeometry.first.x;
-        }
-        else if (m_indicatorGeometry.second.x > originalOffset.x + area.width)
-        {
-            originalOffset.x = m_indicatorGeometry.second.x - area.width;
-        }
-        if (m_indicatorGeometry.first.y < originalOffset.y)
-        {
-            originalOffset.y = m_indicatorGeometry.first.y;
-        }
-        else if (m_indicatorGeometry.second.y > originalOffset.y + area.height)
-        {
-            originalOffset.y = m_indicatorGeometry.second.y - area.height;
-        }
-        setTextContentOffset(originalOffset);
-    }
-
-    void RawTextInput::performCommandCtrlX()
-    {
-        auto hiliteStr = m_text.substr
+        auto selectedText = m_text.substr
         (
-            m_hiliteRange.offset,
-            m_hiliteRange.count
+        /* _Off   */ m_selectedRange.offset,
+        /* _Count */ m_selectedRange.count
         );
-        resource_utils::setClipboardText(hiliteStr);
+        resource_utils::setClipboardText(selectedText);
 
-        eraseTextFragment(m_hiliteRange);
+        if (eraseTextHelper(m_selectedRange))
+        {
+            setCaretPosition(m_selectedRange.offset);
+            setSelectedRange({ 0, 0 });
 
-        setIndicatorPosition(m_hiliteRange.offset);
-
-        setHiliteRange({ 0, 0 });
-
-        onTextChange(m_text);
+            onTextChanged(m_text);
+            onTextEdited(m_text);
+        }
     }
 
-    void RawTextInput::performCommandCtrlV()
+    void RawTextInput::performCommandPasteSelection()
     {
         auto content = resource_utils::getClipboardText();
-
         if (content.has_value())
         {
-            if (m_hiliteRange.count > 0)
+            if (setSelectedTextHelper(content.value()))
             {
-                eraseTextFragment(m_hiliteRange);
-                insertTextFragment(content.value(), m_hiliteRange.offset);
-
-                setIndicatorPosition(m_hiliteRange.offset + content.value().size());
-
-                setHiliteRange({ 0, 0 });
+                onTextChanged(m_text);
+                onTextEdited(m_text);
             }
-            else // Insert at the indicator.
-            {
-                insertTextFragment(content.value(), m_indicatorCharacterOffset);
-
-                setIndicatorPosition(m_indicatorCharacterOffset + content.value().size());
-            }
-            onTextChange(m_text);
         }
     }
 
-    void RawTextInput::changeCandidateText(WstrRefer str)
+    void RawTextInput::setSelectedText(WstrRefer text)
     {
-        if (m_hiliteRange.count > 0)
+        if (setSelectedTextHelper(text))
         {
-            eraseTextFragment(m_hiliteRange);
-            insertTextFragment(str, m_hiliteRange.offset);
-
-            setIndicatorPosition(m_hiliteRange.offset + str.size());
-
-            setHiliteRange({ 0, 0 });
+            onTextChanged(m_text);
         }
-        else // Insert at the indicator.
+    }
+
+    void RawTextInput::editSelectedText(WstrRefer text)
+    {
+        if (setSelectedTextHelper(text))
         {
-            insertTextFragment(str, m_indicatorCharacterOffset);
-
-            setIndicatorPosition(m_indicatorCharacterOffset + str.size());
+            onTextChanged(m_text);
+            onTextEdited(m_text);
         }
-        onTextChange(m_text);
     }
 
     void RawTextInput::onRendererDrawD2d1LayerHelper(Renderer* rndr)
     {
-        //--------------------------------------------------------------
-        // 1. Grayscale text anti-aliasing:
-        // The rendering result is independent of the target background,
-        // so opacity can be set as needed (any value from 0 ~ 1 is OK).
-        //--------------------------------------------------------------
-        // 2. ClearType text anti-aliasing:
-        // The rendering result depends on the target background color,
-        // so you must set an opaque background (better a value >= 0.5).
-        //--------------------------------------------------------------
+        //------------------------------------------------------------------
+        // Note the difference between these two text anti-aliasing modes:
+        //------------------------------------------------------------------
+        // 1. Grayscale:
+        //    The rendering result is independent of the target background,
+        //    so opacity can be set as needed (any value from 0 ~ 1 is OK).
+        //
+        // 2. ClearType:
+        //    The rendering result depends on the target background color,
+        //    so you must set an opaque background (better a value >= 0.5).
+        //
+        //------------------------------------------------------------------
+        // Set alpha channel carefully so that text can display correctly.
+        //------------------------------------------------------------------
         m_visibleTextMask.color = Label::appearance().background.color;
         m_visibleTextMask.color.a = Label::appearance().background.opacity;
 
@@ -271,8 +240,8 @@ namespace d14engine::uikit
             );
             rndr->d2d1DeviceContext()->SetTransform(textContentTrans);
 
-            // The indicator will be drawn above the visible text mask.
-            drawHiliteRange(rndr); drawText(rndr); /* drawIndicator(rndr); */
+            // The caret will be drawn above the visible text mask.
+            drawSelection(rndr); drawTextLayout(rndr); /* drawCaret(rndr); */
         }
         m_visibleTextMask.endDraw(rndr->d2d1DeviceContext());
     }
@@ -300,7 +269,7 @@ namespace d14engine::uikit
         );
 
         //////////////////
-        // Indicator(|) //
+        // Caret(|) //
         //////////////////
 
         D2D1_MATRIX_3X2_F originalTrans = {};
@@ -313,11 +282,11 @@ namespace d14engine::uikit
         );
         rndr->d2d1DeviceContext()->SetTransform(originalTrans * indicatorTrans);
         {
-            indicatorConstrainedRect = math_utils::rect
+            caretConstrainedRect = math_utils::rect
             (
                 m_textContentOffset, math_utils::size(m_visibleTextRect)
             );
-            drawIndicator(rndr); // Vertical Line Caret
+            drawCaret(rndr); // Vertical Line Caret
         }
         rndr->d2d1DeviceContext()->SetTransform(originalTrans);
 
@@ -360,14 +329,16 @@ namespace d14engine::uikit
     void RawTextInput::onChangeThemeStyleHelper(const ThemeStyle& style)
     {
         LabelArea::onChangeThemeStyleHelper(style);
-
-        if (style.name == L"Light")
         {
-            m_placeholder->appearance().foreground.color = D2D1::ColorF{ 0x8c8c8c };
-        }
-        else if (style.name == L"Dark")
-        {
-            m_placeholder->appearance().foreground.color = D2D1::ColorF{ 0xa6a6a6 };
+            auto& color = m_placeholder->appearance().foreground.color;
+            if (style.name == L"Light")
+            {
+                color = D2D1::ColorF{ 0x8c8c8c };
+            }
+            else if (style.name == L"Dark")
+            {
+                color = D2D1::ColorF{ 0xa6a6a6 };
+            }
         }
         appearance().changeTheme(Label::appearance(), style.name);
     }
@@ -386,23 +357,26 @@ namespace d14engine::uikit
             {
                 if (editable)
                 {
-                    if (m_hiliteRange.count > 0) // Remove the hilite text.
+                    if (m_selectedRange.count > 0)
                     {
-                        eraseTextFragment(m_hiliteRange);
+                        if (eraseTextHelper(m_selectedRange))
+                        {
+                            setCaretPosition(m_selectedRange.offset);
+                            setSelectedRange({ 0, 0 });
 
-                        setIndicatorPosition(m_hiliteRange.offset);
-
-                        setHiliteRange({ 0, 0 });
-
-                        onTextChange(m_text);
+                            onTextChanged(m_text);
+                            onTextEdited(m_text);
+                        }
                     }
-                    else if (m_indicatorCharacterOffset > 0) // Remove single character.
+                    else if (m_caretPosition > 0)
                     {
-                        eraseTextFragment({ m_indicatorCharacterOffset - 1, 1 });
+                        if (eraseTextHelper({ m_caretPosition - 1, 1 }))
+                        {
+                            setCaretPosition(m_caretPosition - 1);
 
-                        setIndicatorPosition(m_indicatorCharacterOffset - 1);
-
-                        onTextChange(m_text);
+                            onTextChanged(m_text);
+                            onTextEdited(m_text);
+                        }
                     }
                 }
                 break;
@@ -413,7 +387,7 @@ namespace d14engine::uikit
                 {
                     if (editable)
                     {
-                        changeCandidateText(L"\n");
+                        editSelectedText(L"\n");
                     }
                     break;
                 }
@@ -423,47 +397,46 @@ namespace d14engine::uikit
             {
                 auto focus = Application::FocusType::Keyboard;
                 Application::g_app->focusUIObject(focus, nullptr);
-                return; // Prevent the indicator from blinking when deactivating.
+                return; // Return directly to avoid unexpected caret blinking.
             }
             case VK_END:
             {
-                setHiliteRange({ 0, 0 });
-                setIndicatorPosition(m_text.size());
+                setCaretPosition(m_text.size());
+                setSelectedRange({ 0, 0 });
                 break;
             }
             case VK_HOME:
             {
-                setHiliteRange({ 0, 0 });
-                setIndicatorPosition(0);
+                setCaretPosition(0);
+                setSelectedRange({ 0, 0 });
                 break;
             }
             case VK_LEFT:
             {
-                if (m_hiliteRange.count == 0)
+                if (m_selectedRange.count == 0)
                 {
-                    auto intOffset = (int)m_indicatorCharacterOffset;
-                    auto offset = (size_t)std::max(intOffset - 1, 0);
-                    setIndicatorPosition(offset); // avoid underflow
+                    if (m_caretPosition > 0)
+                    {
+                        setCaretPosition(m_caretPosition - 1);
+                    }
                 }
-                else // move to hilite range leftmost
+                else // move to range's leftmost
                 {
-                    setIndicatorPosition(m_hiliteRange.offset);
-
-                    setHiliteRange({ 0, 0 });
+                    setCaretPosition(m_selectedRange.offset);
+                    setSelectedRange({ 0, 0 });
                 }
                 break;
             }
             case VK_RIGHT:
             {
-                if (m_hiliteRange.count == 0)
+                if (m_selectedRange.count == 0)
                 {
-                    setIndicatorPosition(m_indicatorCharacterOffset + 1);
+                    setCaretPosition(m_caretPosition + 1);
                 }
-                else // move to hilite range rightmost
+                else // move to range's rightmost
                 {
-                    setIndicatorPosition(m_hiliteRange.offset + m_hiliteRange.count);
-
-                    setHiliteRange({ 0, 0 });
+                    setCaretPosition(m_selectedRange.offset + m_selectedRange.count);
+                    setSelectedRange({ 0, 0 });
                 }
                 break;
             }
@@ -471,21 +444,24 @@ namespace d14engine::uikit
             {
                 if (editable)
                 {
-                    if (m_hiliteRange.count > 0) // Remove hilite text.
+                    if (m_selectedRange.count > 0)
                     {
-                        eraseTextFragment(m_hiliteRange);
+                        if (eraseTextHelper(m_selectedRange))
+                        {
+                            setCaretPosition(m_selectedRange.offset);
+                            setSelectedRange({ 0, 0 });
 
-                        setIndicatorPosition(m_hiliteRange.offset);
-
-                        setHiliteRange({ 0, 0 });
-
-                        onTextChange(m_text);
+                            onTextChanged(m_text);
+                            onTextEdited(m_text);
+                        }
                     }
-                    else if (m_indicatorCharacterOffset >= 0 && m_text.size() > 0)
+                    else // delete single character
                     {
-                        eraseTextFragment({ m_indicatorCharacterOffset, 1 });
-
-                        onTextChange(m_text);
+                        if (eraseTextHelper({ m_caretPosition, 1 }))
+                        {
+                            onTextChanged(m_text);
+                            onTextEdited(m_text);
+                        }
                     }
                 }
                 break;
@@ -498,35 +474,40 @@ namespace d14engine::uikit
                     {
                         switch (e.vkey)
                         {
-                        case 'X': performCommandCtrlX(); break;
-                        case 'V': performCommandCtrlV(); break;
+                        case 'X': performCommandCutSelection(); break;
+                        case 'V': performCommandPasteSelection(); break;
                         default: break;
                         }
                     }
                 }
                 break;
             }}
-            m_showIndicator = true;
-            m_indicatorBlinkElapsedSecs = 0.0f;
+            m_caretBlinkingFlag = true;
+            m_caretBlinkingElapsedSecs = 0.0f;
         }
     }
 
     Optional<LOGFONT> RawTextInput::getCompositionFont() const
     {
-        LOGFONT font = {};
-        font.lfHeight = (LONG)platform_utils::scaledByDpi(
-        (
-            m_indicatorGeometry.second.y - m_indicatorGeometry.first.y
-        ));
-        font.lfWidth = 0; // keep the aspect ratio
-        font.lfEscapement = font.lfOrientation = 0;
-        font.lfWeight = m_textLayout->GetFontWeight();
-        font.lfItalic = font.lfUnderline = font.lfStrikeOut = FALSE;
-        font.lfCharSet = DEFAULT_CHARSET;
-        font.lfOutPrecision = OUT_DEFAULT_PRECIS;
-        font.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-        font.lfQuality = CLEARTYPE_NATURAL_QUALITY;
-        font.lfPitchAndFamily = DEFAULT_PITCH;
+        LOGFONT font =
+        {
+            .lfHeight = platform_utils::scaledByDpi<LONG>(
+            (
+                m_caretGeometry.second.y - m_caretGeometry.first.y
+            )),
+            .lfWidth          = 0, // keep the aspect ratio
+            .lfEscapement     = 0,
+            .lfOrientation    = 0,
+            .lfWeight         = m_textLayout->GetFontWeight(),
+            .lfItalic         = FALSE,
+            .lfUnderline      = FALSE,
+            .lfStrikeOut      = FALSE,
+            .lfCharSet        = DEFAULT_CHARSET,
+            .lfOutPrecision   = OUT_DEFAULT_PRECIS,
+            .lfClipPrecision  = CLIP_DEFAULT_PRECIS,
+            .lfQuality        = CLEARTYPE_NATURAL_QUALITY,
+            .lfPitchAndFamily = DEFAULT_PITCH
+        };
         THROW_IF_FAILED(m_textLayout->GetFontFamilyName
         (
             font.lfFaceName, _countof(font.lfFaceName)
@@ -537,25 +518,32 @@ namespace d14engine::uikit
     Optional<COMPOSITIONFORM> RawTextInput::getCompositionForm() const
     {
         auto origin = selfCoordToAbsolute(math_utils::leftTop(m_visibleTextRect));
-
-        COMPOSITIONFORM form = {};
-        form.dwStyle = CFS_POINT;
-        form.ptCurrentPos = platform_utils::scaledByDpi(POINT
+        COMPOSITIONFORM form =
         {
-            math_utils::round(origin.x + m_indicatorGeometry.first.x - m_textContentOffset.x),
-            math_utils::round(origin.y + m_indicatorGeometry.first.y - m_textContentOffset.y)
-        });
+            .dwStyle = CFS_POINT,
+            .ptCurrentPos = math_utils::roundl(platform_utils::scaledByDpi(D2D1_POINT_2F
+            {
+                origin.x + m_caretGeometry.first.x - m_textContentOffset.x,
+                origin.y + m_caretGeometry.first.y - m_textContentOffset.y
+            }))
+        };
         return form;
     }
 
-    void RawTextInput::onInputStringHelper(WstrRefer str)
+    void RawTextInput::onTextInputHelper(WstrViewRefer text)
     {
-        TextInputObject::onInputStringHelper(str);
+        TextInputObject::onTextInputHelper(text);
 
         if (editable)
         {
-            // Discards the unprintable characters (ascii-code from 0 to 32).
-            if (str.size() != 1 || str[0] >= L' ') changeCandidateText(str);
+            // Discards the non-printable characters (ASCII-code from 0 to 32).
+            //
+            // This check was not placed in normalizeRawText because the primary function
+            // of normalizeRawText is to filter out certain unwanted printable characters.
+            // For keyboard inputs containing non-printable characters,
+            // the correct handling approach is to skip the input directly.
+
+            if (text.size() != 1 || text[0] >= L' ') editSelectedText((Wstring)text);
         }
     }
 }

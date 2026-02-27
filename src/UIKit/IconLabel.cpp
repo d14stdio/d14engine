@@ -28,9 +28,9 @@ namespace d14engine::uikit
         m_label = makeUIObject<Label>(labelText);
     }
 
-    void IconLabel::onInitializeFinish()
+    void IconLabel::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         registerUIEvents(m_label);
 

@@ -4,7 +4,7 @@
 
 #include "Common/CppLangUtils/FinallySemantic.h"
 #include "Common/DirectXError.h"
-#include "Common/MathUtils/GDI.h"
+#include "Common/MathUtils/2D.h"
 
 #include "Renderer/GraphUtils/Barrier.h"
 #include "Renderer/GraphUtils/Bitmap.h"

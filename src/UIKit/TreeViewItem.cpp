@@ -34,9 +34,9 @@ namespace d14engine::uikit
         : TreeViewItem(IconLabel::compactLayout(text), rect) { }
 
 
-    void TreeViewItem::onInitializeFinish()
+    void TreeViewItem::initialize()
     {
-        ViewItem::onInitializeFinish();
+        ViewItem::initialize();
 
         loadArrowIconStrokeStyle();
 

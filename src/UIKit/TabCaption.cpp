@@ -24,9 +24,9 @@ namespace d14engine::uikit
         :
         TabCaption(IconLabel::compactLayout(text)) { }
 
-    void TabCaption::onInitializeFinish()
+    void TabCaption::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         if (!m_title)
         {
@@ -235,14 +235,23 @@ namespace d14engine::uikit
             {
                 auto tabGroup = m_parentTabGroup.lock();
 
-                size_t tabIndex = 0;
-                for (auto& tab : tabGroup->tabs())
+                for (size_t i = 0; i < tabGroup->m_tabs.size(); ++i)
                 {
-                    if (cpp_lang_utils::isMostDerivedEqual(tab.caption, shared_from_this())) break;
-                    ++tabIndex;
-                }
-                tabGroup->setSelectedTab(tabIndex);
+                    // Make a copy here to prevent shared_ptr's
+                    // ref-count from reaching zero after removeTab.
+                    auto tab = tabGroup->m_tabs[i];
 
+                    if (cpp_lang_utils::isMostDerivedEqual(tab.caption, shared_from_this()))
+                    {
+                        if (i >= tabGroup->m_visibleTabCount)
+                        {
+                            tabGroup->removeTab(i);
+                            tabGroup->insertTab({ tab });
+                            tabGroup->setSelectedTab(0);
+                        }
+                        else tabGroup->setSelectedTab(i);
+                    }
+                }
                 Application::g_app->sendNextImmediateMouseMoveEvent = true;
             }
         }

@@ -23,9 +23,9 @@ namespace d14engine::uikit
         roundRadiusX = roundRadiusY = roundRadius;
     }
 
-    void CheckBox::onInitializeFinish()
+    void CheckBox::initialize()
     {
-        ClickablePanel::onInitializeFinish();
+        ClickablePanel::initialize();
 
         checkedIcon.loadStrokeStyle();
     }

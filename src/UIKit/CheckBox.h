@@ -23,7 +23,7 @@ namespace d14engine::uikit
             float roundRadius = 4.0f,
             const D2D1_RECT_F& rect = { 0.0f, 0.0f, 24.0f, 24.0f });
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         _D14_SET_APPEARANCE_PROPERTY(CheckBox)
 

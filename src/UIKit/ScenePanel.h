@@ -12,19 +12,19 @@ namespace d14engine::uikit
     {
         ScenePanel(const D2D1_RECT_F& rect = {}, int cmdLayerPriority = 100);
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
     protected:
         SharedPtr<renderer::DrawLayer> m_primaryLayer = {};
         SharedPtr<renderer::DrawLayer> m_closingLayer = {};
 
-        SharedPtr<renderer::Renderer::CommandLayer> m_cmdLayer = {};
+        SharedPtr<Renderer::CommandLayer> m_cmdLayer = {};
 
     public:
         const SharedPtr<renderer::DrawLayer>& primaryLayer() const;
         const SharedPtr<renderer::DrawLayer>& closingLayer() const;
 
-        const SharedPtr<renderer::Renderer::CommandLayer>& cmdLayer() const;
+        const SharedPtr<Renderer::CommandLayer>& cmdLayer() const;
 
         int cmdLayerPriority() const;
         void setCmdLayerPriority(int value);
@@ -86,7 +86,7 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
         void onSizeHelper(SizeEvent& e) override;

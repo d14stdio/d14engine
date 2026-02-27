@@ -27,9 +27,9 @@ namespace d14engine::uikit
         if (Application::g_app != nullptr) m_overflowMenu->release();
     }
 
-    void TabGroup::onInitializeFinish()
+    void TabGroup::initialize()
     {
-        ResizablePanel::onInitializeFinish();
+        ResizablePanel::initialize();
 
         ////////////////////
         // Initialization //
@@ -195,6 +195,13 @@ namespace d14engine::uikit
         // This method intentionally left blank.
     }
 
+    bool TabGroup::Tab::operator==(const Tab& rhs) const
+    {
+        return
+            cpp_lang_utils::isMostDerivedEqual(caption, rhs.caption) &&
+            cpp_lang_utils::isMostDerivedEqual(content, rhs.content);
+    }
+
     const TabGroup::TabImplArray& TabGroup::tabs() const
     {
         return m_tabs;
@@ -226,7 +233,6 @@ namespace d14engine::uikit
         };
         std::transform(tabs.begin(), tabs.end(), backInserter, makeTabImpl);
 
-        auto originalSelectedIndex = m_selectedTabIndex;
 #define UPDATE_TAB_INDEX(Tab_Index) \
 do { \
     if (Tab_Index.has_value()) \
@@ -244,11 +250,6 @@ do { \
 #undef UPDATE_TAB_INDEX
 
         updateAllTabs();
-
-        if (m_selectedTabIndex != originalSelectedIndex)
-        {
-            onSelectedTabChange(m_selectedTabIndex);
-        }
     }
 
     void TabGroup::appendTab(const TabArray& tabs)
@@ -279,7 +280,6 @@ do { \
             }
             m_tabs.erase(m_tabs.begin() + index, m_tabs.begin() + endIndex);
 
-            auto originalSelectedIndex = m_selectedTabIndex;
 #define UPDATE_TAB_INDEX(Tab_Index) \
 do { \
     if (Tab_Index.has_value()) \
@@ -301,11 +301,6 @@ do { \
 #undef UPDATE_TAB_INDEX
 
             updateAllTabs();
-
-            if (m_selectedTabIndex != originalSelectedIndex)
-            {
-                onSelectedTabChange(m_selectedTabIndex);
-            }
         }
     }
 
@@ -419,52 +414,50 @@ do { \
     {
         if (index.has_value() && index.value() >= m_tabs.size()) return;
 
-        auto originalSelectedIndex = m_selectedTabIndex;
+        Tab originalSelectedTab = {};
+        if (m_selectedTabIndex.has_value())
+        {
+            originalSelectedTab = m_tabs[m_selectedTabIndex.value()];
+        }
+        auto originalSelectedTabIndex = m_selectedTabIndex;
 
         /////////////////////////////
         // Step 1 - Reset Original //
         /////////////////////////////
 
-        if (index != m_selectedTabIndex && m_selectedTabIndex.has_value())
+        if (m_selectedTabIndex.has_value())
         {
             auto& tab = m_tabs[m_selectedTabIndex.value()];
             tab.content->setPrivateEnabled(false);
         }
-        ///////////////////////////////
-        // Step 2 - Swap Target Tabs //
-        ///////////////////////////////
+        //////////////////////////////
+        // Step 2 - Update Selected //
+        //////////////////////////////
 
-        if (index.has_value() && index.value() >= m_visibleTabCount)
-        {
-            if (!m_selectedTabIndex.has_value())
-            {
-                m_selectedTabIndex = 0;
-            }
-            auto& tab1 = m_tabs[index.value()];
-            auto& tab2 = m_tabs[m_selectedTabIndex.value()];
-            std::swap(tab1, tab2);
-        }
-        else m_selectedTabIndex = index;
+        m_selectedTabIndex = index;
 
-        ////////////////////////////
-        // Step 3 - Set Candidate //
-        ////////////////////////////
+        //////////////////////////////
+        // Step 3 - Config Selected //
+        //////////////////////////////
 
-        if (getVisibleTabCount() > 0 && m_selectedTabIndex.has_value())
+        if (m_selectedTabIndex.has_value())
         {
             auto& tab = m_tabs[m_selectedTabIndex.value()];
             tab.content->setPrivateEnabled(true);
             tab.content->transform(selfCoordRect());
         }
-        else m_selectedTabIndex.reset();
-
         updateAllTabs();
 
         ///////////////////////////////
         // Step 4 - Trigger Callback //
         ///////////////////////////////
 
-        if (m_selectedTabIndex != originalSelectedIndex)
+        Tab selectedTab = {};
+        if (m_selectedTabIndex.has_value())
+        {
+            selectedTab = m_tabs[m_selectedTabIndex.value()];
+        }
+        if (selectedTab != originalSelectedTab)
         {
             onSelectedTabChange(m_selectedTabIndex);
         }
@@ -1138,25 +1131,6 @@ do { \
         }
     }
 
-    void TabGroup::onChangeThemeStyleHelper(const ThemeStyle& style)
-    {
-        ResizablePanel::onChangeThemeStyleHelper(style);
-
-        appearance().changeTheme(style.name);
-
-        for (auto& tab : m_tabs)
-        {
-            // For those overflow items with non-expired parents,
-            // the appearance is updated by their shared overflow menu;
-            // others require manual updates (as they are not managed).
-
-            if (tab.m_overflowItem->parent().expired())
-            {
-                tab.m_overflowItem->onChangeThemeStyle(style);
-            }
-        }
-    }
-
     void TabGroup::onMouseMoveHelper(MouseMoveEvent& e)
     {
         ResizablePanel::onMouseMoveHelper(e);
@@ -1333,6 +1307,25 @@ do { \
 
                 m_overflowMenu->setViewportOffset({ 0.0f, 0.0f });
                 m_overflowMenu->setActivated(true);
+            }
+        }
+    }
+
+    void TabGroup::onChangeThemeStyleHelper(const ThemeStyle& style)
+    {
+        ResizablePanel::onChangeThemeStyleHelper(style);
+
+        appearance().changeTheme(style.name);
+
+        for (auto& tab : m_tabs)
+        {
+            // For those overflow items with non-expired parents,
+            // the appearance is updated by their shared overflow menu;
+            // others require manual updates (as they are not managed).
+
+            if (tab.m_overflowItem->parent().expired())
+            {
+                tab.m_overflowItem->onChangeThemeStyle(style);
             }
         }
     }

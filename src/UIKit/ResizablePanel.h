@@ -16,7 +16,7 @@ namespace d14engine::uikit
             ComPtrParam<ID2D1Brush> brush = nullptr,
             ComPtrParam<ID2D1Bitmap1> bitmap = nullptr);
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         using MasterPtr = cpp_lang_utils::EnableMasterPtr<ResizablePanel>;
 
@@ -92,7 +92,7 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
-        void drawD2d1ObjectPosterior(renderer::Renderer* rndr) override;
+        void drawD2d1ObjectPosterior(Renderer* rndr) override;
 
         // Panel
         bool isHitHelper(const Event::Point& p) const override;

@@ -9,7 +9,7 @@
             "variables": [
                 {
                     "name": "TargetName",
-                    "value": "VariousFonts",
+                    "value": "ImageViewer",
                     "type": "STRING"
                 }
             ]

@@ -34,9 +34,9 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void ViewItem::onInitializeFinish()
+    void ViewItem::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         ////////////////////////
         // Init Child Objects //
@@ -175,15 +175,20 @@ namespace d14engine::uikit
             auto& mask = drawBufferRes.mask;
             auto& background = setting.background;
 
-            //--------------------------------------------------------------
-            // 1. Grayscale text anti-aliasing:
-            // The rendering result is independent of the target background,
-            // so opacity can be set as needed (any value from 0 ~ 1 is OK).
-            //--------------------------------------------------------------
-            // 2. ClearType text anti-aliasing:
-            // The rendering result depends on the target background color,
-            // so you must set an opaque background (better a value >= 0.5).
-            //--------------------------------------------------------------
+            //------------------------------------------------------------------
+            // Note the difference between these two text anti-aliasing modes:
+            //------------------------------------------------------------------
+            // 1. Grayscale:
+            //    The rendering result is independent of the target background,
+            //    so opacity can be set as needed (any value from 0 ~ 1 is OK).
+            //
+            // 2. ClearType:
+            //    The rendering result depends on the target background color,
+            //    so you must set an opaque background (better a value >= 0.5).
+            //
+            //------------------------------------------------------------------
+            // Set alpha channel carefully so that text can display correctly.
+            //------------------------------------------------------------------
             mask.color = background.color;
             mask.color.a = background.opacity;
 

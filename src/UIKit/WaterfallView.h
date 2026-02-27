@@ -26,9 +26,9 @@ namespace d14engine::uikit
             // Here left blank intentionally.
         }
 
-        void onInitializeFinish() override
+        void initialize() override
         {
-            ScrollView::onInitializeFinish();
+            ScrollView::initialize();
 
             m_layout = std::dynamic_pointer_cast<ConstraintLayout>(m_content);
 

@@ -2,6 +2,10 @@
 
 #include "Common/Precompile.h"
 
+namespace d14engine
+{
+    using D2D1_SIZE_L = SIZE;
+}
 namespace d14engine::math_utils
 {
 #pragma region Type
@@ -62,12 +66,16 @@ namespace d14engine::math_utils
 #pragma region Size
 
     D2D1_SIZE_F ceilf(const D2D1_SIZE_F& size);
-    D2D1_SIZE_F floorf(const D2D1_SIZE_F& size);
-    D2D1_SIZE_F roundf(const D2D1_SIZE_F& size);
-
     D2D1_SIZE_U ceilu(const D2D1_SIZE_F& size);
+    D2D1_SIZE_L ceill(const D2D1_SIZE_F& size);
+
+    D2D1_SIZE_F floorf(const D2D1_SIZE_F& size);
     D2D1_SIZE_U flooru(const D2D1_SIZE_F& size);
+    D2D1_SIZE_L floorl(const D2D1_SIZE_F& size);
+
+    D2D1_SIZE_F roundf(const D2D1_SIZE_F& size);
     D2D1_SIZE_U roundu(const D2D1_SIZE_F& size);
+    D2D1_SIZE_L roundl(const D2D1_SIZE_F& size);
 
     D2D1_SIZE_F min(const D2D1_SIZE_F& a, const D2D1_SIZE_F& b);
     D2D1_SIZE_F max(const D2D1_SIZE_F& a, const D2D1_SIZE_F& b);
@@ -83,8 +91,16 @@ namespace d14engine::math_utils
 #pragma region Point
 
     D2D1_POINT_2F ceilf(const D2D1_POINT_2F& point);
+    D2D1_POINT_2U ceilu(const D2D1_POINT_2F& point);
+    D2D1_POINT_2L ceill(const D2D1_POINT_2F& point);
+
     D2D1_POINT_2F floorf(const D2D1_POINT_2F& point);
+    D2D1_POINT_2U flooru(const D2D1_POINT_2F& point);
+    D2D1_POINT_2L floorl(const D2D1_POINT_2F& point);
+
     D2D1_POINT_2F roundf(const D2D1_POINT_2F& point);
+    D2D1_POINT_2U roundu(const D2D1_POINT_2F& point);
+    D2D1_POINT_2L roundl(const D2D1_POINT_2F& point);
 
     D2D1_POINT_2F minus(const D2D1_POINT_2F& point);
     D2D1_POINT_2F minusX(const D2D1_POINT_2F& point);
@@ -114,22 +130,47 @@ namespace d14engine::math_utils
         return { -FLT_MAX, -FLT_MAX, FLT_MAX, FLT_MAX };
     }
     D2D1_RECT_F rect(float x, float y, float width, float height);
+    D2D1_RECT_L rect(long x, long y, long width, long height);
+
     D2D1_RECT_F rect(const D2D1_POINT_2F& point, const D2D1_SIZE_F& size);
+    D2D1_RECT_L rect(const D2D1_POINT_2L& point, const D2D1_SIZE_L& size);
 
     D2D1_RECT_F ceilf(const D2D1_RECT_F& rect);
+    D2D1_RECT_U ceilu(const D2D1_RECT_F& rect);
+    D2D1_RECT_L ceill(const D2D1_RECT_F& rect);
+
     D2D1_RECT_F floorf(const D2D1_RECT_F& rect);
+    D2D1_RECT_U flooru(const D2D1_RECT_F& rect);
+    D2D1_RECT_L floorl(const D2D1_RECT_F& rect);
+
     D2D1_RECT_F roundf(const D2D1_RECT_F& rect);
+    D2D1_RECT_U roundu(const D2D1_RECT_F& rect);
+    D2D1_RECT_L roundl(const D2D1_RECT_F& rect);
 
     float width(const D2D1_RECT_F& rect);
-    float height(const D2D1_RECT_F& rect);
-    D2D1_SIZE_F size(const D2D1_RECT_F& rect);
+    long width(const D2D1_RECT_L& rect);
 
-    D2D1_POINT_2F leftTop(const D2D1_RECT_F& rect);
-    D2D1_POINT_2F leftBottom(const D2D1_RECT_F& rect);
-    D2D1_POINT_2F rightTop(const D2D1_RECT_F& rect);
-    D2D1_POINT_2F rightBottom(const D2D1_RECT_F& rect);
+    float height(const D2D1_RECT_F& rect);
+    long height(const D2D1_RECT_L& rect);
+
+    D2D1_SIZE_F size(const D2D1_RECT_F& rect);
+    D2D1_SIZE_L size(const D2D1_RECT_L& rect);
 
     D2D1_POINT_2F center(const D2D1_RECT_F& rect);
+    D2D1_POINT_2L center(const D2D1_RECT_L& rect);
+
+    D2D1_POINT_2F leftTop(const D2D1_RECT_F& rect);
+    D2D1_POINT_2L leftTop(const D2D1_RECT_L& rect);
+
+    D2D1_POINT_2F leftBottom(const D2D1_RECT_F& rect);
+    D2D1_POINT_2L leftBottom(const D2D1_RECT_L& rect);
+
+    D2D1_POINT_2F rightTop(const D2D1_RECT_F& rect);
+    D2D1_POINT_2L rightTop(const D2D1_RECT_L& rect);
+
+    D2D1_POINT_2F rightBottom(const D2D1_RECT_F& rect);
+    D2D1_POINT_2L rightBottom(const D2D1_RECT_L& rect);
+
     D2D1_POINT_2F leftCenter(const D2D1_RECT_F& rect);
     D2D1_POINT_2F topCenter(const D2D1_RECT_F& rect);
     D2D1_POINT_2F rightCenter(const D2D1_RECT_F& rect);
@@ -187,6 +228,7 @@ namespace d14engine::math_utils
     // Example 1: dst = { 0, 0, 10, 10 }, src = { 8, 8 }, return = { 1, 1, 9, 9 }.
     // Example 2: dst = { 2, 3, 18, 15 }, src = { 4, 4 }, return = { 8, 7, 12, 11 }.
     D2D1_RECT_F centered(const D2D1_RECT_F& dst, const D2D1_SIZE_F& src);
+    D2D1_RECT_L centered(const D2D1_RECT_L& dst, const D2D1_SIZE_L& src);
 
     D2D1_POINT_2F constrainTo(const D2D1_POINT_2F& point, const D2D1_RECT_F& rect);
 

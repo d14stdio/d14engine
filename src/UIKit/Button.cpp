@@ -38,9 +38,9 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void Button::onInitializeFinish()
+    void Button::initialize()
     {
-        ClickablePanel::onInitializeFinish();
+        ClickablePanel::initialize();
 
         if (m_content == nullptr)
         {

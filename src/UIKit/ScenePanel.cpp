@@ -57,9 +57,9 @@ namespace d14engine::uikit
         }
     }
 
-    void ScenePanel::onInitializeFinish()
+    void ScenePanel::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         THROW_IF_NULL(Application::g_app);
 
@@ -268,7 +268,7 @@ namespace d14engine::uikit
 // m_backBuffer == resolve target
 // m_msaaBuffer == render target
 //
-// Render Pass:
+// RenderPass:
 //
 // Data --> m_msaaBuffer (Render) --> m_backBuffer (Resolve)
 //
@@ -281,7 +281,7 @@ namespace d14engine::uikit
 // m_backBuffer == render target
 // m_msaaBuffer == NONE
 //
-// Render Pass:
+// RenderPass:
 //
 // Data --> m_backBuffer (Render)
 //

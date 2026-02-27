@@ -18,7 +18,7 @@ namespace d14engine::uikit
 
         explicit TabCaption(WstrRefer text = L"Untitled");
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         _D14_SET_APPEARANCE_PROPERTY(TabCaption)
 
@@ -54,7 +54,7 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
         bool isHitHelper(const Event::Point& p) const override;

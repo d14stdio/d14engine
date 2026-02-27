@@ -55,9 +55,9 @@ namespace d14engine::uikit
         //    Some methods depend on it (such as addUIObject).
         //
         //------------------------------------------------------------------
-        // These initializations should be moved into onInitializeFinish.
+        // These initialization processes should be moved into initialize.
         //------------------------------------------------------------------
-        virtual void onInitializeFinish();
+        virtual void initialize();
 
         ////////////////////////
         // UI Graphics (D2D1) //
@@ -562,7 +562,7 @@ namespace d14engine::uikit
     SharedPtr<T> makeUIObject(Types&& ...args)
     {
         auto uiobj = std::make_shared<T>(args...);
-        uiobj->onInitializeFinish();
+        uiobj->initialize();
         return uiobj;
     }
 

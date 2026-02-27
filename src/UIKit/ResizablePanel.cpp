@@ -23,9 +23,9 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void ResizablePanel::onInitializeFinish()
+    void ResizablePanel::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         staticSizingGuideFrame.loadStrokeStyle();
     }
@@ -193,11 +193,11 @@ namespace d14engine::uikit
             resource_utils::solidColorBrush()->SetOpacity(frameSetting.background.opacity);
 
             auto frame = math_utils::inner(m_sizingRect, frameSetting.strokeWidth);
-            D2D1_ROUNDED_RECT outlineRect = { relativeToAbsolute(frame), roundRadiusX, roundRadiusY };
+            D2D1_ROUNDED_RECT roundedRect = { relativeToAbsolute(frame), roundRadiusX, roundRadiusY };
 
             rndr->d2d1DeviceContext()->DrawRoundedRectangle
             (
-            /* roundedRect */ outlineRect,
+            /* roundedRect */ roundedRect,
             /* brush       */ resource_utils::solidColorBrush(),
             /* strokeWidth */ frameSetting.strokeWidth,
             /* strokeStyle */ staticSizingGuideFrame.strokeStyle.Get()

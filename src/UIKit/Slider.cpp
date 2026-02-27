@@ -23,9 +23,9 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void Slider::onInitializeFinish()
+    void Slider::initialize()
     {
-        Panel::onInitializeFinish();
+        Panel::initialize();
 
         ///////////////////////////
         // Load Cached Resources //

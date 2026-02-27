@@ -26,7 +26,7 @@ namespace d14engine::uikit
             float captionPanelHeight = 32.0f,
             float decorativeBarHeight = 4.0f);
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         _D14_SET_APPEARANCE_PROPERTY(Window)
 
@@ -104,7 +104,7 @@ namespace d14engine::uikit
         SharedPtr<IconLabel> m_caption = {};
 
         // Avoid WeakPtr here: a init-param for this member is provided in ctor but the actual
-        // init happens in onInitializeFinish. WeakPtr would make ref-count hit zero unexpectedly.
+        // init happens in initialize. WeakPtr would make ref-count hit zero unexpectedly.
         SharedPtr<Panel> m_content = {};
 
     public:

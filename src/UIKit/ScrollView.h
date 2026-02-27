@@ -12,7 +12,7 @@ namespace d14engine::uikit
     {
         ScrollView(ShrdPtrRefer<Panel> content = nullptr, const D2D1_RECT_F& rect = {});
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
         MaskObject contentMask = {};
 
@@ -60,7 +60,7 @@ namespace d14engine::uikit
 
     protected:
         // Avoid WeakPtr here: a init-param for this member is provided in ctor but the actual
-        // init happens in onInitializeFinish. WeakPtr would make ref-count hit zero unexpectedly.
+        // init happens in initialize(). WeakPtr would make ref-count hit zero unexpectedly.
         SharedPtr<Panel> m_content = {};
 
     public:
@@ -109,13 +109,13 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
-        void onRendererUpdateObject2DHelper(renderer::Renderer* rndr) override;
+        void onRendererUpdateObject2DHelper(Renderer* rndr) override;
 
-        void onRendererDrawD2d1LayerHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1LayerHelper(Renderer* rndr) override;
 
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
-        void drawD2d1ObjectPosterior(renderer::Renderer* rndr) override;
+        void drawD2d1ObjectPosterior(Renderer* rndr) override;
 
         // Panel
         bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;

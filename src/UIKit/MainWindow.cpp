@@ -2,7 +2,7 @@
 
 #include "UIKit/MainWindow.h"
 
-#include "Common/MathUtils/GDI.h"
+#include "Common/MathUtils/2D.h"
 #include "Common/RuntimeError.h"
 
 #include "UIKit/Application.h"
@@ -58,9 +58,9 @@ namespace d14engine::uikit
             captionPanelHeight,
             decorativeBarHeight) { }
 
-    void MainWindow::onInitializeFinish()
+    void MainWindow::initialize()
     {
-        Window::onInitializeFinish();
+        Window::initialize();
 
         THROW_IF_NULL(Application::g_app);
 

@@ -46,7 +46,7 @@ namespace d14engine::uikit
 
     protected:
         // IDrawObject2D
-        void onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;

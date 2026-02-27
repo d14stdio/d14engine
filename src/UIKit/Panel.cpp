@@ -21,10 +21,7 @@ namespace d14engine::uikit
         brush(brush),
         bitmap(bitmap)
     {
-        ISortable<IDrawObject2D>::m_priority = 0;
-        ISortable<Panel>::m_priority = 0;
-
-        updateAbsoluteRect();
+        // Here left blank intentionally.
     }
 
     Panel::~Panel()
@@ -32,11 +29,28 @@ namespace d14engine::uikit
         if (f_onDestroy) f_onDestroy(this);
     }
 
-    void Panel::onInitializeFinish()
+    void Panel::initialize()
     {
         THROW_IF_NULL(Application::g_app);
 
         auto& app = Application::g_app;
+
+        ////////////////////////
+        // Absolute Rectangle //
+        ////////////////////////
+
+        updateAbsoluteRect();
+
+        ///////////////////////
+        // Object Priorities //
+        ///////////////////////
+
+        ISortable<IDrawObject2D>::m_priority = 0;
+        ISortable<Panel>::m_priority = 0;
+
+        ////////////////////////
+        // Theme & LangLocale //
+        ////////////////////////
 
         onChangeThemeStyleHelper(app->themeStyle());
         onChangeLangLocaleHelper(app->langLocale());

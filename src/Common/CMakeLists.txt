@@ -13,7 +13,6 @@ set(
     "DirectXError.cpp"
     "MathUtils/2D.cpp"
     "MathUtils/3D.cpp"
-    "MathUtils/GDI.cpp"
     "Precompile.cpp"
     "ResourcePack.cpp"
     "RuntimeError.cpp"

@@ -545,7 +545,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
                         auto sh_input = std::dynamic_pointer_cast<RawTextBox>(sh_target);
                         if (sh_input != nullptr)
                         {
-                            sh_input->setHiliteRange({ 0, sh_input->text().size() });
+                            sh_input->setSelectedRange({ 0, sh_input->text().size() });
                         }
                     }
                 };
@@ -773,13 +773,13 @@ D14_SET_APP_ENTRY(mainColorfulCube)
 
                         XMStoreFloat4x4(wk_matrix.lock().get(), XMMatrixTransformation
                         (
-                            /* ScalingOrigin      */ XMVectorZero(),
-                            /* ScalingOrientation */ XMQuaternionIdentity(),
-                            /* Scaling            */ scaling,
-                            /* RotationOrigin     */ XMVectorZero(),
-                            /* Rotation           */ XMQuaternionRotationRollPitchYawFromVector(rotation),
-                            /* Translation        */ position)
-                        );
+                        /* ScalingOrigin      */ XMVectorZero(),
+                        /* ScalingOrientation */ XMQuaternionIdentity(),
+                        /* Scaling            */ scaling,
+                        /* RotationOrigin     */ XMVectorZero(),
+                        /* Rotation           */ XMQuaternionRotationRollPitchYawFromVector(rotation),
+                        /* Translation        */ position
+                        ));
                     }
                 }
                 src->setText(std::to_wstring(value));

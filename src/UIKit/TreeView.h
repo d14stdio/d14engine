@@ -11,7 +11,7 @@ namespace d14engine::uikit
     {
         explicit TreeView(const D2D1_RECT_F& rect = {});
 
-        void onInitializeFinish() override;
+        void initialize() override;
 
     protected:
         ItemArray m_rootItems = {};

@@ -21,9 +21,9 @@ namespace d14engine::uikit
         m_label2 = makeUIObject<Label>(label2Text);
     }
 
-    void IconLabel2::onInitializeFinish()
+    void IconLabel2::initialize()
     {
-        IconLabel::onInitializeFinish();
+        IconLabel::initialize();
 
         addUIObject(m_label2);
 
@@ -110,7 +110,7 @@ namespace d14engine::uikit
         return IconLabel::releaseUIObjectHelper(uiobj);
     }
 
-    void IconLabel2::onRendererDrawD2d1ObjectHelper(renderer::Renderer* rndr)
+    void IconLabel2::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
     {
         //////////////////
         // Label & Icon //
