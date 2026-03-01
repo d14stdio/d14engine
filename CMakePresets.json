@@ -1,0 +1,20 @@
+﻿{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "default-config",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "TargetName": "ImageViewer"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default-build",
+            "configurePreset": "default-config",
+            "configuration": "Debug"
+        }
+    ]
+}

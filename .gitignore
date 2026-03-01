@@ -1,6 +1,5 @@
 ﻿.vs
 build
-out
 
 *.pdb
 d14engine.exe
