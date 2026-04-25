@@ -370,10 +370,16 @@ namespace d14engine::uikit
                     }
                     else if (m_caretPosition > 0)
                     {
+                        auto caretPosition = m_caretPosition;
+
                         if (eraseTextHelper({ m_caretPosition - 1, 1 }))
                         {
-                            setCaretPosition(m_caretPosition - 1);
-
+                            // If the caret is at the end of the text,
+                            // eraseTextHelper will update its position.
+                            if (m_caretPosition == caretPosition)
+                            {
+                                setCaretPosition(m_caretPosition - 1);
+                            }
                             onTextChanged(m_text);
                             onTextEdited(m_text);
                         }
