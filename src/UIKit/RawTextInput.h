@@ -19,14 +19,34 @@ namespace d14engine::uikit
 
         const bool multiline = {};
 
+        ////////////////////////
+        // Callback Functions //
+        ////////////////////////
+
+        //------------------------------------------------------------------
+        // Public Interfaces
+        //------------------------------------------------------------------
+    public:
+        void onTextContentOffsetChange(const D2D1_POINT_2F& offset);
+
+        Function<void(RawTextInput*, const D2D1_POINT_2F&)> f_onTextContentOffsetChange = {};
+
+        //------------------------------------------------------------------
+        // Protected Helpers
+        //------------------------------------------------------------------
     protected:
-        Optional<Wstring> normalizeRawText(WstrRefer in) override;
+        virtual void onTextContentOffsetChangeHelper(const D2D1_POINT_2F& offset);
+
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
     public:
         bool editable = true;
 
-        void setText(WstrRefer text) override;
-
+        //------------------------------------------------------------------
+        // Visible Text Area
+        //------------------------------------------------------------------
     protected:
         MaskObject m_visibleTextMask = {};
 
@@ -36,54 +56,106 @@ namespace d14engine::uikit
         const D2D1_RECT_F& visibleTextRect() const;
         void setVisibleTextRect(const D2D1_RECT_F& rect);
 
+        //------------------------------------------------------------------
+        // Text Content Offset
+        //------------------------------------------------------------------
+    protected:
+        D2D1_POINT_2F m_textContentOffset = {};
+
+    protected:
+        virtual D2D1_POINT_2F validateTextContentOffset(const D2D1_POINT_2F& in);
+
+    public:
+        const D2D1_POINT_2F& textContentOffset() const;
+        void setTextContentOffset(const D2D1_POINT_2F& offset);
+
+        // Update the offset without triggering the corresponding event.
+        void setTextContentOffsetSilently(const D2D1_POINT_2F& offset);
+
+        //------------------------------------------------------------------
+        // Placeholder
+        //------------------------------------------------------------------
     protected:
         SharedPtr<Label> m_placeholder = {};
 
     public:
         const SharedPtr<Label>& placeholder() const;
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Text Editing
+        //------------------------------------------------------------------
     protected:
-        D2D1_POINT_2F m_textContentOffset = {};
-
-        // Override to take m_textContentOffset into consideration.
-        size_t hitTestCaretPosition(const D2D1_POINT_2F& sfpt) override;
-
-    protected:
-        virtual D2D1_POINT_2F validateTextContentOffset(const D2D1_POINT_2F& in);
-
-    public:
-        // Override to take m_textContentOffset into consideration.
-        void setCaretPosition(size_t position) override;
+        void editSelectedText(WstrRefer text);
 
     public:
         virtual void performCommandCutSelection();
         virtual void performCommandPasteSelection();
 
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     public:
+        //------------------------------------------------------------------
+        // TextInputObject
+        //------------------------------------------------------------------
+
+        Optional<LOGFONT> getCompositionFont() const override;
+        Optional<COMPOSITIONFORM> getCompositionForm() const override;
+
+        //------------------------------------------------------------------
+        // Label
+        //------------------------------------------------------------------
+
+        void setText(WstrRefer text) override;
+
+        //------------------------------------------------------------------
+        // LabelArea
+        //------------------------------------------------------------------
+
+        void setCaretPosition(size_t position) override;
+
         void setSelectedText(WstrRefer text) override;
 
     protected:
-        void editSelectedText(WstrRefer text);
-
-    protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
+        //------------------------------------------------------------------
+
         void onRendererDrawD2d1LayerHelper(Renderer* rndr) override;
 
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onSizeHelper(SizeEvent& e) override;
 
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;
 
         void onKeyboardHelper(KeyboardEvent& e) override;
 
-    public:
+        //------------------------------------------------------------------
         // TextInputObject
-        Optional<LOGFONT> getCompositionFont() const override;
-        Optional<COMPOSITIONFORM> getCompositionForm() const override;
+        //------------------------------------------------------------------
 
-    protected:
         void onTextInputHelper(WstrViewRefer text) override;
+
+        //------------------------------------------------------------------
+        // Label
+        //------------------------------------------------------------------
+
+        Optional<Wstring> normalizeRawText(WstrRefer in) override;
+
+        //------------------------------------------------------------------
+        // LabelArea
+        //------------------------------------------------------------------
+
+        size_t hitTestCaretPosition(const D2D1_POINT_2F& sfpt) override;
     };
 }

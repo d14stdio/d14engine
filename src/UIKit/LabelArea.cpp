@@ -264,16 +264,16 @@ namespace d14engine::uikit
     {
         Label::onLoseKeyboardFocusHelper();
 
-        if (!keepSelectedRange)
-        {
-            setSelectedRange({ 0, 0 });
-        }
         m_caretBlinkingFlag = false;
         m_caretBlinkingElapsedSecs = 0.0f;
 
         if (!keepCaretPosition)
         {
             setCaretPosition(0);
+        }
+        if (!keepSelectedRange)
+        {
+            setSelectedRange({ 0, 0 });
         }
         decreaseAnimationCount();
     }

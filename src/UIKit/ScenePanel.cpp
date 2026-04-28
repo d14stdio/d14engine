@@ -8,9 +8,6 @@
 #include "Renderer/GraphUtils/Barrier.h"
 #include "Renderer/GraphUtils/ParamHelper.h"
 #include "Renderer/Interfaces/DrawLayer.h"
-
-// Do NOT remove this header for code tidy
-// as the template deduction relies on it.
 #include "Renderer/Interfaces/IDrawObject.h"
 
 #include "UIKit/Application.h"

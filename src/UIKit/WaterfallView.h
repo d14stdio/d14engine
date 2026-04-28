@@ -2,8 +2,6 @@
 
 #include "Common/Precompile.h"
 
-// Do NOT remove this header for code tidy
-// as the template deduction relies on it.
 #include "Common/CppLangUtils/PointerCompare.h"
 
 #include "UIKit/ConstraintLayout.h"
@@ -28,8 +26,6 @@ namespace d14engine::uikit
 
         void initialize() override
         {
-            ScrollView::initialize();
-
             m_layout = std::dynamic_pointer_cast<ConstraintLayout>(m_content);
 
             m_layout->f_onReleaseUIObject = [this]
@@ -50,6 +46,10 @@ namespace d14engine::uikit
                 // The viewport offset may be invalid after resizing.
                 setViewportOffset(m_viewportOffset);
             };
+            // Place `initialize` after the creation of `m_layout`,
+            // because `initialize` may trigger the `onSize` callback,
+            // which may modify the geometry properties of `m_layout`.
+            ScrollView::initialize();
         }
 
         ////////////////////////

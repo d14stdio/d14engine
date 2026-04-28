@@ -89,7 +89,7 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
             ui_titleInput->setVisibleTextRect({ 5.0f, 8.0f, 495.0f, 38.0f });
             ui_titleInput->placeholder()->setText(L"Title");
 
-            ui_titleInput->f_onTextChange =
+            ui_titleInput->f_onTextChanged =
             [
                 wk_mainWindow = (WeakPtr<MainWindow>)ui_mainWindow
             ]
@@ -180,7 +180,8 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
             };
             ui_mainBodyInput->transform( -5.0f, -8.0f, 760.0f, 458.0f);
 
-            ui_mainBodyInput->keepIndicatorPosition = true;
+            ui_mainBodyInput->keepCaretPosition = true;
+            ui_mainBodyInput->keepSelectedRange = true;
 
             ui_mainBodyInput->f_onParentSize = [](Panel* p, SizeEvent& e)
             {
@@ -201,7 +202,7 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
                     sh_inputContextMenu->showInConstrainedRect(e.cursorPoint);
                 }
             };
-            ui_mainBodyInput->f_onTextChange =
+            ui_mainBodyInput->f_onTextChanged =
             [
                 wk_characterCount = (WeakPtr<Label>)ui_characterCount
             ]
@@ -236,10 +237,10 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
                     auto sh_mainBodyInput = wk_mainBodyInput.lock();
                     switch (index)
                     {
-                    case 0: sh_mainBodyInput->performCommandCtrlA(); break;
-                    case 2: sh_mainBodyInput->performCommandCtrlX(); break;
-                    case 3: sh_mainBodyInput->performCommandCtrlC(); break;
-                    case 4: sh_mainBodyInput->performCommandCtrlV(); break;
+                    case 0: sh_mainBodyInput->performCommandSelectAll(); break;
+                    case 2: sh_mainBodyInput->performCommandCutSelection(); break;
+                    case 3: sh_mainBodyInput->performCommandCopySelection(); break;
+                    case 4: sh_mainBodyInput->performCommandPasteSelection(); break;
                     case 6:
                     {
                         auto& editable = sh_mainBodyInput->editable;

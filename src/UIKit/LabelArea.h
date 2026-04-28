@@ -16,8 +16,8 @@ namespace d14engine::uikit
         _D14_SET_APPEARANCE_PROPERTY(LabelArea)
 
     protected:
-        // Controls the blinking of the caret:
-        // (True) Show the caret. (False) Hide the caret.
+        // This is an internal variable used in the implementation
+        // of caret blinking, and it is not intended to be set directly.
         bool m_caretBlinkingFlag = false;
 
         std::pair<D2D1_POINT_2F, D2D1_POINT_2F> m_caretGeometry = {};

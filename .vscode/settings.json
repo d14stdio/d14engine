@@ -2,10 +2,6 @@
     "[markdown]": {
         "editor.wordWrap": "on"
     },
-    "cmake.generator": "Ninja Multi-Config",
-    "cmake.configureArgs": [
-        "-DTargetName=VariousFonts"
-    ],
     "cmake.debugConfig": {
         "cwd": "${workspaceFolder}",
         "program": "${workspaceFolder}/d14engine.exe"

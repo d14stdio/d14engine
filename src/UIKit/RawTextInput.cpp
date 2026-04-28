@@ -42,28 +42,16 @@ namespace d14engine::uikit
         setVisibleTextRect(selfCoordRect());
     }
 
-    Optional<Wstring> RawTextInput::normalizeRawText(WstrRefer in)
+    void RawTextInput::onTextContentOffsetChange(const D2D1_POINT_2F& offset)
     {
-        if (multiline) return std::nullopt;
+        onTextContentOffsetChangeHelper(offset);
 
-        auto lineBreakPos = in.find_first_of(L'\n');
-        if (lineBreakPos == Wstring::npos)
-        {
-            return std::nullopt;
-        }
-        // Cuts off at any line break to keep single line.
-        return in.substr(0, lineBreakPos);
+        if (f_onTextContentOffsetChange) f_onTextContentOffsetChange(this, offset);
     }
 
-    void RawTextInput::setText(WstrRefer text)
+    void RawTextInput::onTextContentOffsetChangeHelper(const D2D1_POINT_2F& offset)
     {
-        if (setTextHelper(text))
-        {
-            setCaretPosition(0);
-            setSelectedRange({ 0, 0 });
-
-            onTextChanged(m_text);
-        }
+        // This method intentionally left blank.
     }
 
     const D2D1_RECT_F& RawTextInput::visibleTextRect() const
@@ -89,20 +77,6 @@ namespace d14engine::uikit
         m_placeholder->transform(m_visibleTextRect);
     }
 
-    const SharedPtr<Label>& RawTextInput::placeholder() const
-    {
-        return m_placeholder;
-    }
-
-    size_t RawTextInput::hitTestCaretPosition(const D2D1_POINT_2F& sfpt)
-    {
-        return LabelArea::hitTestCaretPosition
-        ({
-            sfpt.x + m_textContentOffset.x - m_visibleTextRect.left,
-            sfpt.y + m_textContentOffset.y - m_visibleTextRect.top
-        });
-    }
-
     D2D1_POINT_2F RawTextInput::validateTextContentOffset(const D2D1_POINT_2F& in)
     {
         D2D1_POINT_2F out = { 0.0f, 0.0f };
@@ -116,38 +90,39 @@ namespace d14engine::uikit
         return out;
     }
 
-    void RawTextInput::setCaretPosition(size_t position)
+    const D2D1_POINT_2F& RawTextInput::textContentOffset() const
     {
-        LabelArea::setCaretPosition(position);
+        return m_textContentOffset;
+    }
 
-        // Make a copy here as we need to modify it.
-        auto offset = m_textContentOffset;
-
-        auto width = math_utils::width(m_visibleTextRect);
-        auto height = math_utils::height(m_visibleTextRect);
-
-        if (m_caretGeometry.first.x < offset.x)
-        {
-            offset.x = m_caretGeometry.first.x;
-        }
-        else if (m_caretGeometry.second.x > offset.x + width)
-        {
-            offset.x = m_caretGeometry.second.x - width;
-        }
-        if (m_caretGeometry.first.y < offset.y)
-        {
-            offset.y = m_caretGeometry.first.y;
-        }
-        else if (m_caretGeometry.second.y > offset.y + height)
-        {
-            offset.y = m_caretGeometry.second.y - height;
-        }
+    void RawTextInput::setTextContentOffset(const D2D1_POINT_2F& offset)
+    {
         auto validOffset = validateTextContentOffset(offset);
 
-        if (m_textContentOffset.x != validOffset.x ||
-            m_textContentOffset.y != validOffset.y)
+        if (validOffset.x != m_textContentOffset.x ||
+            validOffset.y != m_textContentOffset.y)
         {
             m_textContentOffset = validOffset;
+            onTextContentOffsetChange(validOffset);
+        }
+    }
+
+    void RawTextInput::setTextContentOffsetSilently(const D2D1_POINT_2F& offset)
+    {
+        m_textContentOffset = validateTextContentOffset(offset);
+    }
+
+    const SharedPtr<Label>& RawTextInput::placeholder() const
+    {
+        return m_placeholder;
+    }
+
+    void RawTextInput::editSelectedText(WstrRefer text)
+    {
+        if (setSelectedTextHelper(text))
+        {
+            onTextChanged(m_text);
+            onTextEdited(m_text);
         }
     }
 
@@ -183,20 +158,94 @@ namespace d14engine::uikit
         }
     }
 
+    Optional<LOGFONT> RawTextInput::getCompositionFont() const
+    {
+        LOGFONT font =
+        {
+            .lfHeight = platform_utils::scaledByDpi<LONG>(
+            (
+                m_caretGeometry.second.y - m_caretGeometry.first.y
+            )),
+            .lfWidth          = 0, // keep the aspect ratio
+            .lfEscapement     = 0,
+            .lfOrientation    = 0,
+            .lfWeight         = m_textLayout->GetFontWeight(),
+            .lfItalic         = FALSE,
+            .lfUnderline      = FALSE,
+            .lfStrikeOut      = FALSE,
+            .lfCharSet        = DEFAULT_CHARSET,
+            .lfOutPrecision   = OUT_DEFAULT_PRECIS,
+            .lfClipPrecision  = CLIP_DEFAULT_PRECIS,
+            .lfQuality        = CLEARTYPE_NATURAL_QUALITY,
+            .lfPitchAndFamily = DEFAULT_PITCH
+        };
+        THROW_IF_FAILED(m_textLayout->GetFontFamilyName
+        (
+            font.lfFaceName, _countof(font.lfFaceName)
+        ));
+        return font;
+    }
+
+    Optional<COMPOSITIONFORM> RawTextInput::getCompositionForm() const
+    {
+        auto origin = selfCoordToAbsolute(math_utils::leftTop(m_visibleTextRect));
+        COMPOSITIONFORM form =
+        {
+            .dwStyle = CFS_POINT,
+            .ptCurrentPos = math_utils::roundl(platform_utils::scaledByDpi(D2D1_POINT_2F
+            {
+                origin.x + m_caretGeometry.first.x - m_textContentOffset.x,
+                origin.y + m_caretGeometry.first.y - m_textContentOffset.y
+            }))
+        };
+        return form;
+    }
+
+    void RawTextInput::setText(WstrRefer text)
+    {
+        if (setTextHelper(text))
+        {
+            setCaretPosition(0);
+            setSelectedRange({ 0, 0 });
+
+            onTextChanged(m_text);
+        }
+    }
+
+    void RawTextInput::setCaretPosition(size_t position)
+    {
+        LabelArea::setCaretPosition(position);
+
+        // Make a copy here as we need to modify it.
+        auto offset = m_textContentOffset;
+
+        auto width = math_utils::width(m_visibleTextRect);
+        auto height = math_utils::height(m_visibleTextRect);
+
+        if (m_caretGeometry.first.x < offset.x)
+        {
+            offset.x = m_caretGeometry.first.x;
+        }
+        else if (m_caretGeometry.second.x > offset.x + width)
+        {
+            offset.x = m_caretGeometry.second.x - width;
+        }
+        if (m_caretGeometry.first.y < offset.y)
+        {
+            offset.y = m_caretGeometry.first.y;
+        }
+        else if (m_caretGeometry.second.y > offset.y + height)
+        {
+            offset.y = m_caretGeometry.second.y - height;
+        }
+        setTextContentOffset(offset);
+    }
+
     void RawTextInput::setSelectedText(WstrRefer text)
     {
         if (setSelectedTextHelper(text))
         {
             onTextChanged(m_text);
-        }
-    }
-
-    void RawTextInput::editSelectedText(WstrRefer text)
-    {
-        if (setSelectedTextHelper(text))
-        {
-            onTextChanged(m_text);
-            onTextEdited(m_text);
         }
     }
 
@@ -268,9 +317,9 @@ namespace d14engine::uikit
         /* interpolationMode    */ m_visibleTextMask.getInterpolationMode()
         );
 
-        //////////////////
+        //////////////
         // Caret(|) //
-        //////////////////
+        //////////////
 
         D2D1_MATRIX_3X2_F originalTrans = {};
         rndr->d2d1DeviceContext()->GetTransform(&originalTrans);
@@ -321,9 +370,8 @@ namespace d14engine::uikit
 
     void RawTextInput::onSizeHelper(SizeEvent& e)
     {
-        Panel::onSizeHelper(e);
-
-        // The text layout should adapt the visible area instead of the box self.
+        // The text layout should adapt the visible text area.
+        Panel::onSizeHelper(e); // LabelArea::onSizeHelper(e);
     }
 
     void RawTextInput::onChangeThemeStyleHelper(const ThemeStyle& style)
@@ -493,63 +541,43 @@ namespace d14engine::uikit
         }
     }
 
-    Optional<LOGFONT> RawTextInput::getCompositionFont() const
-    {
-        LOGFONT font =
-        {
-            .lfHeight = platform_utils::scaledByDpi<LONG>(
-            (
-                m_caretGeometry.second.y - m_caretGeometry.first.y
-            )),
-            .lfWidth          = 0, // keep the aspect ratio
-            .lfEscapement     = 0,
-            .lfOrientation    = 0,
-            .lfWeight         = m_textLayout->GetFontWeight(),
-            .lfItalic         = FALSE,
-            .lfUnderline      = FALSE,
-            .lfStrikeOut      = FALSE,
-            .lfCharSet        = DEFAULT_CHARSET,
-            .lfOutPrecision   = OUT_DEFAULT_PRECIS,
-            .lfClipPrecision  = CLIP_DEFAULT_PRECIS,
-            .lfQuality        = CLEARTYPE_NATURAL_QUALITY,
-            .lfPitchAndFamily = DEFAULT_PITCH
-        };
-        THROW_IF_FAILED(m_textLayout->GetFontFamilyName
-        (
-            font.lfFaceName, _countof(font.lfFaceName)
-        ));
-        return font;
-    }
-
-    Optional<COMPOSITIONFORM> RawTextInput::getCompositionForm() const
-    {
-        auto origin = selfCoordToAbsolute(math_utils::leftTop(m_visibleTextRect));
-        COMPOSITIONFORM form =
-        {
-            .dwStyle = CFS_POINT,
-            .ptCurrentPos = math_utils::roundl(platform_utils::scaledByDpi(D2D1_POINT_2F
-            {
-                origin.x + m_caretGeometry.first.x - m_textContentOffset.x,
-                origin.y + m_caretGeometry.first.y - m_textContentOffset.y
-            }))
-        };
-        return form;
-    }
-
     void RawTextInput::onTextInputHelper(WstrViewRefer text)
     {
         TextInputObject::onTextInputHelper(text);
 
         if (editable)
         {
-            // Discards the non-printable characters (ASCII-code from 0 to 32).
+            // 1. Allow empty input, which can be used to erase selected text.
             //
-            // This check was not placed in normalizeRawText because the primary function
-            // of normalizeRawText is to filter out certain unwanted printable characters.
-            // For keyboard inputs containing non-printable characters,
-            // the correct handling approach is to skip the input directly.
-
+            // 2. A long input usually comes from the input method engine,
+            //    and we assume the result returned by the IME is displayable.
+            //
+            // 3. For a single character, just exclude the non-displayable ones
+            //    (ASCII codes 0 to 32, i.e. characters before space).
+            //
             if (text.size() != 1 || text[0] >= L' ') editSelectedText((Wstring)text);
         }
+    }
+
+    Optional<Wstring> RawTextInput::normalizeRawText(WstrRefer in)
+    {
+        if (multiline) return std::nullopt;
+
+        auto lineBreakPos = in.find_first_of(L'\n');
+        if (lineBreakPos == Wstring::npos)
+        {
+            return std::nullopt;
+        }
+        // Cuts off at any line break to keep single line.
+        return in.substr(0, lineBreakPos);
+    }
+
+    size_t RawTextInput::hitTestCaretPosition(const D2D1_POINT_2F& sfpt)
+    {
+        return LabelArea::hitTestCaretPosition
+        ({
+            sfpt.x + m_textContentOffset.x - m_visibleTextRect.left,
+            sfpt.y + m_textContentOffset.y - m_visibleTextRect.top
+        });
     }
 }
