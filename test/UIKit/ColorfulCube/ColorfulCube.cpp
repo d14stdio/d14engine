@@ -7,12 +7,9 @@
 #include "Renderer/GraphUtils/ParamHelper.h"
 #include "Renderer/GraphUtils/PSO.h"
 #include "Renderer/GraphUtils/Shader.h"
+#include "Renderer/Interfaces/DrawLayer.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/TickTimer.h"
-
-// Do NOT remove this header for code tidy
-// as the template deduction relies on it.
-#include "Renderer/Interfaces/DrawLayer.h"
 
 #include "UIKit/AppEntry.h"
 #include "UIKit/Application.h"

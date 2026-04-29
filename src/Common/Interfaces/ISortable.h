@@ -3,9 +3,6 @@
 #include "Common/Precompile.h"
 
 #include "Common/CppLangUtils/EmptyBase.h"
-
-// Do NOT remove this header for code tidy
-// as the template deduction relies on it.
 #include "Common/CppLangUtils/TypeTraits.h"
 
 namespace d14engine
