@@ -34,7 +34,7 @@ PSInput VS(VSInput input)
         worldMatrix),
         viewMatrix),
         projMatrix);
-    
+
     output.texcoord = input.texcoord;
 
     return output;

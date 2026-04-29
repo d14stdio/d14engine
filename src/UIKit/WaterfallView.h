@@ -46,9 +46,8 @@ namespace d14engine::uikit
                 // The viewport offset may be invalid after resizing.
                 setViewportOffset(m_viewportOffset);
             };
-            // Place `initialize` after the creation of `m_layout`,
-            // because `initialize` may trigger the `onSize` callback,
-            // which may modify the geometry properties of `m_layout`.
+            // Place this at the end because the onSize callback
+            // may reference the above members during initialization.
             ScrollView::initialize();
         }
 

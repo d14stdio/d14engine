@@ -21,8 +21,6 @@ namespace d14engine::uikit
 
     void Label::initialize()
     {
-        Panel::initialize();
-
         /////////////////
         // Text Layout //
         /////////////////
@@ -48,6 +46,10 @@ namespace d14engine::uikit
         ////////////////////
 
         updateTextOverhangs();
+
+        // Place this at the end because the onSize callback
+        // may reference the above members during initialization.
+        Panel::initialize();
     }
 
     void Label::onTextLayoutChange()
