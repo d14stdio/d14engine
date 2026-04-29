@@ -401,8 +401,18 @@ D14_SET_APP_ENTRY(mainImageViewer)
             {
                 if (!wk_titleEditor.expired())
                 {
-                    wk_titleEditor.lock()->setText(index.has_value() ?
-                        tg->tabs()[index.value()].caption->title()->label()->text() : L"");
+                    auto sh_titleEditor = wk_titleEditor.lock();
+                    if (index.has_value())
+                    {
+                        auto& text = tg->tabs()[index.value()].caption->title()->label()->text();
+                        sh_titleEditor->setText(text);
+                        sh_titleEditor->setCaretPosition(text.size());
+                    }
+                    else // no tab selected
+                    {
+                        sh_titleEditor->setText(L"");
+                        sh_titleEditor->setCaretPosition(0);
+                    }
                 }
                 // We should use setCheckStateSilently here:
                 //

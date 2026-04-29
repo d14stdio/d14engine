@@ -259,6 +259,8 @@ do { \
 
     void TabGroup::removeTab(size_t index, size_t count)
     {
+        auto originalSelectedTabIndex = m_selectedTabIndex;
+
         if (index < m_tabs.size())
         {
             count = std::min(count, m_tabs.size() - index);
@@ -301,6 +303,10 @@ do { \
 #undef UPDATE_TAB_INDEX
 
             updateAllTabs();
+        }
+        if (originalSelectedTabIndex.has_value() && !m_selectedTabIndex.has_value())
+        {
+            onSelectedTabChange(m_selectedTabIndex);
         }
     }
 
