@@ -131,13 +131,12 @@ static_assert \
         template<typename ValueType>
         using WeakPriorityMap = std::map<WeakPtr<Target_T>, ValueType, WeakAscending>;
 
-        ///////////////////
-        // Miscellaneous //
-        ///////////////////
+        /////////////////////////
+        // Miscellaneous Tools //
+        /////////////////////////
 
-        // The boolean value returned by foreach-func
-        // indicates whether to handle the remainings.
-
+        // Call "func" for each element in "cont".
+        // The return value of "func" indicates whether to continue iterating.
         static void foreach(
             ShrdPrioritySet& cont,
             FuncRefer<bool(ShrdPtrRefer<Target_T>)> func)
@@ -153,7 +152,7 @@ static_assert \
         {
             bool continueDeliver = true;
 
-            for ( auto itor = cont.begin() ;; )
+            for (auto itor = cont.begin();;)
             {
                 while (itor != cont.end() && itor->expired())
                 {
