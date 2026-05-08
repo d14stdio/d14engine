@@ -32,7 +32,7 @@ namespace d14engine::uikit
             // Fall back to the accent border for Windows 10.
             appearance().stroke.opacity = 1.0f;
         }
-        draggingTarget = DraggingTarget::RootWindow;
+        dragTarget = DragTarget::RootWindow;
 
         auto& callback = Application::g_app->win32WindowSettings.callback;
         callback.f_onClientAreaSize = [this]
@@ -180,7 +180,7 @@ namespace d14engine::uikit
 
         setCornerState(m_originalCornerState);
 
-        isDraggable = true;
+        draggable = true;
         m_originalDisplayState = Normal;
 
         auto hwnd = Application::g_app->win32Window();
@@ -214,7 +214,7 @@ namespace d14engine::uikit
         m_originalCornerState = m_cornerState;
         setCornerState(DoNotRound);
 
-        isDraggable = false;
+        draggable = false;
         m_originalDisplayState = Maximized;
 
         auto hwnd = Application::g_app->win32Window();

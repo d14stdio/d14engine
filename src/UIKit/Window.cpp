@@ -1006,7 +1006,7 @@ namespace d14engine::uikit
         handleMouseButtonForRegisteredTabGroups(e);
     }
 
-    bool Window::isTriggerDraggingHelper(const Event::Point& p)
+    bool Window::canDragHelper(const Event::Point& p)
     {
         return math_utils::isInside(p, captionPanelAbsoluteRect()) &&
             !m_isButton1Hover && !m_isButton2Hover && !m_isButton3Hover;

@@ -363,6 +363,6 @@ namespace d14engine::uikit
         // DraggablePanel
         //------------------------------------------------------------------
 
-        bool isTriggerDraggingHelper(const Event::Point& p) override;
+        bool canDragHelper(const Event::Point& p) override;
     };
 }

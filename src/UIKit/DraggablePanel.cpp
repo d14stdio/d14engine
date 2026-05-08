@@ -19,32 +19,32 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void DraggablePanel::onStartDragging()
+    void DraggablePanel::onDragStart()
     {
-        onStartDraggingHelper();
+        onDragStartHelper();
 
-        if (f_onStartDragging) f_onStartDragging(this);
+        if (f_onDragStart) f_onDragStart(this);
     }
 
-    void DraggablePanel::onEndDragging()
+    void DraggablePanel::onDragEnd()
     {
-        onEndDraggingHelper();
+        onDragEndHelper();
 
-        if (f_onEndDragging) f_onEndDragging(this);
+        if (f_onDragEnd) f_onDragEnd(this);
     }
 
-    bool DraggablePanel::isTriggerDragging(const Event::Point& p)
+    bool DraggablePanel::canDrag(const Event::Point& p)
     {
-        if (!isDraggable) return false;
+        if (!draggable) return false;
 
-        if (f_isTriggerDragging)
+        if (f_canDrag)
         {
-            return f_isTriggerDragging(this, p);
+            return f_canDrag(this, p);
         }
-        else return isTriggerDraggingHelper(p);
+        else return canDragHelper(p);
     }
 
-    void DraggablePanel::onStartDraggingHelper()
+    void DraggablePanel::onDragStartHelper()
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -56,14 +56,14 @@ namespace d14engine::uikit
         (
             Application::FocusType::Mouse, shared_from_this()
         );
-        if (draggingTarget == RootWindow)
+        if (dragTarget == RootWindow)
         {
             app->m_isDraggingWin32Window = true;
         }
         app->cursor()->setIcon(Cursor::Move);
     }
 
-    void DraggablePanel::onEndDraggingHelper()
+    void DraggablePanel::onDragEndHelper()
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -75,14 +75,14 @@ namespace d14engine::uikit
         (
             Application::FocusType::Mouse, nullptr
         );
-        if (draggingTarget == RootWindow)
+        if (dragTarget == RootWindow)
         {
             app->m_isDraggingWin32Window = false;
         }
         app->cursor()->setIcon(Cursor::Arrow);
     }
 
-    bool DraggablePanel::isTriggerDraggingHelper(const Event::Point& p)
+    bool DraggablePanel::canDragHelper(const Event::Point& p)
     {
         return isHit(p);
     }
@@ -92,9 +92,9 @@ namespace d14engine::uikit
         return m_isDragging;
     }
 
-    const DraggablePanel::DraggingPoint& DraggablePanel::draggingPoint() const
+    const DraggablePanel::DragPoint& DraggablePanel::dragPoint() const
     {
-        return m_draggingPoint;
+        return m_dragPoint;
     }
 
     void DraggablePanel::onMouseMoveHelper(MouseMoveEvent& e)
@@ -112,13 +112,13 @@ namespace d14engine::uikit
 
         if (m_isDragging)
         {
-            switch (draggingTarget)
+            switch (dragTarget)
             {
             case SelfObject:
             {
-                if (std::holds_alternative<SelfPoint>(m_draggingPoint))
+                if (std::holds_alternative<SelfPoint>(m_dragPoint))
                 {
-                    auto& point = std::get<SelfPoint>(m_draggingPoint);
+                    auto& point = std::get<SelfPoint>(m_dragPoint);
 
                     auto relative = absoluteToRelative(p);
                     setPosition(relative.x - point.x, relative.y - point.y);
@@ -127,9 +127,9 @@ namespace d14engine::uikit
             }
             case RootWindow:
             {
-                if (std::holds_alternative<RootPoint>(m_draggingPoint))
+                if (std::holds_alternative<RootPoint>(m_dragPoint))
                 {
-                    auto& point = std::get<RootPoint>(m_draggingPoint);
+                    auto& point = std::get<RootPoint>(m_dragPoint);
 
                     POINT cursorPoint = {};
                     GetCursorPos(&cursorPoint);
@@ -163,13 +163,13 @@ namespace d14engine::uikit
 
         if (e.state.leftDown() || e.state.leftDblclk())
         {
-            if (m_isDragging = isTriggerDragging(p))
+            if (m_isDragging = canDrag(p))
             {
-                switch (draggingTarget)
+                switch (dragTarget)
                 {
                 case SelfObject:
                 {
-                    m_draggingPoint = absoluteToSelfCoord(p);
+                    m_dragPoint = absoluteToSelfCoord(p);
                     break;
                 }
                 case RootWindow:
@@ -178,12 +178,12 @@ namespace d14engine::uikit
                     GetCursorPos(&cursorPoint);
                     ScreenToClient(Application::g_app->win32Window(), &cursorPoint);
 
-                    m_draggingPoint = cursorPoint;
+                    m_dragPoint = cursorPoint;
                     break;
                 }
-                default: m_draggingPoint = {};
+                default: m_dragPoint = {};
                 }
-                onStartDragging();
+                onDragStart();
             }
         }
         else if (e.state.leftUp())
@@ -192,7 +192,7 @@ namespace d14engine::uikit
             {
                 m_isDragging = false;
 
-                onEndDragging();
+                onDragEnd();
             }
         }
     }

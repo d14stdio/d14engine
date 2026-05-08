@@ -13,54 +13,90 @@ namespace d14engine::uikit
             ComPtrParam<ID2D1Brush> brush = nullptr,
             ComPtrParam<ID2D1Bitmap1> bitmap = nullptr);
 
+        ////////////////////////
+        // Callback Functions //
+        ////////////////////////
+
+        //------------------------------------------------------------------
+        // Public Interfaces
+        //------------------------------------------------------------------
     public:
-        void onStartDragging();
+        void onDragStart();
 
-        Function<void(DraggablePanel*)> f_onStartDragging = {};
+        Function<void(DraggablePanel*)> f_onDragStart = {};
 
-        void onEndDragging();
+        void onDragEnd();
 
-        Function<void(DraggablePanel*)> f_onEndDragging = {};
+        Function<void(DraggablePanel*)> f_onDragEnd = {};
 
-        bool isTriggerDragging(const Event::Point& p);
+        bool canDrag(const Event::Point& p);
 
-        Function<bool(DraggablePanel*, const Event::Point&)> f_isTriggerDragging = {};
+        Function<bool(DraggablePanel*, const Event::Point&)> f_canDrag = {};
 
+        //------------------------------------------------------------------
+        // Protected Helpers
+        //------------------------------------------------------------------
     protected:
-        virtual void onStartDraggingHelper();
-        virtual void onEndDraggingHelper();
+        virtual void onDragStartHelper();
+        virtual void onDragEndHelper();
 
-        virtual bool isTriggerDraggingHelper(const Event::Point& p);
+        virtual bool canDragHelper(const Event::Point& p);
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Draggable
+        //------------------------------------------------------------------
     public:
-        bool isDraggable = true;
+        bool draggable = true;
 
-        enum class DraggingTarget
+        //------------------------------------------------------------------
+        // Drag Target
+        //------------------------------------------------------------------
+    public:
+        enum class DragTarget
         {
             SelfObject, RootWindow
         };
-        constexpr static auto SelfObject = DraggingTarget::SelfObject;
-        constexpr static auto RootWindow = DraggingTarget::RootWindow;
+        constexpr static auto SelfObject = DragTarget::SelfObject;
+        constexpr static auto RootWindow = DragTarget::RootWindow;
 
-        DraggingTarget draggingTarget = SelfObject;
+        DragTarget dragTarget = SelfObject;
 
+        //------------------------------------------------------------------
+        // Drag State
+        //------------------------------------------------------------------
     protected:
         bool m_isDragging = false;
-
-        using SelfPoint = D2D1_POINT_2F;
-        using RootPoint = POINT;
-
-        using DraggingPoint = Variant<std::monostate, SelfPoint, RootPoint>;
-
-        DraggingPoint m_draggingPoint = {};
 
     public:
         bool isDragging() const;
 
-        const DraggingPoint& draggingPoint() const;
+        //------------------------------------------------------------------
+        // Drag Point
+        //------------------------------------------------------------------
+    protected:
+        using SelfPoint = D2D1_POINT_2F;
+        using RootPoint = POINT;
+
+        using DragPoint = Variant<std::monostate, SelfPoint, RootPoint>;
+
+        DragPoint m_dragPoint = {};
+
+    public:
+        const DragPoint& dragPoint() const;
+
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
 
     protected:
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onMouseMoveHelper(MouseMoveEvent& e) override;
         void onMouseMoveWrapper(MouseMoveEvent& e);
 
