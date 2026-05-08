@@ -20,17 +20,31 @@ namespace d14engine::uikit
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
-        ShadowMask shadow = {};
-
         _D14_SET_APPEARANCE_PROPERTY(ElevatedButton)
 
+        //////////////////////
+        // Cached Resources //
+        //////////////////////
+
+        ShadowMask shadow = {};
+
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
+        //------------------------------------------------------------------
+
         void onRendererDrawD2d1LayerHelper(Renderer* rndr) override;
 
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onSizeHelper(SizeEvent& e) override;
 
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;
