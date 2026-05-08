@@ -22,10 +22,10 @@ namespace d14engine::file_system_utils
     // Example 4: fileName = L"first/second/", return = L"".
     Wstring extractFileSuffix(WstrRefer fileName, WCHAR token = L'.');
 
-    // Return true to terminate searching next file in foreachFileInDir.
-    using FileOperationFunc = Function<bool(WstrRefer /* file path */)>;
+    // Return true to stop finding next file in foreachFileInDir.
+    using FileCallback = Function<bool(WstrRefer /* filePath */)>;
 
     // Returns whether the specific files are located successfully.
     // wildcard examples: "*" for all, "*.png" for PNG images, etc.
-    bool foreachFileInDir(WstrRefer dir, WstrRefer wildcard, const FileOperationFunc& func);
+    bool foreachFileInDir(WstrRefer dir, WstrRefer wildcard, const FileCallback& callback);
 }

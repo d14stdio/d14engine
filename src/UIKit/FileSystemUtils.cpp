@@ -42,7 +42,7 @@ namespace d14engine::file_system_utils
         return fileName;
     }
 
-    bool foreachFileInDir(WstrRefer dir, WstrRefer wildcard, const FileOperationFunc& func)
+    bool foreachFileInDir(WstrRefer dir, WstrRefer wildcard, const FileCallback& callback)
     {
         WIN32_FIND_DATA findData = {};
         auto handle = FindFirstFileW((dir + wildcard).c_str(), &findData);
@@ -55,7 +55,7 @@ namespace d14engine::file_system_utils
         {
             if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
             {
-                if (func(dir + findData.cFileName)) break;
+                if (callback(dir + findData.cFileName)) break;
             }
             nextFileFound = FindNextFileW(handle, &findData);
         }
