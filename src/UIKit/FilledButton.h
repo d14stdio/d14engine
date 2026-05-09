@@ -21,8 +21,15 @@ namespace d14engine::uikit
 
         _D14_SET_APPEARANCE_PROPERTY(FilledButton)
 
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     protected:
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;
     };
 }
