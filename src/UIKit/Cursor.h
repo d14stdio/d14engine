@@ -130,7 +130,7 @@ namespace d14engine::uikit
         void unregisterDynamicIcon(WstrRefer name);
 
         //------------------------------------------------------------------
-        // Select Icon Object
+        // Select Icon
         //------------------------------------------------------------------
     protected:
         template<typename T>
@@ -160,7 +160,7 @@ namespace d14engine::uikit
         void setDynamicIcon(WstrRefer name);
 
         //------------------------------------------------------------------
-        // Select Icon Source
+        // Icon Source
         //------------------------------------------------------------------
     public:
         enum class IconSource { System, UIKit };
@@ -176,7 +176,7 @@ namespace d14engine::uikit
         void setIconSource(IconSource src);
 
         //------------------------------------------------------------------
-        // Select System Icon
+        // System Icons
         //------------------------------------------------------------------
     protected:
         bool m_systemIconUpdateFlag = false;

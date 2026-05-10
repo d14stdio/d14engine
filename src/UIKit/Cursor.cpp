@@ -47,9 +47,9 @@ namespace d14engine::uikit
 
         auto cursorPath = Application::g_app->createInfo.cursorPath() + themeName + L"/";
 
-        ////////////////////////
-        // Load static icons. //
-        ////////////////////////
+        ///////////////////////
+        // Load Static Icons //
+        ///////////////////////
 
 #define DEF_STATIC_ICON(Name, ...) { StaticIconIndex::Name, L#Name L".png ", __VA_ARGS__ }
 
@@ -82,9 +82,9 @@ namespace d14engine::uikit
             };
         }
 
-        /////////////////////////
-        // Load dynamic icons. //
-        /////////////////////////
+        ////////////////////////
+        // Load Dynamic Icons //
+        ////////////////////////
 
 #define LOAD_DYNAMIC_ICON(Name, ...) \
 do { \
