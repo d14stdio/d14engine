@@ -239,11 +239,11 @@ do { \
 
             if (m_selectedIconID.index() == g_staticIconSeat)
             {
-                auto& iconID0 = std::get<g_staticIconSeat>(m_selectedIconID);
-                if (iconID0.index() == g_basicIconSeat)
+                auto& iconID1 = std::get<g_staticIconSeat>(m_selectedIconID);
+                if (iconID1.index() == g_basicIconSeat)
                 {
-                    auto& iconID = std::get<g_basicIconSeat>(iconID0);
-                    switch (iconID)
+                    auto& iconID2 = std::get<g_basicIconSeat>(iconID1);
+                    switch (iconID2)
                     {
                     case Alternate: SET_CURSOR(IDC_UPARROW);
                     case Arrow:     SET_CURSOR(IDC_ARROW);
@@ -266,11 +266,11 @@ do { \
             }
             else if (m_selectedIconID.index() == g_dynamicIconSeat)
             {
-                auto& iconID0 = std::get<g_dynamicIconSeat>(m_selectedIconID);
-                if (iconID0.index() == g_basicIconSeat)
+                auto& iconID1 = std::get<g_dynamicIconSeat>(m_selectedIconID);
+                if (iconID1.index() == g_basicIconSeat)
                 {
-                    auto& iconID = std::get<g_basicIconSeat>(iconID0);
-                    switch (iconID)
+                    auto& iconID2 = std::get<g_basicIconSeat>(iconID1);
+                    switch (iconID2)
                     {
                     case Busy:    SET_CURSOR(IDC_WAIT);
                     case Working: SET_CURSOR(IDC_APPSTARTING);
