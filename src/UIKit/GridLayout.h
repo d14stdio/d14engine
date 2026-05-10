@@ -45,7 +45,7 @@ namespace d14engine::uikit
         float m_horzCellDelta = {}, m_vertCellDelta = {};
         size_t m_horzCellCount = {}, m_vertCellCount = {};
 
-        void updateCellDeltaInfo();
+        void updateDeltaFromCount();
 
     public:
         float horzCellDelta() const;

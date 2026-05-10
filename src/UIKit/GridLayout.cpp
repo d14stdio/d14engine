@@ -25,7 +25,7 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void GridLayout::updateCellDeltaInfo()
+    void GridLayout::updateDeltaFromCount()
     {
         m_horzCellDelta = (width() - 2.0f * m_horzMargin) / m_horzCellCount;
         m_vertCellDelta = (height() - 2.0f * m_vertMargin) / m_vertCellCount;
@@ -56,7 +56,7 @@ namespace d14engine::uikit
         m_horzCellCount = std::max(horz, 1_uz);
         m_vertCellCount = std::max(vert, 1_uz);
 
-        updateCellDeltaInfo();
+        updateDeltaFromCount();
         updateAllElements();
     }
 
@@ -85,7 +85,7 @@ namespace d14engine::uikit
         m_horzMargin = horz;
         m_vertMargin = vert;
 
-        updateCellDeltaInfo();
+        updateDeltaFromCount();
         updateAllElements();
     }
 
@@ -133,9 +133,9 @@ namespace d14engine::uikit
 
     void GridLayout::onSizeHelper(SizeEvent& e)
     {
-        // We must call updateCellDeltaInfo before Layout::onSizeHelper
+        // We must call updateDeltaFromCount before Layout::onSizeHelper
         // as updateAllElements depends on the updated geometry information.
-        updateCellDeltaInfo();
+        updateDeltaFromCount();
 
         Layout::onSizeHelper(e);
     }
