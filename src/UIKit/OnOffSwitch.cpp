@@ -160,8 +160,10 @@ namespace d14engine::uikit
         // Background //
         ////////////////
 
-        resource_utils::solidColorBrush()->SetColor(setting.background.color);
-        resource_utils::solidColorBrush()->SetOpacity(setting.background.opacity);
+        auto& background = setting.background;
+
+        resource_utils::solidColorBrush()->SetColor(background.color);
+        resource_utils::solidColorBrush()->SetOpacity(background.opacity);
 
         Panel::drawBackground(rndr);
 
@@ -169,16 +171,16 @@ namespace d14engine::uikit
         // Handle //
         ////////////
 
-        auto& geoSetting = appearance().handle.geometry[m_state.index()];
-        auto& bkgnSetting = appearance().handle.background[m_state.index()];
+        auto& handleGeo = appearance().handle.geometry[m_state.index()];
+        auto& handleBkgn = appearance().handle.background[m_state.index()];
 
-        resource_utils::solidColorBrush()->SetColor(bkgnSetting.color);
-        resource_utils::solidColorBrush()->SetOpacity(bkgnSetting.opacity);
+        resource_utils::solidColorBrush()->SetColor(handleBkgn.color);
+        resource_utils::solidColorBrush()->SetOpacity(handleBkgn.opacity);
 
         D2D1_ROUNDED_RECT handleRoundedRect =
         {
             handleAbsoluteRect(),
-            geoSetting.roundRadius, geoSetting.roundRadius
+            handleGeo.roundRadius, handleGeo.roundRadius
         };
         rndr->d2d1DeviceContext()->FillRoundedRectangle
         (

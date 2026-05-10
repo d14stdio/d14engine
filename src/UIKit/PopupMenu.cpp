@@ -266,10 +266,10 @@ namespace d14engine::uikit
         // Extension //
         ///////////////
 
-        auto& extBkgn = appearance().background;
+        auto& extBackground = appearance().background;
 
-        resource_utils::solidColorBrush()->SetColor(extBkgn.color);
-        resource_utils::solidColorBrush()->SetOpacity(extBkgn.opacity);
+        resource_utils::solidColorBrush()->SetColor(extBackground.color);
+        resource_utils::solidColorBrush()->SetOpacity(extBackground.opacity);
 
         D2D1_ROUNDED_RECT extRect =
         {

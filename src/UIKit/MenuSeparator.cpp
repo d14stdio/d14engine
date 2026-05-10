@@ -17,17 +17,15 @@ namespace d14engine::uikit
 
     void MenuSeparator::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
     {
-        auto& bkgn = appearance().background;
+        auto& background = appearance().background;
 
-        resource_utils::solidColorBrush()->SetColor(bkgn.color);
-        resource_utils::solidColorBrush()->SetOpacity(bkgn.opacity);
-
-        auto& bkgnRect = m_absoluteRect;
+        resource_utils::solidColorBrush()->SetColor(background.color);
+        resource_utils::solidColorBrush()->SetOpacity(background.opacity);
 
         rndr->d2d1DeviceContext()->DrawLine
         (
-        /* point0      */ math_utils::leftCenter(bkgnRect),
-        /* point1      */ math_utils::rightCenter(bkgnRect),
+        /* point0      */ math_utils::leftCenter(m_absoluteRect),
+        /* point1      */ math_utils::rightCenter(m_absoluteRect),
         /* brush       */ resource_utils::solidColorBrush(),
         /* strokeWidth */ appearance().strokeWidth
         );

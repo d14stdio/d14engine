@@ -280,10 +280,10 @@ namespace d14engine::uikit
             //------------------------------------------------------------------
             // Set alpha channel carefully so that text can display correctly.
             //------------------------------------------------------------------
-            auto& bkgn = appearance().background;
+            auto& background = appearance().background;
 
-            contentMask.color = bkgn.color;
-            contentMask.color.a = bkgn.opacity;
+            contentMask.color = background.color;
+            contentMask.color.a = background.opacity;
 
             auto maskTrans = D2D1::Matrix3x2F::Translation
             (
@@ -303,10 +303,10 @@ namespace d14engine::uikit
         // Background //
         ////////////////
 
-        auto& bkgn = appearance().background;
+        auto& background = appearance().background;
 
-        resource_utils::solidColorBrush()->SetColor(bkgn.color);
-        resource_utils::solidColorBrush()->SetOpacity(bkgn.opacity);
+        resource_utils::solidColorBrush()->SetColor(background.color);
+        resource_utils::solidColorBrush()->SetOpacity(background.opacity);
 
         ResizablePanel::drawBackground(rndr);
 
