@@ -22,11 +22,21 @@ namespace d14engine::uikit
 
         _D14_SET_APPEARANCE_PROPERTY(FlatButton)
 
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
+        //------------------------------------------------------------------
+
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;
     };
 }
