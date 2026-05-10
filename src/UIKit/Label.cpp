@@ -416,11 +416,9 @@ do { \
 
     void Label::drawTextLayout(Renderer* rndr)
     {
-        auto& foreground = appearance().foreground;
-        if (!m_enabled)
-        {
-            foreground = appearance().secondaryForeground;
-        }
+        auto& setting = appearance();
+        auto& foreground = m_enabled ? setting.foreground : setting.secondaryForeground;
+
         resource_utils::solidColorBrush()->SetColor(foreground.color);
         resource_utils::solidColorBrush()->SetOpacity(foreground.opacity);
 
