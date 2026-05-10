@@ -11,10 +11,25 @@ namespace d14engine::uikit
     {
         using Panel::Panel;
 
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
+
+        //------------------------------------------------------------------
+        // Bitmap Data
+        //------------------------------------------------------------------
+    public:
         animation_utils::BitmapSequence bitmapData = {};
 
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
+        //------------------------------------------------------------------
+
         void onRendererUpdateObject2DHelper(Renderer* rndr) override;
 
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
