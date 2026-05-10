@@ -10,13 +10,19 @@ namespace d14engine::uikit
     {
         IconLabel2(
             WstrRefer labelText = {},
-            WstrRefer label2Text = {},
+            WstrRefer labelText2 = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
 
         void initialize() override;
 
-        void setEnabled(bool value) override;
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
+
+        //------------------------------------------------------------------
+        // Child Objects
+        //------------------------------------------------------------------
 
     protected:
         SharedPtr<Label> m_label2 = {};
@@ -24,6 +30,34 @@ namespace d14engine::uikit
     public:
         const SharedPtr<Label>& label2() const;
         void setLabel2(ShrdPtrRefer<Label> label);
+
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
+    public:
+        //------------------------------------------------------------------
+        // Panel
+        //------------------------------------------------------------------
+
+        void setEnabled(bool value) override;
+
+    protected:
+        //------------------------------------------------------------------
+        // IDrawObject2D
+        //------------------------------------------------------------------
+
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
+
+        //------------------------------------------------------------------
+        // Panel
+        //------------------------------------------------------------------
+
+        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
+
+        //////////////////////
+        // Layout Templates //
+        //////////////////////
 
     public:
         static SharedPtr<IconLabel2> menuItemLayout(
@@ -33,9 +67,5 @@ namespace d14engine::uikit
             float textHeadPadding = 30.0f,
             float hotkeyTailPadding = 30.0f,
             const D2D1_RECT_F& rect = {});
-
-    protected:
-        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
-        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
     };
 }

@@ -18,15 +18,20 @@ namespace d14engine::uikit
 
         void initialize() override;
 
-        void setEnabled(bool value) override;
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
+        //------------------------------------------------------------------
+        // Child Objects
+        //------------------------------------------------------------------
     public:
         struct Icon
         {
             D2D1_RECT_F rect = {};
             BitmapObject bitmap = {};
 
-            Optional<D2D1_SIZE_F> customSize = {};
+            Optional<D2D1_SIZE_F> size = {};
         }
         icon = {};
 
@@ -37,6 +42,13 @@ namespace d14engine::uikit
         const SharedPtr<Label>& label() const;
         void setLabel(ShrdPtrRefer<Label> label);
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Update Layout
+        //------------------------------------------------------------------
     public:
         void updateLayout();
 
@@ -44,6 +56,36 @@ namespace d14engine::uikit
 
     protected:
         virtual void updateLayoutHelper();
+
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
+    public:
+        //------------------------------------------------------------------
+        // Panel
+        //------------------------------------------------------------------
+
+        void setEnabled(bool value) override;
+
+    protected:
+        //------------------------------------------------------------------
+        // IDrawObject2D
+        //------------------------------------------------------------------
+
+        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
+
+        //------------------------------------------------------------------
+        // Panel
+        //------------------------------------------------------------------
+
+        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
+
+        void onSizeHelper(SizeEvent& e) override;
+
+        //////////////////////
+        // Layout Templates //
+        //////////////////////
 
     public:
         static SharedPtr<IconLabel> uniformLayout(
@@ -72,10 +114,5 @@ namespace d14engine::uikit
             WstrRefer labelText = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
-
-    protected:
-        void onSizeHelper(SizeEvent& e) override;
-        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
-        void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
     };
 }

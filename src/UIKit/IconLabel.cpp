@@ -37,13 +37,6 @@ namespace d14engine::uikit
         m_label->transform(selfCoordRect());
     }
 
-    void IconLabel::setEnabled(bool value)
-    {
-        Panel::setEnabled(value);
-
-        m_label->setEnabled(value);
-    }
-
     const SharedPtr<Label>& IconLabel::label() const
     {
         return m_label;
@@ -76,6 +69,52 @@ namespace d14engine::uikit
         // This method intentionally left blank.
     }
 
+    void IconLabel::setEnabled(bool value)
+    {
+        Panel::setEnabled(value);
+
+        m_label->setEnabled(value);
+    }
+
+    void IconLabel::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
+    {
+        ////////////////
+        // Label Text //
+        ////////////////
+
+        if (m_label->isD2d1ObjectVisible())
+        {
+            m_label->onRendererDrawD2d1Object(rndr);
+        }
+
+        /////////////////
+        // Icon Bitmap //
+        /////////////////
+
+        if (icon.bitmap.data)
+        {
+            rndr->d2d1DeviceContext()->DrawBitmap
+            (
+            /* bitmap               */ icon.bitmap.data.Get(),
+            /* destinationRectangle */ selfCoordToAbsolute(icon.rect),
+            /* opacity              */ icon.bitmap.opacity,
+            /* interpolationMode    */ icon.bitmap.getInterpolationMode()
+            );
+        }
+    }
+
+    bool IconLabel::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    {
+        if (cpp_lang_utils::isMostDerivedEqual(uiobj, m_label)) return false;
+
+        return Panel::releaseUIObjectHelper(uiobj);
+    }
+
+    void IconLabel::onSizeHelper(SizeEvent& e)
+    {
+        Panel::onSizeHelper(e); updateLayout();
+    }
+
     SharedPtr<IconLabel> IconLabel::uniformLayout(
         WstrRefer labelText,
         BmpObjParam iconBitmap,
@@ -90,9 +129,9 @@ namespace d14engine::uikit
             if (pIconLabel->icon.bitmap.data)
             {
                 D2D1_SIZE_F iconSize = {};
-                if (pIconLabel->icon.customSize.has_value())
+                if (pIconLabel->icon.size.has_value())
                 {
-                    iconSize = pIconLabel->icon.customSize.value();
+                    iconSize = pIconLabel->icon.size.value();
                 }
                 else // use the original size of the bitmap
                 {
@@ -129,7 +168,7 @@ namespace d14engine::uikit
                 pIconLabel->m_label->transform(pIconLabel->selfCoordRect());
             }
         };
-        // Perform the callback immediately to initialize the layout.
+        // Execute the callback immediately to initialize the layout.
         iconLabel->f_updateLayout(iconLabel.get());
 
         return iconLabel;
@@ -147,9 +186,9 @@ namespace d14engine::uikit
         iconLabel->f_updateLayout = [iconHeadPadding, iconTailPadding](IconLabel* pIconLabel)
         {
             D2D1_SIZE_F iconSize = { 0.0f, 0.0f };
-            if (pIconLabel->icon.customSize.has_value())
+            if (pIconLabel->icon.size.has_value())
             {
-                iconSize = pIconLabel->icon.customSize.value();
+                iconSize = pIconLabel->icon.size.value();
             }
             else if (pIconLabel->icon.bitmap.data != nullptr)
             {
@@ -175,7 +214,7 @@ namespace d14engine::uikit
                 pIconLabel->height()
             });
         };
-        // Perform the callback immediately to initialize the layout.
+        // Execute the callback immediately to initialize the layout.
         iconLabel->f_updateLayout(iconLabel.get());
 
         return iconLabel;
@@ -191,9 +230,9 @@ namespace d14engine::uikit
         iconLabel->f_updateLayout = [](IconLabel* pIconLabel)
         {
             D2D1_SIZE_F iconSize = { 0.0f, 0.0f };
-            if (pIconLabel->icon.customSize.has_value())
+            if (pIconLabel->icon.size.has_value())
             {
-                iconSize = pIconLabel->icon.customSize.value();
+                iconSize = pIconLabel->icon.size.value();
             }
             else if (pIconLabel->icon.bitmap.data != nullptr)
             {
@@ -219,7 +258,7 @@ namespace d14engine::uikit
                 pIconLabel->height()
             });
         };
-        // Perform the callback immediately to initialize the layout.
+        // Execute the callback immediately to initialize the layout.
         iconLabel->f_updateLayout(iconLabel.get());
 
         return iconLabel;
@@ -237,9 +276,9 @@ namespace d14engine::uikit
         iconLabel->f_updateLayout = [](IconLabel* pIconLabel)
         {
             D2D1_SIZE_F iconSize = { 0.0f, 0.0f };
-            if (pIconLabel->icon.customSize.has_value())
+            if (pIconLabel->icon.size.has_value())
             {
-                iconSize = pIconLabel->icon.customSize.value();
+                iconSize = pIconLabel->icon.size.value();
             }
             else if (pIconLabel->icon.bitmap.data != nullptr)
             {
@@ -264,7 +303,7 @@ namespace d14engine::uikit
                 pIconLabel->height()
             });
         };
-        // Perform the callback immediately to initialize the layout.
+        // Execute the callback immediately to initialize the layout.
         iconLabel->f_updateLayout(iconLabel.get());
 
         return iconLabel;
@@ -276,46 +315,5 @@ namespace d14engine::uikit
         const D2D1_RECT_F& rect)
     {
         return compactLayout(labelText, iconBitmap, 12.0f, 0.0f, rect);
-    }
-
-    void IconLabel::onSizeHelper(SizeEvent& e)
-    {
-        Panel::onSizeHelper(e);
-
-        updateLayout();
-    }
-
-    bool IconLabel::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
-    {
-        if (cpp_lang_utils::isMostDerivedEqual(uiobj, m_label)) return false;
-
-        return Panel::releaseUIObjectHelper(uiobj);
-    }
-
-    void IconLabel::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
-    {
-        ////////////////
-        // Label Text //
-        ////////////////
-
-        if (m_label->isD2d1ObjectVisible())
-        {
-            m_label->onRendererDrawD2d1Object(rndr);
-        }
-
-        /////////////////
-        // Icon Bitmap //
-        /////////////////
-
-        if (icon.bitmap.data)
-        {
-            rndr->d2d1DeviceContext()->DrawBitmap
-            (
-            /* bitmap               */ icon.bitmap.data.Get(),
-            /* destinationRectangle */ selfCoordToAbsolute(icon.rect),
-            /* opacity              */ icon.bitmap.opacity,
-            /* interpolationMode    */ icon.bitmap.getInterpolationMode()
-            );
-        }
     }
 }
