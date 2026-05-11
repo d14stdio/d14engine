@@ -15,17 +15,18 @@ namespace d14engine::uikit
 
         _D14_SET_APPEARANCE_PROPERTY(LabelArea)
 
-    protected:
-        // This is an internal variable used in the implementation
-        // of caret blinking, and it is not intended to be set directly.
-        bool m_caretBlinkingFlag = false;
+        //////////////////////////
+        // Graphical Components //
+        //////////////////////////
 
-        std::pair<D2D1_POINT_2F, D2D1_POINT_2F> m_caretGeometry = {};
+        //------------------------------------------------------------------
+        // Caret Position
+        //------------------------------------------------------------------
+    protected:
         size_t m_caretPosition = 0;
+        std::pair<D2D1_POINT_2F, D2D1_POINT_2F> m_caretGeometry = {};
 
         virtual size_t hitTestCaretPosition(const D2D1_POINT_2F& point);
-
-        float m_caretBlinkingElapsedSecs = 0.0f;
 
     public:
         bool keepCaretPosition = false;
@@ -35,6 +36,19 @@ namespace d14engine::uikit
         size_t caretPosition() const;
         virtual void setCaretPosition(size_t position);
 
+        //------------------------------------------------------------------
+        // Caret Blinking
+        //------------------------------------------------------------------
+    protected:
+        // This is an internal variable used in the implementation
+        // of caret blinking, and it is not intended to be set directly.
+        bool m_caretBlinkingFlag = false;
+
+        float m_caretBlinkingElapsedSecs = 0.0f;
+
+        //------------------------------------------------------------------
+        // Selected Range
+        //------------------------------------------------------------------
     protected:
         size_t m_selectedRangeOrigin = 0;
 
@@ -55,12 +69,27 @@ namespace d14engine::uikit
         // Returns whether m_text is changed after called.
         bool setSelectedTextHelper(WstrRefer text);
 
+        ///////////////////////
+        // Interaction Logic //
+        ///////////////////////
+
+        //------------------------------------------------------------------
+        // Shortcut Commands
+        //------------------------------------------------------------------
+
     public:
         virtual void performCommandSelectAll();
         virtual void performCommandCopySelection();
 
+        /////////////////////////
+        // Interface Overrides //
+        /////////////////////////
+
     protected:
+        //------------------------------------------------------------------
         // IDrawObject2D
+        //------------------------------------------------------------------
+
         void onRendererUpdateObject2DHelper(Renderer* rndr) override;
 
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
@@ -68,7 +97,10 @@ namespace d14engine::uikit
         void drawCaret(Renderer* rndr);
         void drawSelection(Renderer* rndr);
 
+        //------------------------------------------------------------------
         // Panel
+        //------------------------------------------------------------------
+
         void onGetKeyboardFocusHelper() override;
 
         void onLoseKeyboardFocusHelper() override;
@@ -83,7 +115,10 @@ namespace d14engine::uikit
 
         void onChangeThemeStyleHelper(const ThemeStyle& style) override;
 
+        //------------------------------------------------------------------
         // Label
+        //------------------------------------------------------------------
+
         void onTextLayoutChangeHelper() override;
     };
 }
