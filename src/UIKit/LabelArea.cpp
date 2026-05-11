@@ -80,7 +80,7 @@ namespace d14engine::uikit
 
     bool LabelArea::setSelectedTextHelper(WstrRefer text)
     {
-        auto result = normalizeRawText(text);
+        auto result = normalizeText(text);
         auto& source = result.has_value() ? result.value() : text;
 
         if (m_selectedRange.count > 0)
@@ -112,7 +112,7 @@ namespace d14engine::uikit
                 setCaretPosition(m_selectedRange.offset + source.size());
                 setSelectedRange({ 0, 0 });
 
-                m_textLayout = getTextLayout();
+                m_textLayout = createTextLayout();
                 updateTextOverhangs();
 
                 onTextLayoutChange();

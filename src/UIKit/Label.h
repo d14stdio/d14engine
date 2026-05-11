@@ -38,11 +38,6 @@ namespace d14engine::uikit
     protected:
         virtual void onTextLayoutChangeHelper();
 
-        // This function will be called at the beginning of setText.
-        // Return nullopt to have setText use the raw text directly.
-        // Example: "raw\ntext" -> normalize -> "rawtext" -> setText
-        virtual Optional<Wstring> normalizeRawText(WstrRefer text);
-
         //////////////////////////
         // Graphical Components //
         //////////////////////////
@@ -50,6 +45,15 @@ namespace d14engine::uikit
         //------------------------------------------------------------------
         // Text Content
         //------------------------------------------------------------------
+    public:
+        // This function is called at the beginning of setText
+        // to ensure the displayed text conforms to specific rules.
+        // Additionally, you can call this function independently
+        // to inspect the processed text (see how it is normalized).
+        // Return nullopt to have setText use the raw text directly.
+        // Example: "asdf\n" -> normalize -> "asdf" -> setText
+        virtual Optional<Wstring> normalizeText(WstrRefer text);
+
     protected:
         Wstring m_text = {};
 
@@ -112,7 +116,7 @@ namespace d14engine::uikit
             }
             alignment = {};
         };
-        ComPtr<IDWriteTextLayout> getTextLayout
+        ComPtr<IDWriteTextLayout> createTextLayout
         (const TextLayoutParams& params = {}) const;
 
         //------------------------------------------------------------------

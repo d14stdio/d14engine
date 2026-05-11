@@ -559,7 +559,7 @@ namespace d14engine::uikit
         }
     }
 
-    Optional<Wstring> RawTextInput::normalizeRawText(WstrRefer in)
+    Optional<Wstring> RawTextInput::normalizeText(WstrRefer in)
     {
         if (multiline) return std::nullopt;
 

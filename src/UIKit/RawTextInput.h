@@ -150,7 +150,7 @@ namespace d14engine::uikit
         // Label
         //------------------------------------------------------------------
 
-        Optional<Wstring> normalizeRawText(WstrRefer in) override;
+        Optional<Wstring> normalizeText(WstrRefer in) override;
 
         //------------------------------------------------------------------
         // LabelArea

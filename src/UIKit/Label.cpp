@@ -39,7 +39,7 @@ namespace d14engine::uikit
                 .paragraph = DWRITE_PARAGRAPH_ALIGNMENT_CENTER,
             }
         };
-        m_textLayout = getTextLayout(layoutParams);
+        m_textLayout = createTextLayout(layoutParams);
 
         ////////////////////
         // Text Overhangs //
@@ -64,7 +64,7 @@ namespace d14engine::uikit
         // This method intentionally left blank.
     }
 
-    Optional<Wstring> Label::normalizeRawText(WstrRefer text)
+    Optional<Wstring> Label::normalizeText(WstrRefer text)
     {
         return std::nullopt;
     }
@@ -96,7 +96,7 @@ namespace d14engine::uikit
 
     bool Label::setTextHelper(WstrRefer text)
     {
-        auto result = normalizeRawText(text);
+        auto result = normalizeText(text);
         auto& source = result.has_value() ? result.value() : text;
 
         if (m_text != source)
@@ -105,7 +105,7 @@ namespace d14engine::uikit
         }
         else return false;
 
-        m_textLayout = getTextLayout();
+        m_textLayout = createTextLayout();
         updateTextOverhangs();
 
         onTextLayoutChange();
@@ -114,7 +114,7 @@ namespace d14engine::uikit
 
     bool Label::insertTextHelper(WstrRefer text, size_t offset)
     {
-        auto result = normalizeRawText(text);
+        auto result = normalizeText(text);
         auto& source = result.has_value() ? result.value() : text;
 
         auto _Off = std::min(offset, m_text.size());
@@ -130,7 +130,7 @@ namespace d14engine::uikit
         }
         else return false;
 
-        m_textLayout = getTextLayout();
+        m_textLayout = createTextLayout();
         updateTextOverhangs();
 
         onTextLayoutChange();
@@ -158,7 +158,7 @@ namespace d14engine::uikit
         {
             m_text.erase(offset, count);
 
-            m_textLayout = getTextLayout();
+            m_textLayout = createTextLayout();
             updateTextOverhangs();
 
             onTextLayoutChange();
@@ -171,7 +171,7 @@ namespace d14engine::uikit
 
     void Label::setTextFormat(IDWriteTextFormat* textFormat)
     {
-        m_textLayout = getTextLayout
+        m_textLayout = createTextLayout
         ({
             .textFormat = textFormat
         });
@@ -207,7 +207,7 @@ namespace d14engine::uikit
                     .paragraph = source->m_textLayout->GetParagraphAlignment()
                 }
             };
-            m_textLayout = getTextLayout(layoutParams);
+            m_textLayout = createTextLayout(layoutParams);
 
 #define COPY_TEXT_LAYOUT_FONT_ATTR(Property_Name) \
 do { \
@@ -241,7 +241,7 @@ do { \
         return m_textLayout.Get();
     }
 
-    ComPtr<IDWriteTextLayout> Label::getTextLayout(const TextLayoutParams& params) const
+    ComPtr<IDWriteTextLayout> Label::createTextLayout(const TextLayoutParams& params) const
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -306,7 +306,7 @@ do { \
     DWRITE_TEXT_METRICS Label::getTextMetrics(const TextMetricsParams& params) const
     {
         DWRITE_TEXT_METRICS metrics = {};
-        THROW_IF_FAILED(getTextLayout(params)->GetMetrics(&metrics));
+        THROW_IF_FAILED(createTextLayout(params)->GetMetrics(&metrics));
         return metrics;
     }
 
