@@ -11,7 +11,7 @@ using namespace d14engine::renderer;
 
 namespace d14engine::uikit
 {
-    Label::Label(WstrRefer text, const D2D_RECT_F& rect)
+    Label::Label(WstrParam text, const D2D_RECT_F& rect)
         :
         Panel(rect, resource_utils::solidColorBrush()),
         m_text(text)
@@ -47,24 +47,24 @@ namespace d14engine::uikit
 
         updateTextOverhangs();
 
-        // Place this at the end because the onSize callback
-        // may reference the above members during initialization.
+        // Place the base initialization here because
+        // its logic may reference the objects initialized above.
         Panel::initialize();
     }
 
-    void Label::onTextLayoutChange()
+    void Label::onTextLayoutChanged()
     {
-        onTextLayoutChangeHelper();
+        onTextLayoutChangedHelper();
 
-        if (f_onTextLayoutChange) f_onTextLayoutChange(this);
+        if (f_onTextLayoutChanged) f_onTextLayoutChanged(this);
     }
 
-    void Label::onTextLayoutChangeHelper()
+    void Label::onTextLayoutChangedHelper()
     {
         // This method intentionally left blank.
     }
 
-    Optional<Wstring> Label::normalizeText(WstrRefer text)
+    Optional<Wstring> Label::normalizeText(WstrParam text)
     {
         return std::nullopt;
     }
@@ -74,17 +74,17 @@ namespace d14engine::uikit
         return m_text;
     }
 
-    void Label::setText(WstrRefer text)
+    void Label::setText(WstrParam text)
     {
         setTextHelper(text);
     }
 
-    void Label::insertText(WstrRefer text, size_t offset)
+    void Label::insertText(WstrParam text, size_t offset)
     {
         insertTextHelper(text, offset);
     }
 
-    void Label::appendText(WstrRefer text)
+    void Label::appendText(WstrParam text)
     {
         appendTextHelper(text);
     }
@@ -94,7 +94,7 @@ namespace d14engine::uikit
         eraseTextHelper(range);
     }
 
-    bool Label::setTextHelper(WstrRefer text)
+    bool Label::setTextHelper(WstrParam text)
     {
         auto result = normalizeText(text);
         auto& source = result.has_value() ? result.value() : text;
@@ -108,11 +108,11 @@ namespace d14engine::uikit
         m_textLayout = createTextLayout();
         updateTextOverhangs();
 
-        onTextLayoutChange();
+        onTextLayoutChanged();
         return true;
     }
 
-    bool Label::insertTextHelper(WstrRefer text, size_t offset)
+    bool Label::insertTextHelper(WstrParam text, size_t offset)
     {
         auto result = normalizeText(text);
         auto& source = result.has_value() ? result.value() : text;
@@ -133,11 +133,11 @@ namespace d14engine::uikit
         m_textLayout = createTextLayout();
         updateTextOverhangs();
 
-        onTextLayoutChange();
+        onTextLayoutChanged();
         return true;
     }
 
-    bool Label::appendTextHelper(WstrRefer text)
+    bool Label::appendTextHelper(WstrParam text)
     {
         return insertTextHelper(text, m_text.size());
     }
@@ -161,7 +161,7 @@ namespace d14engine::uikit
             m_textLayout = createTextLayout();
             updateTextOverhangs();
 
-            onTextLayoutChange();
+            onTextLayoutChanged();
             return true;
         }
         else return false;
@@ -177,10 +177,10 @@ namespace d14engine::uikit
         });
         updateTextOverhangs();
 
-        onTextLayoutChange();
+        onTextLayoutChanged();
     }
 
-    void Label::copyTextStyle(Label* source, OptRefer<WstringView> text)
+    void Label::copyTextStyle(Label* source, OptParam<WstringView> text)
     {
         if (source != nullptr)
         {
@@ -232,7 +232,7 @@ do { \
 
             drawTextOptions = source->drawTextOptions;
 
-            onTextLayoutChange();
+            onTextLayoutChanged();
         }
     }
 
@@ -500,9 +500,9 @@ do { \
         updateTextOverhangs();
     }
 
-    void Label::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void Label::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Panel::onChangeThemeStyleHelper(style);
+        Panel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

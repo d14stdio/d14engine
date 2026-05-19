@@ -19,14 +19,14 @@ namespace d14engine::renderer::graph_utils
             THROW_IF_FAILED(g_utils->CreateDefaultIncludeHandler(&g_defaultIncludeHandler));
         }
 
-        ComPtr<IDxcBlob> load(WstrRefer fileName)
+        ComPtr<IDxcBlob> load(WstrParam fileName)
         {
             ComPtr<IDxcBlobEncoding> cso = {};
             THROW_IF_FAILED(g_utils->LoadFile(fileName.c_str(), nullptr, &cso));
             return cso; // no encoding for binary data
         }
 
-        void save(WstrRefer fileName, IDxcBlob* blob)
+        void save(WstrParam fileName, IDxcBlob* blob)
         {
             auto hFile = CreateFile
             (
@@ -53,7 +53,7 @@ namespace d14engine::renderer::graph_utils
             THROW_IF_FALSE(CloseHandle(hFile));
         }
 
-        ComPtr<IDxcBlob> compile(WstrRefer hlslFileName, const CompileOption& option)
+        ComPtr<IDxcBlob> compile(WstrParam hlslFileName, const CompileOption& option)
         {
             /////////////////
             // Load Source //
@@ -164,9 +164,9 @@ namespace d14engine::renderer::graph_utils
             return shader;
         }
 
-        Object::Object(const CompileOption& option) : option(option) {}
+        Object::Object(const CompileOption& option) : option(option) { }
 
-        void loadDefaultObject(WstrRefer path, WstrRefer name, StreamOption option, Package& shaders)
+        void loadStandardObjects(WstrParam path, WstrParam name, StreamOption option, Library& objects)
         {
             if (option.in.has_value())
             {
@@ -175,20 +175,20 @@ namespace d14engine::renderer::graph_utils
                 case CSO:
                 {
                     auto csoPath = path + L"CSO/" + name;
-                    for (auto& s : shaders)
+                    for (auto& obj : objects)
                     {
-                        s.second.blob = load(csoPath + L"_" + s.first + L".cso");
+                        obj.second.blob = load(csoPath + L"_" + obj.first + L".cso");
                     }
                     break;
                 }
                 case HLSL:
                 {
                     auto hlslPath = path + L"HLSL/" + name;
-                    for (auto& s : shaders)
+                    for (auto& obj : objects)
                     {
-                        auto& option = s.second.option;
+                        auto& option = obj.second.option;
                         THROW_IF_FALSE(option.has_value());
-                        s.second.blob = compile(hlslPath + L".hlsl", option.value());
+                        obj.second.blob = compile(hlslPath + L".hlsl", option.value());
                     }
                     break;
                 }
@@ -202,9 +202,9 @@ namespace d14engine::renderer::graph_utils
                 case CSO:
                 {
                     auto csoPath = path + L"CSO/" + name;
-                    for (auto& s : shaders)
+                    for (auto& obj : objects)
                     {
-                        save(csoPath + L"_" + s.first + L".cso", s.second.blob.Get());
+                        save(csoPath + L"_" + obj.first + L".cso", obj.second.blob.Get());
                     }
                     break;
                 }

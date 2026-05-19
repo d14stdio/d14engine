@@ -6,7 +6,7 @@
 
 namespace d14engine
 {
-    ResourcePack loadResource(WstrRefer name, WstrRefer type)
+    ResourcePack loadResource(WstrParam name, WstrParam type)
     {
         auto hModule = GetModuleHandle(nullptr);
 

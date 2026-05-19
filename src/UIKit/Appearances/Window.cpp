@@ -191,7 +191,7 @@ namespace d14engine::uikit::appearance
         }
     }
 
-    void Window::Appearance::changeTheme(WstrRefer themeName)
+    void Window::Appearance::changeTheme(WstrParam themeName)
     {
         stroke.color = color::normal();
 

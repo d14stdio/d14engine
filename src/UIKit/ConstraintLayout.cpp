@@ -12,7 +12,7 @@ namespace d14engine::uikit
         // Here left blank intentionally.
     }
 
-    void ConstraintLayout::updateElement(ShrdPtrRefer<Panel> elem, const GeometryInfo& geoInfo)
+    void ConstraintLayout::updateElement(SharedPtrParam<Panel> elem, const GeometryInfo& geoInfo)
     {
         D2D1_RECT_F rect = elem->relativeRect();
 

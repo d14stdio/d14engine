@@ -117,7 +117,7 @@ namespace d14engine::uikit
         return m_placeholder;
     }
 
-    void RawTextInput::editSelectedText(WstrRefer text)
+    void RawTextInput::editSelectedText(WstrParam text)
     {
         if (setSelectedTextHelper(text))
         {
@@ -201,7 +201,7 @@ namespace d14engine::uikit
         return form;
     }
 
-    void RawTextInput::setText(WstrRefer text)
+    void RawTextInput::setText(WstrParam text)
     {
         if (setTextHelper(text))
         {
@@ -241,7 +241,7 @@ namespace d14engine::uikit
         setTextContentOffset(offset);
     }
 
-    void RawTextInput::setSelectedText(WstrRefer text)
+    void RawTextInput::setSelectedText(WstrParam text)
     {
         if (setSelectedTextHelper(text))
         {
@@ -374,9 +374,9 @@ namespace d14engine::uikit
         Panel::onSizeHelper(e); // LabelArea::onSizeHelper(e);
     }
 
-    void RawTextInput::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void RawTextInput::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        LabelArea::onChangeThemeStyleHelper(style);
+        LabelArea::onThemeStyleChangedHelper(style);
         {
             auto& color = m_placeholder->appearance().foreground.color;
             if (style.name == L"Light")
@@ -397,7 +397,7 @@ namespace d14engine::uikit
 
         THROW_IF_NULL(Application::g_app);
 
-        if (holdKeyboardFocus() && e.state.pressed())
+        if (isKeyboardFocused() && e.state.pressed())
         {
             switch (e.vkey)
             {
@@ -541,7 +541,7 @@ namespace d14engine::uikit
         }
     }
 
-    void RawTextInput::onTextInputHelper(WstrViewRefer text)
+    void RawTextInput::onTextInputHelper(WstrViewParam text)
     {
         TextInputObject::onTextInputHelper(text);
 
@@ -559,7 +559,7 @@ namespace d14engine::uikit
         }
     }
 
-    Optional<Wstring> RawTextInput::normalizeText(WstrRefer in)
+    Optional<Wstring> RawTextInput::normalizeText(WstrParam in)
     {
         if (multiline) return std::nullopt;
 

@@ -42,12 +42,12 @@ namespace d14engine::uikit
         StatefulObject<ToggleButtonState, ToggleButtonStateChangeEvent>
     {
         ToggleButton(
-            ShrdPtrRefer<IconLabel> content,
+            SharedPtrParam<IconLabel> content,
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
         ToggleButton(
-            WstrRefer text = L"Button",
+            WstrParam text = L"Button",
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
@@ -66,7 +66,7 @@ namespace d14engine::uikit
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         // ClickablePanel
         void onMouseButtonReleaseHelper(Button::Event& e) override;

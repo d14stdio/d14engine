@@ -140,12 +140,12 @@ namespace d14engine::renderer
 
     void Letterbox::createPipelineState()
     {
-        graph_utils::shader::Package shaders =
+        graph_utils::shader::Library shaders =
         {
             { L"VS", {{ L"VS", L"vs_6_0" }} },
             { L"PS", {{ L"PS", L"ps_6_0" }} }
         };
-        graph_utils::shader::loadDefaultObject
+        graph_utils::shader::loadStandardObjects
         (
             rndr->createInfo.shaderPath(), L"Letterbox",
             { graph_utils::shader::CSO }, shaders

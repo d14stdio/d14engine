@@ -8,7 +8,7 @@
 namespace d14engine::uikit
 {
     ToggleButton::ToggleButton(
-        ShrdPtrRefer<IconLabel> content,
+        SharedPtrParam<IconLabel> content,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -20,7 +20,7 @@ namespace d14engine::uikit
     }
 
     ToggleButton::ToggleButton(
-        WstrRefer text,
+        WstrParam text,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -65,9 +65,9 @@ namespace d14engine::uikit
         else FilledButton::onRendererDrawD2d1ObjectHelper(rndr);
     }
 
-    void ToggleButton::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void ToggleButton::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        FilledButton::onChangeThemeStyleHelper(style);
+        FilledButton::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

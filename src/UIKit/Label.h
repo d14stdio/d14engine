@@ -9,7 +9,7 @@ namespace d14engine::uikit
 {
     struct Label : appearance::Label, Panel
     {
-        Label(WstrRefer text = {}, const D2D_RECT_F& rect = {});
+        Label(WstrParam text = {}, const D2D_RECT_F& rect = {});
 
         void initialize() override;
 
@@ -28,15 +28,15 @@ namespace d14engine::uikit
         // Therefore, updates to m_textLayout's properties
         // (m_textLayout->setFontSize(n, range) etc.) require manual handling.
 
-        void onTextLayoutChange();
+        void onTextLayoutChanged();
 
-        Function<void(Label*)> f_onTextLayoutChange = {};
+        Function<void(Label*)> f_onTextLayoutChanged = {};
 
         //------------------------------------------------------------------
         // Protected Helpers
         //------------------------------------------------------------------
     protected:
-        virtual void onTextLayoutChangeHelper();
+        virtual void onTextLayoutChangedHelper();
 
         //////////////////////////
         // Graphical Components //
@@ -52,17 +52,17 @@ namespace d14engine::uikit
         // to inspect the processed text (see how it is normalized).
         // Return nullopt to have setText use the raw text directly.
         // Example: "asdf\n" -> normalize -> "asdf" -> setText
-        virtual Optional<Wstring> normalizeText(WstrRefer text);
+        virtual Optional<Wstring> normalizeText(WstrParam text);
 
     protected:
         Wstring m_text = {};
 
     public:
         const Wstring& text() const;
-        virtual void setText(WstrRefer text);
+        virtual void setText(WstrParam text);
 
-        void insertText(WstrRefer text, size_t offset);
-        void appendText(WstrRefer text);
+        void insertText(WstrParam text, size_t offset);
+        void appendText(WstrParam text);
 
         struct CharacterRange { size_t offset, count; };
 
@@ -71,10 +71,10 @@ namespace d14engine::uikit
     protected:
         // These helpers return whether m_text is changed after called.
 
-        bool setTextHelper(WstrRefer text);
+        bool setTextHelper(WstrParam text);
 
-        bool insertTextHelper(WstrRefer text, size_t offset);
-        bool appendTextHelper(WstrRefer text);
+        bool insertTextHelper(WstrParam text, size_t offset);
+        bool appendTextHelper(WstrParam text);
 
         bool eraseTextHelper(const CharacterRange& range);
 
@@ -86,7 +86,7 @@ namespace d14engine::uikit
 
         void setTextFormat(IDWriteTextFormat* textFormat);
 
-        void copyTextStyle(Label* source, OptRefer<WstringView> text = {});
+        void copyTextStyle(Label* source, OptParam<WstringView> text = {});
 
         //------------------------------------------------------------------
         // Text Layout
@@ -267,6 +267,6 @@ namespace d14engine::uikit
 
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
     };
 }

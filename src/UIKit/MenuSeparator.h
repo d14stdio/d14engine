@@ -18,6 +18,6 @@ namespace d14engine::uikit
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
     };
 }

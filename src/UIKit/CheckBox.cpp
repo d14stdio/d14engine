@@ -232,9 +232,9 @@ namespace d14engine::uikit
         m_state.buttonFlag = State::ButtonFlag::Idle;
     }
 
-    void CheckBox::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void CheckBox::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ClickablePanel::onChangeThemeStyleHelper(style);
+        ClickablePanel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

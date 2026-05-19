@@ -17,7 +17,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     Window::Window(
-        ShrdPtrRefer<IconLabel> caption,
+        SharedPtrParam<IconLabel> caption,
         const D2D1_RECT_F& rect,
         float captionPanelHeight,
         float decorativeBarHeight)
@@ -33,7 +33,7 @@ namespace d14engine::uikit
     }
 
     Window::Window(
-        WstrRefer title,
+        WstrParam title,
         const D2D1_RECT_F& rect,
         float captionPanelHeight,
         float decorativeBarHeight)
@@ -197,7 +197,7 @@ namespace d14engine::uikit
         return m_caption;
     }
 
-    void Window::setCaption(ShrdPtrRefer<IconLabel> caption)
+    void Window::setCaption(SharedPtrParam<IconLabel> caption)
     {
         if (caption && !cpp_lang_utils::isMostDerivedEqual(caption, m_caption))
         {
@@ -210,7 +210,7 @@ namespace d14engine::uikit
         }
     }
 
-    void Window::setContent(ShrdPtrRefer<Panel> uiobj)
+    void Window::setContent(SharedPtrParam<Panel> uiobj)
     {
         if (!cpp_lang_utils::isMostDerivedEqual(uiobj, m_content))
         {
@@ -441,12 +441,12 @@ namespace d14engine::uikit
         resource_utils::solidColorBrush()->SetOpacity(background.opacity);
     }
 
-    void Window::registerTabGroup(WeakPtrRefer<TabGroup> tg)
+    void Window::registerTabGroup(WeakPtrParam<TabGroup> tg)
     {
         m_registeredTabGroups.insert(tg);
     }
 
-    void Window::unregisterTabGroup(WeakPtrRefer<TabGroup> tg)
+    void Window::unregisterTabGroup(WeakPtrParam<TabGroup> tg)
     {
         m_registeredTabGroups.erase(tg);
     }
@@ -864,7 +864,7 @@ namespace d14engine::uikit
         ResizablePanel::drawD2d1ObjectPosterior(rndr);
     }
 
-    bool Window::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    bool Window::releaseUIObjectHelper(SharedPtrParam<Panel> uiobj)
     {
         if (cpp_lang_utils::isMostDerivedEqual(uiobj, m_caption)) return false;
 
@@ -890,9 +890,9 @@ namespace d14engine::uikit
         if (m_content) m_content->transform(clientAreaSelfcoordRect());
     }
 
-    void Window::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void Window::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ResizablePanel::onChangeThemeStyleHelper(style);
+        ResizablePanel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
 
@@ -961,7 +961,7 @@ namespace d14engine::uikit
     {
         Panel::onMouseButtonHelper(e);
 
-        if (respondSetForegroundEvent)
+        if (bringToFrontOnMouseButton)
         {
             if (e.state.leftDown() ||
                 e.state.rightDown() ||

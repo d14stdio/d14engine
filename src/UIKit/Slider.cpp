@@ -25,8 +25,6 @@ namespace d14engine::uikit
 
     void Slider::initialize()
     {
-        Panel::initialize();
-
         ///////////////////////////
         // Load Cached Resources //
         ///////////////////////////
@@ -40,27 +38,30 @@ namespace d14engine::uikit
         ////////////////////////
 
         m_valueLabel = makeUIObject<Label>();
-        {
-            registerUIEvents(m_valueLabel);
 
-            m_valueLabel->setPrivateVisible(false);
-            m_valueLabel->setPrivateEnabled(false);
+        registerUIEvents(m_valueLabel);
 
-            m_valueLabel->transform(valueLabelSelfCoordRect());
+        m_valueLabel->setPrivateVisible(false);
+        m_valueLabel->setPrivateEnabled(false);
 
-            m_valueLabel->setTextFormat(D14_FONT(L"Default/9"));
+        m_valueLabel->transform(valueLabelSelfCoordRect());
 
-            auto layout = m_valueLabel->textLayout();
-            auto alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
-            THROW_IF_FAILED(layout->SetTextAlignment(alignment));
+        m_valueLabel->setTextFormat(D14_FONT(L"Default/9"));
 
-            std::wstringstream ss = {};
+        auto layout = m_valueLabel->textLayout();
+        auto alignment = DWRITE_TEXT_ALIGNMENT_CENTER;
+        THROW_IF_FAILED(layout->SetTextAlignment(alignment));
 
-            auto& precision = appearance().valueLabel.precision;
-            ss << std::fixed << std::setprecision(precision) << m_value;
+        std::wstringstream ss = {};
 
-            m_valueLabel->setText(ss.str());
-        }
+        auto& precision = appearance().valueLabel.precision;
+        ss << std::fixed << std::setprecision(precision) << m_value;
+
+        m_valueLabel->setText(ss.str());
+
+        // Place the base initialization here because
+        // its logic may reference the objects initialized above.
+        Panel::initialize();
     }
 
     void Slider::HandleRes::loadShadow()
@@ -364,9 +365,9 @@ namespace d14engine::uikit
         m_valueLabel->transform(valueLabelSelfCoordRect());
     }
 
-    void Slider::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void Slider::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Panel::onChangeThemeStyleHelper(style);
+        Panel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

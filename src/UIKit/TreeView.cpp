@@ -13,7 +13,7 @@ namespace d14engine::uikit
     {
         WaterfallView::initialize();
 
-        m_layout->f_onReleaseUIObject = [this](Panel* p, ShrdPtrRefer<Panel> uiobj)
+        m_layout->f_onReleaseUIObject = [this](Panel* p, SharedPtrParam<Panel> uiobj)
         {
             auto itemobj = std::static_pointer_cast<TreeViewItem>(uiobj);
             if (itemobj)
@@ -165,7 +165,7 @@ namespace d14engine::uikit
                     // before showing it.
 
                     m_items[i]->setPrivateVisible(value);
-                    m_items[i]->appEventReactability.hitTest = value;
+                    m_items[i]->appEventHandling.hitTest = value;
                 }
             }
             else // It is always safe to deactivate an item.
@@ -173,7 +173,7 @@ namespace d14engine::uikit
                 for (size_t i = range.index1.value(); i <= range.index2.value(); ++i)
                 {
                      m_items[i]->setPrivateVisible(false);
-                     m_items[i]->appEventReactability.hitTest = false;
+                     m_items[i]->appEventHandling.hitTest = false;
                 }
             }
         }

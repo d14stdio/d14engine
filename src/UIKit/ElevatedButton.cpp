@@ -14,7 +14,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     ElevatedButton::ElevatedButton(
-        ShrdPtrRefer<IconLabel> content,
+        SharedPtrParam<IconLabel> content,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -23,7 +23,7 @@ namespace d14engine::uikit
         shadow(size()) { }
 
     ElevatedButton::ElevatedButton(
-        WstrRefer text,
+        WstrParam text,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -89,9 +89,9 @@ namespace d14engine::uikit
         shadow.loadBitmap(e.size);
     }
 
-    void ElevatedButton::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void ElevatedButton::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        FilledButton::onChangeThemeStyleHelper(style);
+        FilledButton::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

@@ -2,7 +2,6 @@
 
 #include "Common/Precompile.h"
 
-#include "Common/CppLangUtils/EmptyBase.h"
 #include "Common/CppLangUtils/TypeTraits.h"
 
 namespace d14engine
@@ -15,10 +14,10 @@ namespace d14engine
     // ISortable<Height> and ISortable<Weight>, in which case a student knows
     // their height and weight respectively and can be sorted by each of them.
 
-    template<typename Target_T, bool Inherit = false, typename Priority_T = int>
-    struct ISortable : std::conditional_t<Inherit, Target_T, cpp_lang_utils::EmptyBase>
+    template<typename Target_T, typename Priority_T = int>
+    struct ISortable
     {
-        using Type = ISortable<Target_T, Inherit, Priority_T>;
+        using Type = ISortable<Target_T, Priority_T>;
 
 #define SET_OPERATOR_REQUIRE(Operator) \
 static_assert \
@@ -37,8 +36,8 @@ static_assert \
     public:
         const Type* id() const { return this; }
 
-        Priority_T priority() const { return m_priority; }
-        void setPriority(Priority_T value) { m_priority = value; }
+        const Priority_T& priority() const { return m_priority; }
+        void setPriority(const Priority_T& value) { m_priority = value; }
 
         ///////////////////////
         // Raw Ptr Ascending //
@@ -74,17 +73,17 @@ static_assert \
         // Shared Ptr Ascending //
         //////////////////////////
 
-        struct ShrdAscending
+        struct SharedAscending
         {
-            bool operator()(ShrdPtrRefer<Type> lhs, ShrdPtrRefer<Type> rhs) const
+            bool operator()(SharedPtrParam<Type> lhs, SharedPtrParam<Type> rhs) const
             {
                 return RawAscending()(*lhs.get(), *rhs.get());
             }
         };
-        using ShrdPrioritySet = std::set<SharedPtr<Target_T>, ShrdAscending>;
+        using SharedPrioritySet = std::set<SharedPtr<Target_T>, SharedAscending>;
 
         template<typename ValueType>
-        using ShrdPriorityMap = std::map<SharedPtr<Target_T>, ValueType, ShrdAscending>;
+        using SharedPriorityMap = std::map<SharedPtr<Target_T>, ValueType, SharedAscending>;
 
         ////////////////////////
         // Weak Ptr Ascending //
@@ -92,7 +91,7 @@ static_assert \
 
         struct WeakAscending
         {
-            bool operator()(WeakPtrRefer<Type> lhs, WeakPtrRefer<Type> rhs) const
+            bool operator()(WeakPtrParam<Type> lhs, WeakPtrParam<Type> rhs) const
             {
                 // The order of comparison here is significant:
                 //
@@ -123,7 +122,7 @@ static_assert \
                 if (rhs.expired()) return false;
                 if (lhs.expired()) return true;
 
-                return ShrdAscending()(lhs.lock(), rhs.lock());
+                return SharedAscending()(lhs.lock(), rhs.lock());
             }
         };
         using WeakPrioritySet = std::set<WeakPtr<Target_T>, WeakAscending>;
@@ -136,21 +135,21 @@ static_assert \
         /////////////////////////
 
         // Call "func" for each element in "cont".
-        // The return value of "func" indicates whether to continue iterating.
+        // The return value of "func" indicates whether to stop iterating.
         static void foreach(
-            ShrdPrioritySet& cont,
-            FuncRefer<bool(ShrdPtrRefer<Target_T>)> func)
+            SharedPrioritySet& cont,
+            FuncParam<bool(SharedPtrParam<Target_T>)> func)
         {
             for (auto& elem : cont)
             {
-                if (!func(elem)) break;
+                if (func(elem)) break;
             }
         }
         static void foreach(
             WeakPrioritySet& cont,
-            FuncRefer<bool(ShrdPtrRefer<Target_T>)> func)
+            FuncParam<bool(SharedPtrParam<Target_T>)> func)
         {
-            bool continueDeliver = true;
+            bool continueIterate = true;
 
             for (auto itor = cont.begin();;)
             {
@@ -160,9 +159,9 @@ static_assert \
                 }
                 if (itor != cont.end())
                 {
-                    if (continueDeliver)
+                    if (continueIterate)
                     {
-                        continueDeliver = func(itor->lock());
+                        continueIterate = !func(itor->lock());
                     }
                     ++itor;
                 }

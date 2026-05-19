@@ -26,7 +26,7 @@ namespace d14engine::uikit
         }
         else // lose focus when disabled
         {
-            if (holdKeyboardFocus())
+            if (isKeyboardFocused())
             {
                 auto focus = Application::FocusType::Keyboard;
                 Application::g_app->focusUIObject(focus, nullptr);
@@ -44,7 +44,7 @@ namespace d14engine::uikit
         auto deltaSecs = (float)rndr->timer()->deltaSecs();
         float totalDistance = width() - 2.0f * roundRadiusX;
 
-        if (holdKeyboardFocus() && animSetting.enabled && totalDistance > 0.0f)
+        if (isKeyboardFocused() && animSetting.enabled && totalDistance > 0.0f)
         {
             m_dynamicBottomLineLength = animation_utils::motionAccelUniformDecel
                 (m_dynamicBottomLineLength, deltaSecs, totalDistance,
@@ -108,9 +108,9 @@ namespace d14engine::uikit
         }
     }
 
-    void TextInput::onGetKeyboardFocusHelper()
+    void TextInput::onKeyboardFocusGainedHelper()
     {
-        RawTextInput::onGetKeyboardFocusHelper();
+        RawTextInput::onKeyboardFocusGainedHelper();
 
         increaseAnimationCount();
 
@@ -122,9 +122,9 @@ namespace d14engine::uikit
         }
     }
 
-    void TextInput::onLoseKeyboardFocusHelper()
+    void TextInput::onKeyboardFocusLostHelper()
     {
-        RawTextInput::onLoseKeyboardFocusHelper();
+        RawTextInput::onKeyboardFocusLostHelper();
 
         decreaseAnimationCount();
 
@@ -164,9 +164,9 @@ namespace d14engine::uikit
         }
     }
 
-    void TextInput::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void TextInput::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        RawTextInput::onChangeThemeStyleHelper(style);
+        RawTextInput::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

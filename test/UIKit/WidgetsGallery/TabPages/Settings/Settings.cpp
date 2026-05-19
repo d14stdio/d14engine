@@ -66,7 +66,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         ui_btnLabel->setTextFormat(D14_FONT(L"Default/14"));
         THROW_IF_FAILED(ui_btnLabel->textLayout()->SetUnderline(true, { 0, UINT32_MAX }));
 
-        ui_aboutButton->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style)
+        ui_aboutButton->f_onThemeStyleChanged = [=](Panel* p, const Panel::ThemeStyle& style)
         {
             auto& appear = dynamic_cast<FlatButton*>(p)->appearance();
 
@@ -87,7 +87,7 @@ void createSettingsTabPage(ConstraintLayout* page)
             if (e.left())
             {
                 auto wnd = Application::g_app->win32Window();
-                auto url = L"https://github.com/DreamersGather/D14Engine";
+                auto url = L"https://github.com/d14stdio/d14engine";
                 ShellExecute(wnd, nullptr, url, nullptr, nullptr, SW_NORMAL);
             }
         };
@@ -106,7 +106,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         geoInfo.Top.ToTop = 220.0f;
         ui_sideLayout->addElement(ui_engineIcon, geoInfo);
     }
-    auto ui_uikitIcon = makeUIObject<Panel>(math_utils::sizeOnlyRect({ 233.0f, 55.0f }));
+    auto ui_uikitIcon = makeUIObject<Panel>(math_utils::sizeOnlyRect({ 266.0f, 55.0f }));
     {
         ui_uikitIcon->bitmap = bitmap_utils::loadBitmap(
             L"Test/UIKit/WidgetsGallery/Images/AboutPanel/D14UIKit.png");
@@ -353,7 +353,7 @@ void createSettingsTabPage(ConstraintLayout* page)
         [=,
             strModeMap = StrModeMap{ strModeArray.begin(), strModeArray.end() }
         ]
-        (ComboBox* cb, OptRefer<size_t> index)
+        (ComboBox* cb, OptParam<size_t> index)
         {
             auto& text = cb->content()->label()->text();
             Application::g_app->renderer()->setAntialiasMode2D(strModeMap.at(text));
@@ -661,12 +661,12 @@ void createSettingsTabPage(ConstraintLayout* page)
         changeTextRenderingMode();
     };
     ui_pixelGeometrySelector->f_onSelectedChange =
-    [=](ComboBox* cb, OptRefer<size_t> index)
+    [=](ComboBox* cb, OptParam<size_t> index)
     {
         changeTextRenderingMode();
     };
     ui_renderingModeSelector->f_onSelectedChange =
-    [=](ComboBox* cb, OptRefer<size_t> index)
+    [=](ComboBox* cb, OptParam<size_t> index)
     {
         changeTextRenderingMode();
 
@@ -726,7 +726,7 @@ void createSettingsTabPage(ConstraintLayout* page)
     [=,
         textAntialiasModeMap = TextAntialiasModeMap{ textAntialiasModePairs.begin(), textAntialiasModePairs.end() }
     ]
-    (ComboBox* cb, OptRefer<size_t> index)
+    (ComboBox* cb, OptParam<size_t> index)
     {
         // Text Antialias Mode Conflict:
         //
@@ -862,7 +862,7 @@ void createSettingsTabPage(ConstraintLayout* page)
             if (e.on()) Application::g_app->increaseAnimationCount();
             else if (e.off()) Application::g_app->decreaseAnimationCount();
         };
-        ui_frameRateLimitInput->f_onLoseKeyboardFocus = [](Panel* p)
+        ui_frameRateLimitInput->f_onKeyboardFocusLost = [](Panel* p)
         {
             auto label = (Label*)p;
             int fpsLimit = _wtoi(label->text().c_str());

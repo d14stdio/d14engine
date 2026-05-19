@@ -18,7 +18,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     TreeViewItem::TreeViewItem(
-        ShrdPtrRefer<Panel> content,
+        SharedPtrParam<Panel> content,
         const D2D1_RECT_F& rect)
         :
         ViewItem(content, rect)
@@ -30,7 +30,7 @@ namespace d14engine::uikit
         m_layout = makeUIObject<ConstraintLayout>();
     }
 
-    TreeViewItem::TreeViewItem(WstrRefer text, const D2D1_RECT_F& rect)
+    TreeViewItem::TreeViewItem(WstrParam text, const D2D1_RECT_F& rect)
         : TreeViewItem(IconLabel::compactLayout(text), rect) { }
 
 
@@ -98,7 +98,7 @@ namespace d14engine::uikit
         else return *m_layout->children().begin();
     }
 
-    void TreeViewItem::setContent(ShrdPtrRefer<Panel> content)
+    void TreeViewItem::setContent(SharedPtrParam<Panel> content)
     {
         auto originalContent = TreeViewItem::content().lock();
         if (content && !cpp_lang_utils::isMostDerivedEqual(content, originalContent))
@@ -302,7 +302,7 @@ namespace d14engine::uikit
         removeItem(0, m_childItems.size());
     }
 
-    WeakPtrRefer<TreeViewItem::ChildItemImpl> TreeViewItem::itemImplPtr() const
+    WeakPtrParam<TreeViewItem::ChildItemImpl> TreeViewItem::itemImplPtr() const
     {
         return m_itemImplPtr;
     }
@@ -540,9 +540,9 @@ namespace d14engine::uikit
         m_layout->transform(selfCoordRect());
     }
 
-    void TreeViewItem::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void TreeViewItem::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ViewItem::onChangeThemeStyleHelper(style);
+        ViewItem::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

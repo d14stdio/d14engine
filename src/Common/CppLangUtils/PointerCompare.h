@@ -18,13 +18,13 @@ namespace d14engine::cpp_lang_utils
     }
 
     template<typename T, typename U>
-    bool isMostDerivedEqual(ShrdPtrRefer<T> lhs, ShrdPtrRefer<U> rhs)
+    bool isMostDerivedEqual(SharedPtrParam<T> lhs, SharedPtrParam<U> rhs)
     {
         return isMostDerivedEqual(lhs.get(), rhs.get());
     }
 
     template<typename T, typename U>
-    bool isMostDerivedEqual(WeakPtrRefer<T> lhs, WeakPtrRefer<U> rhs)
+    bool isMostDerivedEqual(WeakPtrParam<T> lhs, WeakPtrParam<U> rhs)
     {
         return isMostDerivedEqual(lhs.lock(), rhs.lock());
     }

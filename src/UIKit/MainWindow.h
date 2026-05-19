@@ -10,12 +10,12 @@ namespace d14engine::uikit
     struct MainWindow : Window
     {
         MainWindow(
-            ShrdPtrRefer<IconLabel> caption,
+            SharedPtrParam<IconLabel> caption,
             float captionPanelHeight = 32.0f,
             float decorativeBarHeight = 4.0f);
 
         MainWindow(
-            WstrRefer title = L"Untitled",
+            WstrParam title = L"Untitled",
             float captionPanelHeight = 32.0f,
             float decorativeBarHeight = 4.0f);
 
@@ -80,7 +80,7 @@ namespace d14engine::uikit
 
     protected:
         // Panel
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         // Window
         void onCloseHelper() override;

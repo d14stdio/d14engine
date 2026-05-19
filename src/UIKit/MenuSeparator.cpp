@@ -12,7 +12,7 @@ namespace d14engine::uikit
 {
     MenuSeparator::MenuSeparator(const D2D1_RECT_F& rect)
         :
-        MenuItem((ShrdPtrRefer<Panel>)nullptr, rect) { isTriggerItem = false; }
+        MenuItem((SharedPtrParam<Panel>)nullptr, rect) { isTriggerItem = false; }
 
 
     void MenuSeparator::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
@@ -31,9 +31,9 @@ namespace d14engine::uikit
         );
     }
 
-    void MenuSeparator::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void MenuSeparator::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        MenuItem::onChangeThemeStyleHelper(style);
+        MenuItem::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(ViewItem::appearance(), style.name);
     }

@@ -52,11 +52,11 @@ namespace d14engine::uikit
         // Theme & LangLocale //
         ////////////////////////
 
-        onChangeThemeStyleHelper(app->themeStyle());
-        onChangeLangLocaleHelper(app->langLocale());
+        onThemeStyleChangedHelper(app->themeStyle());
+        onLangLocaleChangedHelper(app->langLocale());
     }
 
-    void Panel::registerDrawObject(ShrdPtrRefer<Panel> uiobj)
+    void Panel::registerDrawObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         if (m_drawObjects.find(uiobj) != m_drawObjects.end()) return;
@@ -83,7 +83,7 @@ namespace d14engine::uikit
         );
     }
 
-    void Panel::unregisterDrawObject(ShrdPtrRefer<Panel> uiobj)
+    void Panel::unregisterDrawObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
 
@@ -121,7 +121,7 @@ namespace d14engine::uikit
     {
         m_enabled = value;
 
-        updateAppEventReactability();
+        updateAppEventHandling();
     }
 
     void Panel::setPrivateVisible(bool value)
@@ -133,7 +133,7 @@ namespace d14engine::uikit
     {
         m_privateEnabled = value;
 
-        updateAppEventReactability();
+        updateAppEventHandling();
     }
 
     void Panel::updateAbsoluteRect()
@@ -368,18 +368,18 @@ namespace d14engine::uikit
         return { leftTop.x, leftTop.y, rightBottom.x, rightBottom.y };
     }
 
-    bool Panel::isPlayAnimation() const
+    bool Panel::isAnimating() const
     {
-        return m_isPlayAnimation;
+        return m_isAnimating;
     }
 
     void Panel::increaseAnimationCount()
     {
         THROW_IF_NULL(Application::g_app);
 
-        if (!m_isPlayAnimation)
+        if (!m_isAnimating)
         {
-            m_isPlayAnimation = true;
+            m_isAnimating = true;
             Application::g_app->increaseAnimationCount();
         }
     }
@@ -388,9 +388,9 @@ namespace d14engine::uikit
     {
         THROW_IF_NULL(Application::g_app);
 
-        if (m_isPlayAnimation)
+        if (m_isAnimating)
         {
-            m_isPlayAnimation = false;
+            m_isAnimating = false;
             Application::g_app->decreaseAnimationCount();
         }
     }
@@ -472,7 +472,7 @@ namespace d14engine::uikit
         return m_parent;
     }
 
-    void Panel::setParent(ShrdPtrRefer<Panel> uiobj)
+    void Panel::setParent(SharedPtrParam<Panel> uiobj)
     {
         if (!uiobj)
         {
@@ -504,7 +504,7 @@ namespace d14engine::uikit
         return m_children;
     }
 
-    void Panel::registerUIEvents(ShrdPtrRefer<Panel> uiobj)
+    void Panel::registerUIEvents(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         if (m_children.find(uiobj) != m_children.end()) return;
@@ -552,7 +552,7 @@ namespace d14engine::uikit
         );
     }
 
-    void Panel::unregisterUIEvents(ShrdPtrRefer<Panel> uiobj)
+    void Panel::unregisterUIEvents(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
 
@@ -589,13 +589,13 @@ namespace d14engine::uikit
         }
     }
 
-    void Panel::addUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Panel::addUIObject(SharedPtrParam<Panel> uiobj)
     {
         registerDrawObject(uiobj);
         registerUIEvents(uiobj);
     }
 
-    void Panel::removeUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Panel::removeUIObject(SharedPtrParam<Panel> uiobj)
     {
         unregisterDrawObject(uiobj);
         unregisterUIEvents(uiobj);
@@ -620,13 +620,13 @@ namespace d14engine::uikit
         return m_pinnedChildren;
     }
 
-    void Panel::pinUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Panel::pinUIObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         m_pinnedChildren.insert(uiobj);
     }
 
-    void Panel::unpinUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Panel::unpinUIObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         m_pinnedChildren.erase(uiobj);
@@ -761,15 +761,15 @@ namespace d14engine::uikit
         setUIObjectPriority(uiobj->uiObjectPriority() + 1);
     }
 
-    void Panel::ApplicationEventReactability::set(bool value)
+    void Panel::ApplicationEventHandling::set(bool value)
     {
         mouse.enter = mouse.move = mouse.leave =
         mouse.button = mouse.wheel = keyboard = hitTest = value;
     }
 
-    void Panel::updateAppEventReactability()
+    void Panel::updateAppEventHandling()
     {
-        appEventReactability.set(m_enabled && m_privateEnabled);
+        appEventHandling.set(m_enabled && m_privateEnabled);
     }
 
     bool Panel::release()
@@ -808,7 +808,7 @@ namespace d14engine::uikit
         return isReleased;
     }
 
-    bool Panel::releaseUIObject(ShrdPtrRefer<Panel> uiobj)
+    bool Panel::releaseUIObject(SharedPtrParam<Panel> uiobj)
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -830,35 +830,35 @@ namespace d14engine::uikit
         else return isHitHelper(p);
     }
 
-    void Panel::onGetMouseFocus()
+    void Panel::onMouseFocusGained()
     {
-        onGetMouseFocusHelper();
+        onMouseFocusGainedHelper();
 
-        if (f_onGetMouseFocus) f_onGetMouseFocus(this);
+        if (f_onMouseFocusGained) f_onMouseFocusGained(this);
     }
 
-    void Panel::onGetKeyboardFocus()
+    void Panel::onKeyboardFocusGained()
     {
-        onGetKeyboardFocusHelper();
+        onKeyboardFocusGainedHelper();
 
-        if (f_onGetKeyboardFocus) f_onGetKeyboardFocus(this);
+        if (f_onKeyboardFocusGained) f_onKeyboardFocusGained(this);
     }
 
-    void Panel::onLoseMouseFocus()
+    void Panel::onMouseFocusLost()
     {
-        onLoseMouseFocusHelper();
+        onMouseFocusLostHelper();
 
-        if (f_onLoseMouseFocus) f_onLoseMouseFocus(this);
+        if (f_onMouseFocusLost) f_onMouseFocusLost(this);
     }
 
-    void Panel::onLoseKeyboardFocus()
+    void Panel::onKeyboardFocusLost()
     {
-        onLoseKeyboardFocusHelper();
+        onKeyboardFocusLostHelper();
 
-        if (f_onLoseKeyboardFocus) f_onLoseKeyboardFocus(this);
+        if (f_onKeyboardFocusLost) f_onKeyboardFocusLost(this);
     }
 
-    bool Panel::holdMouseFocus() const
+    bool Panel::isMouseFocused() const
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -868,7 +868,7 @@ namespace d14engine::uikit
         return cpp_lang_utils::isMostDerivedEqual(uiobj.lock(), shared_from_this());
     }
 
-    bool Panel::holdKeyboardFocus() const
+    bool Panel::isKeyboardFocused() const
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -978,18 +978,18 @@ namespace d14engine::uikit
         if (f_onKeyboard) f_onKeyboard(this, e);
     }
 
-    void Panel::onChangeThemeStyle(const ThemeStyle& style)
+    void Panel::onThemeStyleChanged(const ThemeStyle& style)
     {
-        onChangeThemeStyleHelper(style);
+        onThemeStyleChangedHelper(style);
 
-        if (f_onChangeThemeStyle) f_onChangeThemeStyle(this, style);
+        if (f_onThemeStyleChanged) f_onThemeStyleChanged(this, style);
     }
 
-    void Panel::onChangeLangLocale(WstrRefer codeName)
+    void Panel::onLangLocaleChanged(WstrParam codeName)
     {
-        onChangeLangLocaleHelper(codeName);
+        onLangLocaleChangedHelper(codeName);
 
-        if (f_onChangeLangLocale) f_onChangeLangLocale(this, codeName);
+        if (f_onLangLocaleChanged) f_onLangLocaleChanged(this, codeName);
     }
 
     bool Panel::isD2d1ObjectVisible() const
@@ -1054,7 +1054,7 @@ namespace d14engine::uikit
         }
     }
 
-    bool Panel::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    bool Panel::releaseUIObjectHelper(SharedPtrParam<Panel> uiobj)
     {
         removeUIObject(uiobj); return true;
     }
@@ -1064,22 +1064,22 @@ namespace d14engine::uikit
         return math_utils::isOverlapped(p, m_absoluteRect);
     }
 
-    void Panel::onGetMouseFocusHelper()
+    void Panel::onMouseFocusGainedHelper()
     {
         // This method intentionally left blank.
     }
 
-    void Panel::onGetKeyboardFocusHelper()
+    void Panel::onKeyboardFocusGainedHelper()
     {
         // This method intentionally left blank.
     }
 
-    void Panel::onLoseMouseFocusHelper()
+    void Panel::onMouseFocusLostHelper()
     {
         // This method intentionally left blank.
     }
 
-    void Panel::onLoseKeyboardFocusHelper()
+    void Panel::onKeyboardFocusLostHelper()
     {
         // This method intentionally left blank.
     }
@@ -1126,17 +1126,17 @@ namespace d14engine::uikit
 
     void Panel::onMouseMoveHelper(MouseMoveEvent& e)
     {
-        ISortable<Panel>::foreach(m_pinnedChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_pinnedChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.move)
+            if (child->appEventHandling.mouse.move)
             {
                 child->onMouseMove(e);
             }
-            return child->appEventTransparency.mouse.move;
+            return child->appEventBlocking.mouse.move;
         });
         if (!m_enableChildMouseMoveEvent) return;
 
-        ChildObjectTempSet hitChildren = {};
+        ChildObjectWeakSet hitChildren = {};
 
         if (!m_childHitTestRect.has_value() || math_utils::isOverlapped
             (
@@ -1145,7 +1145,7 @@ namespace d14engine::uikit
         {
             for (auto& child : m_children)
             {
-                if (child->appEventReactability.hitTest && child->isHit(e.cursorPoint))
+                if (child->appEventHandling.hitTest && child->isHit(e.cursorPoint))
                 {
                     hitChildren.insert(child);
                 }
@@ -1167,7 +1167,7 @@ namespace d14engine::uikit
                 if (!enterCandidate.expired())
                 {
                     auto candidate = enterCandidate.lock();
-                    if (candidate->appEventReactability.mouse.enter)
+                    if (candidate->appEventHandling.mouse.enter)
                     {
                         candidate->onMouseEnter(e);
                     }
@@ -1175,7 +1175,7 @@ namespace d14engine::uikit
                 if (!leaveCandidate.expired())
                 {
                     auto candidate = leaveCandidate.lock();
-                    if (candidate->appEventReactability.mouse.leave)
+                    if (candidate->appEventHandling.mouse.leave)
                     {
                         candidate->onMouseLeave(e);
                     }
@@ -1184,131 +1184,131 @@ namespace d14engine::uikit
         }
         else // trigger multiple mouse-enter-leave events
         {
-            ISortable<Panel>::foreach(hitChildren, [&](ShrdPtrRefer<Panel> child)
+            ISortable<Panel>::foreach(hitChildren, [&](SharedPtrParam<Panel> child)
             {
                 // Moved in just now, trigger onMouseEnter event.
                 if (m_hitChildren.find(child) == m_hitChildren.end())
                 {
-                    if (child->appEventReactability.mouse.enter)
+                    if (child->appEventHandling.mouse.enter)
                     {
                         child->onMouseEnter(e);
                     }
-                    return child->appEventTransparency.mouse.enter;
+                    return child->appEventBlocking.mouse.enter;
                 }
-                return true;
+                return false;
             });
-            ISortable<Panel>::foreach(m_hitChildren, [&](ShrdPtrRefer<Panel> child)
+            ISortable<Panel>::foreach(m_hitChildren, [&](SharedPtrParam<Panel> child)
             {
                 // Moved out just now, trigger onMouseLeave event.
                 if (hitChildren.find(child) == hitChildren.end())
                 {
-                    if (child->appEventReactability.mouse.leave)
+                    if (child->appEventHandling.mouse.leave)
                     {
                         child->onMouseLeave(e);
                     }
-                    return child->appEventTransparency.mouse.leave;
+                    return child->appEventBlocking.mouse.leave;
                 }
-                return true;
+                return false;
             });
         }
         m_hitChildren = std::move(hitChildren);
 
-        ISortable<Panel>::foreach(m_hitChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_hitChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.move)
+            if (child->appEventHandling.mouse.move)
             {
                 child->onMouseMove(e);
             }
-            return child->appEventTransparency.mouse.move;
+            return child->appEventBlocking.mouse.move;
         });
     }
 
     void Panel::onMouseLeaveHelper(MouseMoveEvent& e)
     {
-        ISortable<Panel>::foreach(m_hitChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_hitChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.leave)
+            if (child->appEventHandling.mouse.leave)
             {
                 child->onMouseLeave(e);
             }
-            return child->appEventTransparency.mouse.leave;
+            return child->appEventBlocking.mouse.leave;
         });
         m_hitChildren.clear();
     }
 
     void Panel::onMouseButtonHelper(MouseButtonEvent& e)
     {
-        ISortable<Panel>::foreach(m_pinnedChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_pinnedChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.button)
+            if (child->appEventHandling.mouse.button)
             {
                 child->onMouseButton(e);
             }
-            return child->appEventTransparency.mouse.button;
+            return child->appEventBlocking.mouse.button;
         });
-        ISortable<Panel>::foreach(m_hitChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_hitChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.button)
+            if (child->appEventHandling.mouse.button)
             {
                 child->onMouseButton(e);
             }
-            return child->appEventTransparency.mouse.button;
+            return child->appEventBlocking.mouse.button;
         });
     }
 
     void Panel::onMouseWheelHelper(MouseWheelEvent& e)
     {
-        ISortable<Panel>::foreach(m_pinnedChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_pinnedChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.wheel)
+            if (child->appEventHandling.mouse.wheel)
             {
                 child->onMouseWheel(e);
             }
-            return child->appEventTransparency.mouse.wheel;
+            return child->appEventBlocking.mouse.wheel;
         });
-        ISortable<Panel>::foreach(m_hitChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_hitChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.mouse.wheel)
+            if (child->appEventHandling.mouse.wheel)
             {
                 child->onMouseWheel(e);
             }
-            return child->appEventTransparency.mouse.wheel;
+            return child->appEventBlocking.mouse.wheel;
         });
     }
 
     void Panel::onKeyboardHelper(KeyboardEvent& e)
     {
-        ISortable<Panel>::foreach(m_pinnedChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_pinnedChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.keyboard)
+            if (child->appEventHandling.keyboard)
             {
                 child->onKeyboard(e);
             }
-            return child->appEventTransparency.keyboard;
+            return child->appEventBlocking.keyboard;
         });
-        ISortable<Panel>::foreach(m_hitChildren, [&](ShrdPtrRefer<Panel> child)
+        ISortable<Panel>::foreach(m_hitChildren, [&](SharedPtrParam<Panel> child)
         {
-            if (child->appEventReactability.keyboard)
+            if (child->appEventHandling.keyboard)
             {
                 child->onKeyboard(e);
             }
-            return child->appEventTransparency.keyboard;
+            return child->appEventBlocking.keyboard;
         });
     }
 
-    void Panel::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void Panel::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
         for (auto& child : m_children)
         {
-            child->onChangeThemeStyle(style);
+            child->onThemeStyleChanged(style);
         }
     }
 
-    void Panel::onChangeLangLocaleHelper(WstrRefer codeName)
+    void Panel::onLangLocaleChangedHelper(WstrParam codeName)
     {
         for (auto& child : m_children)
         {
-            child->onChangeLangLocale(codeName);
+            child->onLangLocaleChanged(codeName);
         }
     }
 

@@ -109,7 +109,7 @@ namespace d14engine::uikit
 
         void onMouseLeaveHelper(MouseMoveEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         //------------------------------------------------------------------
         // ClickablePanel

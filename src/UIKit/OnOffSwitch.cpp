@@ -206,9 +206,9 @@ namespace d14engine::uikit
         );
     }
 
-    void OnOffSwitch::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void OnOffSwitch::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ClickablePanel::onChangeThemeStyleHelper(style);
+        ClickablePanel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

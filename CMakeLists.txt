@@ -20,6 +20,13 @@ message(STATUS "D14Engine v${PROJECT_VERSION}")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #----------------------------------------------------------
+# C++ Compiler
+#----------------------------------------------------------
+
+set(CMAKE_C_COMPILER "cl")
+set(CMAKE_CXX_COMPILER "cl")
+
+#----------------------------------------------------------
 # C++ Standard
 #----------------------------------------------------------
 
@@ -107,7 +114,7 @@ if(NOT DEFINED TargetName)
 endif()
 IsPropertyValid(D14_${TargetName}Source TargetValid)
 if (TargetValid)
-    message(STATUS "Set target to: ${TargetName}")
+    message(STATUS "${TargetName}")
 else()
     message(FATAL_ERROR "Target is not valid: ${TargetName}")
 endif()

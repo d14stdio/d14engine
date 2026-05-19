@@ -166,7 +166,7 @@ namespace d14engine::uikit::appearance
         }
     }
 
-    void TextInput::Appearance::changeTheme(WstrRefer themeName)
+    void TextInput::Appearance::changeTheme(WstrParam themeName)
     {
         bottomLine.background.Dynamic =
         {

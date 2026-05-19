@@ -11,7 +11,7 @@ namespace d14engine::uikit
 {
     struct LabelArea : appearance::LabelArea, Label
     {
-        LabelArea(WstrRefer text = {}, const D2D_RECT_F& rect = {});
+        LabelArea(WstrParam text = {}, const D2D_RECT_F& rect = {});
 
         _D14_SET_APPEARANCE_PROPERTY(LabelArea)
 
@@ -63,11 +63,11 @@ namespace d14engine::uikit
         void setSelectedRange(const CharacterRange& range);
 
     public:
-        virtual void setSelectedText(WstrRefer text);
+        virtual void setSelectedText(WstrParam text);
 
     protected:
         // Returns whether m_text is changed after called.
-        bool setSelectedTextHelper(WstrRefer text);
+        bool setSelectedTextHelper(WstrParam text);
 
         ///////////////////////
         // Interaction Logic //
@@ -101,9 +101,9 @@ namespace d14engine::uikit
         // Panel
         //------------------------------------------------------------------
 
-        void onGetKeyboardFocusHelper() override;
+        void onKeyboardFocusGainedHelper() override;
 
-        void onLoseKeyboardFocusHelper() override;
+        void onKeyboardFocusLostHelper() override;
 
         void onSizeHelper(SizeEvent& e) override;
 
@@ -113,12 +113,12 @@ namespace d14engine::uikit
 
         void onKeyboardHelper(KeyboardEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         //------------------------------------------------------------------
         // Label
         //------------------------------------------------------------------
 
-        void onTextLayoutChangeHelper() override;
+        void onTextLayoutChangedHelper() override;
     };
 }

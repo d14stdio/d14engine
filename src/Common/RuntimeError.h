@@ -12,7 +12,7 @@ namespace d14engine
         const Wstring fileName = {};
         const UINT lineNumber = {};
 
-        RuntimeError(WstrRefer fileName, UINT lineNumber, WstrRefer descText = {});
+        RuntimeError(WstrParam fileName, UINT lineNumber, WstrParam descText = {});
 
     protected:
         Wstring m_descText = {};

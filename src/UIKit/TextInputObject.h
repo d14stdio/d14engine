@@ -23,40 +23,40 @@ namespace d14engine::uikit
         // Text Event Callbacks //
         //////////////////////////
     public:
-        void onTextInput(WstrViewRefer text)
+        void onTextInput(WstrViewParam text)
         {
             onTextInputHelper(text);
 
             if (f_onTextInput) f_onTextInput(this, text);
         }
-        Function<void(TextInputObject*, WstrViewRefer)> f_onTextInput = {};
+        Function<void(TextInputObject*, WstrViewParam)> f_onTextInput = {};
 
-        void onTextChanged(WstrRefer text)
+        void onTextChanged(WstrParam text)
         {
             onTextChangedHelper(text);
 
             if (f_onTextChanged) f_onTextChanged(this, text);
         }
-        Function<void(TextInputObject*, WstrRefer)> f_onTextChanged = {};
+        Function<void(TextInputObject*, WstrParam)> f_onTextChanged = {};
 
-        void onTextEdited(WstrRefer text)
+        void onTextEdited(WstrParam text)
         {
             onTextEditedHelper(text);
 
             if (f_onTextEdited) f_onTextEdited(this, text);
         }
-        Function<void(TextInputObject*, WstrRefer)> f_onTextEdited = {};
+        Function<void(TextInputObject*, WstrParam)> f_onTextEdited = {};
 
     protected:
-        virtual void onTextInputHelper(WstrViewRefer text)
+        virtual void onTextInputHelper(WstrViewParam text)
         {
             // This method intentionally left blank.
         }
-        virtual void onTextChangedHelper(WstrRefer text)
+        virtual void onTextChangedHelper(WstrParam text)
         {
             // This method intentionally left blank.
         }
-        virtual void onTextEditedHelper(WstrRefer text)
+        virtual void onTextEditedHelper(WstrParam text)
         {
             // This method intentionally left blank.
         }

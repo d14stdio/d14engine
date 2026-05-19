@@ -105,7 +105,7 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
             Wstring assetsPath = L"test/UIKit/PixelAnimation/stick_boy/";
             animation_utils::BitmapSequence::FramePackage rawFrames = {};
 
-            file_system_utils::foreachFileInDir(assetsPath, L"*.png", [&](WstrRefer& path)
+            file_system_utils::foreachFileInDir(assetsPath, L"*.png", [&](WstrParam& path)
             {
                 auto index = file_system_utils::extractFilePrefix(
                             file_system_utils::extractFileName(path));
@@ -243,7 +243,7 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
 
             ui_timeSpanInput->bringToFront();
 
-            ui_timeSpanInput->f_onLoseKeyboardFocus = [=](Panel* p)
+            ui_timeSpanInput->f_onKeyboardFocusLost = [=](Panel* p)
             {
                 if (!wk_stickBoy.expired())
                 {
@@ -271,7 +271,7 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
             // No need to do the clearing if the application already destroyed.
             if (!Application::g_app) return;
 
-            if (p->isPlayAnimation()) p->decreaseAnimationCount();
+            if (p->isAnimating()) p->decreaseAnimationCount();
 
             if (!wk_fpsLabel.expired())
             {
@@ -344,7 +344,7 @@ D14_SET_APP_ENTRY(mainPixelAnimation)
                 }
             };
             ui_pixelViewer->f_onSelectedTabChange = [=]
-            (TabGroup * tg, OptRefer<size_t> index)
+            (TabGroup * tg, OptParam<size_t> index)
             {
                 if (index.has_value() && !wk_frameSizeSlider.expired())
                 {

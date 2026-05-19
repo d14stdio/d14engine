@@ -49,7 +49,7 @@ namespace d14engine::uikit
     protected:
         WeakPtr<MenuItem> m_associatedItem = {};
 
-        friend void MenuItem::setAssociatedMenu(ShrdPtrRefer<PopupMenu> menu);
+        friend void MenuItem::setAssociatedMenu(SharedPtrParam<PopupMenu> menu);
 
     public:
         const WeakPtr<MenuItem>& associatedItem() const;
@@ -84,7 +84,7 @@ namespace d14engine::uikit
         // Panel
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         void onMouseMoveHelper(MouseMoveEvent& e) override;
 

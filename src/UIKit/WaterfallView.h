@@ -29,7 +29,7 @@ namespace d14engine::uikit
             m_layout = std::dynamic_pointer_cast<ConstraintLayout>(m_content);
 
             m_layout->f_onReleaseUIObject = [this]
-            (Panel* p, ShrdPtrRefer<Panel> uiobj)
+            (Panel* p, SharedPtrParam<Panel> uiobj)
             {
                 for (size_t i = 0; i < m_items.size(); ++i)
                 {
@@ -46,8 +46,8 @@ namespace d14engine::uikit
                 // The viewport offset may be invalid after resizing.
                 setViewportOffset(m_viewportOffset);
             };
-            // Place this at the end because the onSize callback
-            // may reference the above members during initialization.
+            // Place the base initialization here because
+            // its logic may reference the objects initialized above.
             ScrollView::initialize();
         }
 
@@ -154,7 +154,7 @@ namespace d14engine::uikit
             for (auto& item : items)
             {
                 item->setPrivateVisible(false);
-                item->appEventReactability.hitTest = false;
+                item->appEventHandling.hitTest = false;
 
                 ConstraintLayout::GeometryInfo geoInfo = {};
 
@@ -467,7 +467,7 @@ do { \
         // Item Index Calculators
         //------------------------------------------------------------------
     public:
-        Optional<size_t> getItemIndex(ShrdPtrRefer<Item_T> item) const
+        Optional<size_t> getItemIndex(SharedPtrParam<Item_T> item) const
         {
             for (size_t i = 0; i < m_items.size(); ++i)
             {
@@ -516,7 +516,7 @@ do { \
                     auto& item = m_items[i];
 
                     item->setPrivateVisible(value);
-                    item->appEventReactability.hitTest = value;
+                    item->appEventHandling.hitTest = value;
                 }
             }
         }
@@ -547,9 +547,9 @@ do { \
         // Panel
         //------------------------------------------------------------------
 
-        void onGetKeyboardFocusHelper() override
+        void onKeyboardFocusGainedHelper() override
         {
-            ScrollView::onGetKeyboardFocusHelper();
+            ScrollView::onKeyboardFocusGainedHelper();
 
             for (auto& i : m_selectedItemIndices)
             {
@@ -557,9 +557,9 @@ do { \
             }
         }
 
-        void onLoseKeyboardFocusHelper() override
+        void onKeyboardFocusLostHelper() override
         {
-            ScrollView::onLoseKeyboardFocusHelper();
+            ScrollView::onKeyboardFocusLostHelper();
 
             for (auto& i : m_selectedItemIndices)
             {

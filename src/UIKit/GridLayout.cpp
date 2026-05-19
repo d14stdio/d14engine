@@ -97,7 +97,7 @@ namespace d14engine::uikit
         updateAllElements();
     }
 
-    void GridLayout::updateElement(ShrdPtrRefer<Panel> elem, const GeometryInfo& geoInfo)
+    void GridLayout::updateElement(SharedPtrParam<Panel> elem, const GeometryInfo& geoInfo)
     {
         if (geoInfo.isFixedSize)
         {

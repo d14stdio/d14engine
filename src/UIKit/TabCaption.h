@@ -14,9 +14,9 @@ namespace d14engine::uikit
     {
         friend TabGroup;
 
-        TabCaption(ShrdPtrRefer<IconLabel> title);
+        TabCaption(SharedPtrParam<IconLabel> title);
 
-        explicit TabCaption(WstrRefer text = L"Untitled");
+        explicit TabCaption(WstrParam text = L"Untitled");
 
         void initialize() override;
 
@@ -31,7 +31,7 @@ namespace d14engine::uikit
 
     public:
         const SharedPtr<IconLabel>& title() const;
-        void setTitle(ShrdPtrRefer<IconLabel> title);
+        void setTitle(SharedPtrParam<IconLabel> title);
 
         const WeakPtr<TabGroup>& parentTabGroup() const;
 
@@ -61,7 +61,7 @@ namespace d14engine::uikit
 
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         void onMouseMoveHelper(MouseMoveEvent& e) override;
 

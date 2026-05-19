@@ -110,7 +110,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
             ui_scenePanel->setUIObjectPriority(0);
             ui_scenePanel->transform(0.0f, 0.0f, 564.0f, 564.0f);
 
-            ui_scenePanel->f_onChangeThemeStyle = []
+            ui_scenePanel->f_onThemeStyleChanged = []
             (Panel* p, const Panel::ThemeStyle& style)
             {
                 auto sp = (ScenePanel*)p;
@@ -120,7 +120,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
                 }
                 else sp->setClearColor(Colors::Black);
             };
-            ui_scenePanel->f_onChangeThemeStyle(ui_scenePanel.get(), app->themeStyle());
+            ui_scenePanel->f_onThemeStyleChanged(ui_scenePanel.get(), app->themeStyle());
         }
         auto ui_fpsLabel = makeManagedUIObject<Label>(ui_scenePanel);
         {
@@ -559,7 +559,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
             ui_sideLayout->addElement(ui_cameraTitle, geoInfo);
         }
         FocusGroup cameraDataFocusGroup = {};
-        auto createCameraDataEditor = [&](WstrRefer name, size_t offsetY, wchar_t which, OptRefer<XMFLOAT3> invalid)
+        auto createCameraDataEditor = [&](WstrParam name, size_t offsetY, wchar_t which, OptParam<XMFLOAT3> invalid)
         {
             auto ui_cameraData = makeUIObject<Label>(name);
             {
@@ -671,7 +671,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
                             syncCameraDataComponent((RawTextBox*)p, component);
                         }
                     };
-                    ui_cameraData_->f_onLoseKeyboardFocus = [=](Panel* p)
+                    ui_cameraData_->f_onKeyboardFocusLost = [=](Panel* p)
                     {
                         updateCameraData((RawTextBox*)p, component);
                     };
@@ -707,7 +707,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
             ui_sideLayout->addElement(ui_objectTitle, geoInfo);
         }
         FocusGroup objectDataFocusGroup = {};
-        auto createObjectDataEditor = [&](WstrRefer name, size_t offsetY, size_t index, OptRefer<XMFLOAT3> invalid)
+        auto createObjectDataEditor = [&](WstrParam name, size_t offsetY, size_t index, OptParam<XMFLOAT3> invalid)
         {
             auto ui_objectData = makeUIObject<Label>(name);
             {
@@ -816,7 +816,7 @@ D14_SET_APP_ENTRY(mainColorfulCube)
                     geoInfo.axis.y = { offsetY, 1 };
                     ui_sideLayout->addElement(ui_objectData_, geoInfo);
 
-                    ui_objectData_->f_onLoseKeyboardFocus = [=](Panel* p)
+                    ui_objectData_->f_onKeyboardFocusLost = [=](Panel* p)
                     {
                         updateObjectData((RawTextBox*)p, component);
                     };

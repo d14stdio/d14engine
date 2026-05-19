@@ -12,12 +12,12 @@ namespace d14engine::uikit
     struct Button : appearance::Button, ClickablePanel
     {
         Button(
-            ShrdPtrRefer<IconLabel> content,
+            SharedPtrParam<IconLabel> content,
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
         Button(
-            WstrRefer text = L"Button",
+            WstrParam text = L"Button",
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
@@ -37,7 +37,7 @@ namespace d14engine::uikit
 
     public:
         const SharedPtr<IconLabel>& content() const;
-        void setContent(ShrdPtrRefer<IconLabel> content);
+        void setContent(SharedPtrParam<IconLabel> content);
 
         ///////////////////////
         // Interaction Logic //
@@ -71,7 +71,7 @@ namespace d14engine::uikit
         // Panel
         //------------------------------------------------------------------
 
-        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
+        bool releaseUIObjectHelper(SharedPtrParam<Panel> uiobj) override;
 
         bool isHitHelper(const uikit::Event::Point& p) const override;
 
@@ -81,7 +81,7 @@ namespace d14engine::uikit
 
         void onMouseLeaveHelper(MouseMoveEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         //------------------------------------------------------------------
         // ClickablePanel

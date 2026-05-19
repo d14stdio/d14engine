@@ -6,7 +6,7 @@ namespace d14engine
 {
     bool RuntimeError::g_flag = false;
 
-    RuntimeError::RuntimeError(WstrRefer fileName, UINT lineNumber, WstrRefer descText)
+    RuntimeError::RuntimeError(WstrParam fileName, UINT lineNumber, WstrParam descText)
         : fileName(fileName), lineNumber(lineNumber), m_descText(descText) { g_flag = true; }
 
     const Wstring& RuntimeError::descText() const

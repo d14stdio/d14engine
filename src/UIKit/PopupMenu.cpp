@@ -296,9 +296,9 @@ namespace d14engine::uikit
         shadow.loadBitmap(extendedSize(e.size));
     }
 
-    void PopupMenu::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void PopupMenu::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        WaterfallView::onChangeThemeStyleHelper(style);
+        WaterfallView::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

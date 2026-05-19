@@ -213,7 +213,7 @@ namespace d14engine::uikit
         m_cursor->setPrivateVisible(false);
     }
 
-    int Application::run(FuncRefer<void(Application* app)> onLaunch)
+    int Application::run(FuncParam<void(Application* app)> onLaunch)
     {
         if (onLaunch) onLaunch(this);
 
@@ -441,13 +441,13 @@ namespace d14engine::uikit
             // START: Mouse-Move Event
             //------------------------------------------------------------------
 
-            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](SharedPtrParam<Panel> uiobj)
             {
-                if (uiobj->appEventReactability.mouse.move)
+                if (uiobj->appEventHandling.mouse.move)
                 {
                     uiobj->onMouseMove(e);
                 }
-                return uiobj->appEventTransparency.mouse.move;
+                return uiobj->appEventBlocking.mouse.move;
             });
             auto& mouseFocused = app->m_focusedUIObjects[(size_t)FocusType::Mouse];
 
@@ -457,11 +457,11 @@ namespace d14engine::uikit
             }
             else // Deliver mouse-move event normally.
             {
-                UIObjectTempSet hitUIObjects = {};
+                UIObjectWeakSet hitUIObjects = {};
 
                 for (auto& uiobj : app->m_uiObjects)
                 {
-                    if (uiobj->appEventReactability.hitTest && uiobj->isHit(cursorPoint))
+                    if (uiobj->appEventHandling.hitTest && uiobj->isHit(cursorPoint))
                     {
                         hitUIObjects.insert(uiobj);
                     }
@@ -482,7 +482,7 @@ namespace d14engine::uikit
                         if (!enterCandidate.expired())
                         {
                             auto candidate = enterCandidate.lock();
-                            if (candidate->appEventReactability.mouse.enter)
+                            if (candidate->appEventHandling.mouse.enter)
                             {
                                 candidate->onMouseEnter(e);
                             }
@@ -490,7 +490,7 @@ namespace d14engine::uikit
                         if (!leaveCandidate.expired())
                         {
                             auto candidate = leaveCandidate.lock();
-                            if (candidate->appEventReactability.mouse.leave)
+                            if (candidate->appEventHandling.mouse.leave)
                             {
                                 candidate->onMouseLeave(e);
                             }
@@ -499,42 +499,42 @@ namespace d14engine::uikit
                 }
                 else // trigger multiple mouse-enter-leave events
                 {
-                    ISortable<Panel>::foreach(hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                    ISortable<Panel>::foreach(hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                     {
                         // Moved in just now, trigger mouse-enter event.
                         if (app->m_hitUIObjects.find(uiobj) == app->m_hitUIObjects.end())
                         {
-                            if (uiobj->appEventReactability.mouse.enter)
+                            if (uiobj->appEventHandling.mouse.enter)
                             {
                                 uiobj->onMouseEnter(e);
                             }
-                            return uiobj->appEventTransparency.mouse.enter;
+                            return uiobj->appEventBlocking.mouse.enter;
                         }
-                        return true;
+                        return false;
                     });
-                    ISortable<Panel>::foreach(app->m_hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                    ISortable<Panel>::foreach(app->m_hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                     {
                         // Moved out just now, trigger mouse-leave event.
                         if (hitUIObjects.find(uiobj) == hitUIObjects.end())
                         {
-                            if (uiobj->appEventReactability.mouse.leave)
+                            if (uiobj->appEventHandling.mouse.leave)
                             {
                                 uiobj->onMouseLeave(e);
                             }
-                            return uiobj->appEventTransparency.mouse.leave;
+                            return uiobj->appEventBlocking.mouse.leave;
                         }
-                        return true;
+                        return false;
                     });
                 }
                 app->m_hitUIObjects = std::move(hitUIObjects);
 
-                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                 {
-                    if (uiobj->appEventReactability.mouse.move)
+                    if (uiobj->appEventHandling.mouse.move)
                     {
                         uiobj->onMouseMove(e);
                     }
-                    return uiobj->appEventTransparency.mouse.move;
+                    return uiobj->appEventBlocking.mouse.move;
                 });
             }
             //------------------------------------------------------------------
@@ -592,13 +592,13 @@ namespace d14engine::uikit
             }
             else // Deliver mouse-leave event normally.
             {
-                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                 {
-                    if (uiobj->appEventReactability.mouse.leave)
+                    if (uiobj->appEventHandling.mouse.leave)
                     {
                         uiobj->onMouseLeave(e);
                     }
-                    return uiobj->appEventTransparency.mouse.leave;
+                    return uiobj->appEventBlocking.mouse.leave;
                 });
                 app->m_hitUIObjects.clear();
             }
@@ -652,13 +652,13 @@ namespace d14engine::uikit
             // START: Mouse-Button Event
             //------------------------------------------------------------------
 
-            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](SharedPtrParam<Panel> uiobj)
             {
-                if (uiobj->appEventReactability.mouse.button)
+                if (uiobj->appEventHandling.mouse.button)
                 {
                     uiobj->onMouseButton(e);
                 }
-                return uiobj->appEventTransparency.mouse.button;
+                return uiobj->appEventBlocking.mouse.button;
             });
             auto& mouseFocused = app->m_focusedUIObjects[(size_t)FocusType::Mouse];
 
@@ -668,13 +668,13 @@ namespace d14engine::uikit
             }
             else // Deliver mouse-button event normally.
             {
-                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                 {
-                    if (uiobj->appEventReactability.mouse.button)
+                    if (uiobj->appEventHandling.mouse.button)
                     {
                         uiobj->onMouseButton(e);
                     }
-                    return uiobj->appEventTransparency.mouse.button;
+                    return uiobj->appEventBlocking.mouse.button;
                 });
                 app->handleImmediateMouseMoveEventCallback();
             }
@@ -724,13 +724,13 @@ namespace d14engine::uikit
             // START: Mouse-Wheel Event
             //------------------------------------------------------------------
 
-            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](SharedPtrParam<Panel> uiobj)
             {
-                if (uiobj->appEventReactability.mouse.wheel)
+                if (uiobj->appEventHandling.mouse.wheel)
                 {
                     uiobj->onMouseWheel(e);
                 }
-                return uiobj->appEventTransparency.mouse.wheel;
+                return uiobj->appEventBlocking.mouse.wheel;
             });
             auto& mouseFocused = app->m_focusedUIObjects[(size_t)FocusType::Mouse];
 
@@ -740,13 +740,13 @@ namespace d14engine::uikit
             }
             else // Deliver mouse-wheel event normally.
             {
-                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                 {
-                    if (uiobj->appEventReactability.mouse.wheel)
+                    if (uiobj->appEventHandling.mouse.wheel)
                     {
                         uiobj->onMouseWheel(e);
                     }
-                    return uiobj->appEventTransparency.mouse.wheel;
+                    return uiobj->appEventBlocking.mouse.wheel;
                 });
                 app->handleImmediateMouseMoveEventCallback();
             }
@@ -784,13 +784,13 @@ namespace d14engine::uikit
             // START: Keyboard Event
             //------------------------------------------------------------------
 
-            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+            ISortable<Panel>::foreach(app->m_pinnedUIObjects, [&](SharedPtrParam<Panel> uiobj)
             {
-                if (uiobj->appEventReactability.keyboard)
+                if (uiobj->appEventHandling.keyboard)
                 {
                     uiobj->onKeyboard(e);
                 }
-                return uiobj->appEventTransparency.keyboard;
+                return uiobj->appEventBlocking.keyboard;
             });
             auto& keyboardFocused = app->m_focusedUIObjects[(size_t)FocusType::Keyboard];
 
@@ -800,13 +800,13 @@ namespace d14engine::uikit
             }
             else // Deliver keyboard event normally.
             {
-                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](ShrdPtrRefer<Panel> uiobj)
+                ISortable<Panel>::foreach(app->m_hitUIObjects, [&](SharedPtrParam<Panel> uiobj)
                 {
-                    if (uiobj->appEventReactability.keyboard)
+                    if (uiobj->appEventHandling.keyboard)
                     {
                         uiobj->onKeyboard(e);
                     }
-                    return uiobj->appEventTransparency.keyboard;
+                    return uiobj->appEventBlocking.keyboard;
                 });
                 app->handleImmediateMouseMoveEventCallback();
             }
@@ -1018,7 +1018,7 @@ if (app != nullptr) \
         return m_uiCmdLayer;
     }
 
-    void Application::registerDrawObject(ShrdPtrRefer<Panel> uiobj)
+    void Application::registerDrawObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         if (drawObjects().find(uiobj) != drawObjects().end()) return;
@@ -1045,7 +1045,7 @@ if (app != nullptr) \
         );
     }
 
-    void Application::unregisterDrawObject(ShrdPtrRefer<Panel> uiobj)
+    void Application::unregisterDrawObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
 
@@ -1162,7 +1162,7 @@ if (app != nullptr) \
         return m_uiObjects;
     }
 
-    void Application::registerUIEvents(ShrdPtrRefer<Panel> uiobj)
+    void Application::registerUIEvents(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         if (m_uiObjects.find(uiobj) != m_uiObjects.end()) return;
@@ -1189,7 +1189,7 @@ if (app != nullptr) \
         );
     }
 
-    void Application::unregisterUIEvents(ShrdPtrRefer<Panel> uiobj)
+    void Application::unregisterUIEvents(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
 
@@ -1208,13 +1208,13 @@ if (app != nullptr) \
         // adapt to the existing priorities.
     }
 
-    void Application::addUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Application::addUIObject(SharedPtrParam<Panel> uiobj)
     {
         registerDrawObject(uiobj);
         registerUIEvents(uiobj);
     }
 
-    void Application::removeUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Application::removeUIObject(SharedPtrParam<Panel> uiobj)
     {
         unregisterDrawObject(uiobj);
         unregisterUIEvents(uiobj);
@@ -1234,13 +1234,13 @@ if (app != nullptr) \
         return m_pinnedUIObjects;
     }
 
-    void Application::pinUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Application::pinUIObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         m_pinnedUIObjects.insert(uiobj);
     }
 
-    void Application::unpinUIObject(ShrdPtrRefer<Panel> uiobj)
+    void Application::unpinUIObject(SharedPtrParam<Panel> uiobj)
     {
         if (uiobj == nullptr) return;
         m_pinnedUIObjects.erase(uiobj);
@@ -1251,7 +1251,7 @@ if (app != nullptr) \
         m_pinnedUIObjects.clear();
     }
 
-    void Application::focusUIObject(FocusType focus, ShrdPtrRefer<Panel> uiobj)
+    void Application::focusUIObject(FocusType focus, SharedPtrParam<Panel> uiobj)
     {
         auto& focused = m_focusedUIObjects[(size_t)focus];
         if (cpp_lang_utils::isMostDerivedEqual(uiobj, focused.lock())) return;
@@ -1262,13 +1262,13 @@ if (app != nullptr) \
         {
             if (!focused.expired())
             {
-                focused.lock()->onLoseMouseFocus();
+                focused.lock()->onMouseFocusLost();
             }
             focused = uiobj;
 
             if (!focused.expired())
             {
-                focused.lock()->onGetMouseFocus();
+                focused.lock()->onMouseFocusGained();
             }
             break;
         }
@@ -1276,13 +1276,13 @@ if (app != nullptr) \
         {
             if (!focused.expired())
             {
-                focused.lock()->onLoseKeyboardFocus();
+                focused.lock()->onKeyboardFocusLost();
             }
             focused = uiobj;
 
             if (!focused.expired())
             {
-                focused.lock()->onGetKeyboardFocus();
+                focused.lock()->onKeyboardFocusGained();
             }
             break;
         }
@@ -1405,7 +1405,7 @@ if (app != nullptr) \
         }
         for (auto& uiobj : m_uiObjects)
         {
-            uiobj->onChangeThemeStyle(style);
+            uiobj->onThemeStyleChanged(style);
         }
         m_themeStyle = style;
     }
@@ -1415,11 +1415,11 @@ if (app != nullptr) \
         return m_langLocale;
     }
 
-    void Application::setLangLocale(WstrRefer codeName)
+    void Application::setLangLocale(WstrParam codeName)
     {
         for (auto& uiobj : m_uiObjects)
         {
-            uiobj->onChangeLangLocale(codeName);
+            uiobj->onLangLocaleChanged(codeName);
         }
         m_langLocale = codeName;
     }

@@ -36,10 +36,10 @@ namespace d14engine::uikit
 
         ElementGeometryInfoMap m_elemGeoInfos = {};
 
-        virtual void updateElement(ShrdPtrRefer<Panel> elem, const GeometryInfo_T& geoInfo) = 0;
+        virtual void updateElement(SharedPtrParam<Panel> elem, const GeometryInfo_T& geoInfo) = 0;
 
     public:
-        void addElement(ShrdPtrRefer<Panel> elem, const GeometryInfo_T& geoInfo)
+        void addElement(SharedPtrParam<Panel> elem, const GeometryInfo_T& geoInfo)
         {
             if (elem == nullptr) return;
 
@@ -49,7 +49,7 @@ namespace d14engine::uikit
             updateElement(elem, geoInfo);
         }
 
-        void removeElement(ShrdPtrRefer<Panel> elem)
+        void removeElement(SharedPtrParam<Panel> elem)
         {
             removeUIObject(elem);
             m_elemGeoInfos.erase(elem);
@@ -57,7 +57,7 @@ namespace d14engine::uikit
 
         using ElementGeometryInfoPtr = ElementGeometryInfoMap::iterator;
 
-        Optional<ElementGeometryInfoPtr> findElement(ShrdPtrRefer<Panel> elem)
+        Optional<ElementGeometryInfoPtr> findElement(SharedPtrParam<Panel> elem)
         {
             auto itor = m_elemGeoInfos.find(elem);
             if (itor != m_elemGeoInfos.end()) return itor;
@@ -128,7 +128,7 @@ namespace d14engine::uikit
         // Panel
         //------------------------------------------------------------------
 
-        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override
+        bool releaseUIObjectHelper(SharedPtrParam<Panel> uiobj) override
         {
             removeElement(uiobj); return true;
         }
@@ -140,9 +140,9 @@ namespace d14engine::uikit
             updateAllElements();
         }
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override
         {
-            ResizablePanel::onChangeThemeStyleHelper(style);
+            ResizablePanel::onThemeStyleChangedHelper(style);
 
             appearance().changeTheme(style.name);
         }

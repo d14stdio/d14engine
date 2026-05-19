@@ -4,7 +4,7 @@
 
 namespace d14engine::uikit
 {
-    BitmapObject::BitmapObject(ComPtrParam<ID2D1Bitmap1> data) : data(data) {}
+    BitmapObject::BitmapObject(ComPtrParam<ID2D1Bitmap1> data) : data(data) { }
 
     bool BitmapObject::empty() const
     {

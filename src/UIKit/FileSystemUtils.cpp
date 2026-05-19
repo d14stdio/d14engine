@@ -4,7 +4,7 @@
 
 namespace d14engine::file_system_utils
 {
-    Wstring extractFileName(WstrRefer path)
+    Wstring extractFileName(WstrParam path)
     {
         auto slashPos = path.find_last_of(L'/');
         if (slashPos != Wstring::npos)
@@ -22,7 +22,7 @@ namespace d14engine::file_system_utils
         return path;
     }
 
-    Wstring extractFilePrefix(WstrRefer fileName, WCHAR token)
+    Wstring extractFilePrefix(WstrParam fileName, WCHAR token)
     {
         auto tokenPos = fileName.find_last_of(token);
         if (tokenPos != Wstring::npos)
@@ -32,7 +32,7 @@ namespace d14engine::file_system_utils
         return fileName;
     }
 
-    Wstring extractFileSuffix(WstrRefer fileName, WCHAR token)
+    Wstring extractFileSuffix(WstrParam fileName, WCHAR token)
     {
         auto tokenPos = fileName.find_last_of(token);
         if (tokenPos != Wstring::npos)
@@ -42,7 +42,7 @@ namespace d14engine::file_system_utils
         return fileName;
     }
 
-    bool foreachFileInDir(WstrRefer dir, WstrRefer wildcard, const FileCallback& callback)
+    bool foreachFileInDir(WstrParam dir, WstrParam wildcard, const FileCallback& callback)
     {
         WIN32_FIND_DATA findData = {};
         auto handle = FindFirstFileW((dir + wildcard).c_str(), &findData);

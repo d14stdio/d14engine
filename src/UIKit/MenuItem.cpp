@@ -20,7 +20,7 @@ namespace d14engine::uikit
         return m_associatedMenu;
     }
 
-    void MenuItem::setAssociatedMenu(ShrdPtrRefer<PopupMenu> menu)
+    void MenuItem::setAssociatedMenu(SharedPtrParam<PopupMenu> menu)
     {
         // cpp_lang_utils::isMostDerivedEqual treats 2 empty objects as equal,
         // so check "menu" here to make sure the associated menu can be reset.
@@ -87,9 +87,9 @@ namespace d14engine::uikit
         }
     }
 
-    void MenuItem::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void MenuItem::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ViewItem::onChangeThemeStyleHelper(style);
+        ViewItem::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(ViewItem::appearance(), style.name);
     }

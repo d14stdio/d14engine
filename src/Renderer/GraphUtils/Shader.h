@@ -8,8 +8,12 @@ namespace d14engine::renderer::graph_utils
     {
         void initialize();
 
-        ComPtr<IDxcBlob> load(WstrRefer fileName);
-        void save(WstrRefer fileName, IDxcBlob* blob);
+        ////////////////////
+        // Blob Utilities //
+        ////////////////////
+
+        ComPtr<IDxcBlob> load(WstrParam fileName);
+        void save(WstrParam fileName, IDxcBlob* blob);
 
         ///////////////////
         // HLSL Compiler //
@@ -32,12 +36,12 @@ namespace d14engine::renderer::graph_utils
             Wstring pdbOutPath = {};
         };
         ComPtr<IDxcBlob> compile(
-            WstrRefer hlslFileName,
+            WstrParam hlslFileName,
             const CompileOption& option);
 
-        ////////////////////
-        // Default Loader //
-        ////////////////////
+        /////////////////////
+        // Standard Loader //
+        /////////////////////
 
         enum class Format
         {
@@ -60,11 +64,12 @@ namespace d14engine::renderer::graph_utils
             Object() = default;
             Object(const CompileOption& option);
         };
-        using Package = std::unordered_map<Wstring, Object>;
+        using Library = std::unordered_map<Wstring, Object>;
 
-        // path = Renderer::CreateInfo::shaderPath()
-        void loadDefaultObject(
-            WstrRefer path, WstrRefer name,
-            StreamOption option, Package& shaders);
+        // `path` should be the root directory of a library
+        // organized in the D14Engine standard shader layout.
+        void loadStandardObjects(
+            WstrParam path, WstrParam name,
+            StreamOption option, Library& objects);
     }
 }

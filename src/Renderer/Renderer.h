@@ -607,7 +607,7 @@ namespace d14engine::renderer
 #pragma region Render Pass Implementation
 
     public:
-        void resetCmdList(OptRefer<ID3D12CommandAllocator*> alloc = {});
+        void resetCmdList(OptParam<ID3D12CommandAllocator*> alloc = {});
         void submitCmdList();
         void flushCmdQueue();
 
@@ -666,13 +666,13 @@ namespace d14engine::renderer
             bool enabled = true;
 
         public:
-            using DrawObjectSet = ISortable<IDrawObject>::ShrdPrioritySet;
+            using DrawObjectSet = ISortable<IDrawObject>::SharedPrioritySet;
 
-            using DrawObjectLayerMap = ISortable<IDrawLayer>::ShrdPriorityMap<DrawObjectSet>;
+            using DrawObjectLayerMap = ISortable<IDrawLayer>::SharedPriorityMap<DrawObjectSet>;
 
             using D3D12Target = DrawObjectLayerMap;
 
-            using DrawObject2DSet = ISortable<IDrawObject2D>::ShrdPrioritySet;
+            using DrawObject2DSet = ISortable<IDrawObject2D>::SharedPrioritySet;
 
             using D2D1Target = DrawObject2DSet;
 
@@ -686,7 +686,7 @@ namespace d14engine::renderer
             void resetCmdList(ID3D12GraphicsCommandList* cmdList, size_t index);
         };
 
-        using CommandLayerSet = ISortable<CommandLayer>::ShrdPrioritySet;
+        using CommandLayerSet = ISortable<CommandLayer>::SharedPrioritySet;
 
         CommandLayerSet cmdLayers = {};
 

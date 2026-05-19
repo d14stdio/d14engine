@@ -29,9 +29,9 @@ namespace d14engine::uikit
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
-        void onGetKeyboardFocusHelper() override;
+        void onKeyboardFocusGainedHelper() override;
 
-        void onLoseKeyboardFocusHelper() override;
+        void onKeyboardFocusLostHelper() override;
 
         void onMouseEnterHelper(MouseMoveEvent& e) override;
 
@@ -39,6 +39,6 @@ namespace d14engine::uikit
 
         void onMouseButtonHelper(MouseButtonEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
     };
 }

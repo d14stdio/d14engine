@@ -8,7 +8,7 @@ namespace d14engine::uikit
 {
     void FrameAnimPanel::onRendererUpdateObject2DHelper(Renderer* rndr)
     {
-        if (m_isPlayAnimation) bitmapData.update(rndr);
+        if (m_isAnimating) bitmapData.update(rndr);
     }
 
     void FrameAnimPanel::onRendererDrawD2d1ObjectHelper(Renderer* rndr)

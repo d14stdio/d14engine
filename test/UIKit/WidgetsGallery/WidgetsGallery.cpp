@@ -5,6 +5,7 @@
 #include "UIKit/AppEntry.h"
 #include "UIKit/Application.h"
 #include "UIKit/ConstraintLayout.h"
+#include "UIKit/Cursor.h"
 #include "UIKit/IconLabel.h"
 #include "UIKit/Label.h"
 #include "UIKit/MainWindow.h"
@@ -26,6 +27,8 @@ D14_SET_APP_ENTRY(mainWidgetsGallery)
     };
     return Application(info).run([&](Application* app)
     {
+        app->cursor()->setIconSource(Cursor::IconSource::UIKit);
+
         auto ui_mainWindow = makeRootUIObject<MainWindow>(L"D14Engine - WidgetsGallery @ UIKit");
         {
             ui_mainWindow->setCaptionPanelHeight(40.0f);
@@ -67,7 +70,7 @@ D14_SET_APP_ENTRY(mainWidgetsGallery)
             barAppear.separator.geometry.size.height = 24.0f;
             barAppear.overflow.button.geometry.offset.y = 7.0f;
         }
-        auto appendTabPage = [&](WstrRefer title)
+        auto appendTabPage = [&](WstrParam title)
         {
             auto ui_caption = makeUIObject<TabCaption>(title);
             auto ui_content = makeUIObject<ConstraintLayout>();

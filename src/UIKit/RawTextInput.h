@@ -89,7 +89,7 @@ namespace d14engine::uikit
         // Text Editing
         //------------------------------------------------------------------
     protected:
-        void editSelectedText(WstrRefer text);
+        void editSelectedText(WstrParam text);
 
     public:
         virtual void performCommandCutSelection();
@@ -111,7 +111,7 @@ namespace d14engine::uikit
         // Label
         //------------------------------------------------------------------
 
-        void setText(WstrRefer text) override;
+        void setText(WstrParam text) override;
 
         //------------------------------------------------------------------
         // LabelArea
@@ -119,7 +119,7 @@ namespace d14engine::uikit
 
         void setCaretPosition(size_t position) override;
 
-        void setSelectedText(WstrRefer text) override;
+        void setSelectedText(WstrParam text) override;
 
     protected:
         //------------------------------------------------------------------
@@ -136,7 +136,7 @@ namespace d14engine::uikit
 
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         void onKeyboardHelper(KeyboardEvent& e) override;
 
@@ -144,13 +144,13 @@ namespace d14engine::uikit
         // TextInputObject
         //------------------------------------------------------------------
 
-        void onTextInputHelper(WstrViewRefer text) override;
+        void onTextInputHelper(WstrViewParam text) override;
 
         //------------------------------------------------------------------
         // Label
         //------------------------------------------------------------------
 
-        Optional<Wstring> normalizeText(WstrRefer in) override;
+        Optional<Wstring> normalizeText(WstrParam in) override;
 
         //------------------------------------------------------------------
         // LabelArea

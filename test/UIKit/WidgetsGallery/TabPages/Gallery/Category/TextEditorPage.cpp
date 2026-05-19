@@ -28,6 +28,6 @@ SharedPtr<TreeViewItem> createTextEditorPage(ConstraintLayout* page)
             dark.background.color = D2D1::ColorF{ 0x272727 };
         }
     }
-    DEF_CATEGORY_ITEM(SLAVER, TextEditor, Text Editor, 26X26)
-    RET_CATEGORY_ITEM
+    DEFINE_CATEGORY_ITEM(SLAVER, TextEditor, Text Editor, 26X26)
+    RETURN_CATEGORY_ITEM
 }

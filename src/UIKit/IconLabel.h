@@ -12,7 +12,7 @@ namespace d14engine::uikit
     struct IconLabel : Panel
     {
         IconLabel(
-            WstrRefer labelText = {},
+            WstrParam labelText = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
 
@@ -40,7 +40,7 @@ namespace d14engine::uikit
 
     public:
         const SharedPtr<Label>& label() const;
-        void setLabel(ShrdPtrRefer<Label> label);
+        void setLabel(SharedPtrParam<Label> label);
 
         ///////////////////////
         // Interaction Logic //
@@ -79,7 +79,7 @@ namespace d14engine::uikit
         // Panel
         //------------------------------------------------------------------
 
-        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
+        bool releaseUIObjectHelper(SharedPtrParam<Panel> uiobj) override;
 
         void onSizeHelper(SizeEvent& e) override;
 
@@ -89,29 +89,29 @@ namespace d14engine::uikit
 
     public:
         static SharedPtr<IconLabel> uniformLayout(
-            WstrRefer labelText = {},
+            WstrParam labelText = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
 
         static SharedPtr<IconLabel> compactLayout(
-            WstrRefer labelText = {},
+            WstrParam labelText = {},
             BmpObjParam iconBitmap = {},
             float iconHeadPadding = 0.0f,
             float iconTailPadding = 0.0f,
             const D2D1_RECT_F& rect = {});
 
         static SharedPtr<IconLabel> iconExpandedLayout(
-            WstrRefer labelText = {},
+            WstrParam labelText = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
 
         static SharedPtr<IconLabel> labelExpandedLayout(
-            WstrRefer labelText = {},
+            WstrParam labelText = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
 
         static SharedPtr<IconLabel> comboBoxLayout(
-            WstrRefer labelText = {},
+            WstrParam labelText = {},
             BmpObjParam iconBitmap = {},
             const D2D1_RECT_F& rect = {});
     };

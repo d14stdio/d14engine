@@ -31,7 +31,7 @@ namespace d14engine::uikit
         const WeakPtr<PopupMenu>& parentMenu() const;
 
         WeakPtr<PopupMenu> associatedMenu() const;
-        void setAssociatedMenu(ShrdPtrRefer<PopupMenu> menu);
+        void setAssociatedMenu(SharedPtrParam<PopupMenu> menu);
 
     public:
         // Controls whether to close parent-menus immediately after clicking.
@@ -49,7 +49,7 @@ namespace d14engine::uikit
         void onRendererDrawD2d1ObjectHelper(Renderer* rndr) override;
 
         // Panel
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         void onMouseButtonHelper(MouseButtonEvent& e) override;
     };

@@ -66,9 +66,9 @@ namespace d14engine::uikit
         // Public Interfaces
         //------------------------------------------------------------------
     public:
-        void onSelectedTabChange(OptRefer<size_t> index);
+        void onSelectedTabChange(OptParam<size_t> index);
 
-        Function<void(TabGroup*, OptRefer<size_t>)> f_onSelectedTabChange = {};
+        Function<void(TabGroup*, OptParam<size_t>)> f_onSelectedTabChange = {};
 
         Function<void(TabGroup*, Window*)> f_onTriggerTabPromoting = {};
 
@@ -76,7 +76,7 @@ namespace d14engine::uikit
         // Protected Helpers
         //------------------------------------------------------------------
     protected:
-        virtual void onSelectedTabChangeHelper(OptRefer<size_t> index);
+        virtual void onSelectedTabChangeHelper(OptParam<size_t> index);
 
         //////////////////////////
         // Graphical Components //
@@ -135,7 +135,7 @@ namespace d14engine::uikit
         SharedPtr<PopupMenu> m_overflowMenu = {};
 
     public:
-        ShrdPtrRefer<PopupMenu> overflowMenu() const;
+        SharedPtrParam<PopupMenu> overflowMenu() const;
 
         //------------------------------------------------------------------
         // Drawing Properties
@@ -148,11 +148,11 @@ namespace d14engine::uikit
         D2D1_RECT_F tabBarAbsoluteRect() const;
 
         // Returns the cached value directly.
-        D2D1_RECT_F tabAbsoluteRect(OptRefer<size_t> index) const;
+        D2D1_RECT_F tabAbsoluteRect(OptParam<size_t> index) const;
 
-        D2D1_RECT_F tabCaptionAbsoluteRect(OptRefer<size_t> index) const;
+        D2D1_RECT_F tabCaptionAbsoluteRect(OptParam<size_t> index) const;
 
-        D2D1_RECT_F separatorAbsoluteRect(OptRefer<size_t> index) const;
+        D2D1_RECT_F separatorAbsoluteRect(OptParam<size_t> index) const;
 
         D2D1_RECT_F overflowButtonAbsoluteRect() const;
 
@@ -168,11 +168,11 @@ namespace d14engine::uikit
         Optional<size_t> m_selectedTabIndex = {};
 
     public:
-        OptRefer<size_t> selectedTabIndex() const;
-        void setSelectedTab(OptRefer<size_t> index);
+        OptParam<size_t> selectedTabIndex() const;
+        void setSelectedTab(OptParam<size_t> index);
 
     protected:
-        TabState getTabState(OptRefer<size_t> index) const;
+        TabState getTabState(OptParam<size_t> index) const;
 
         // Only the visible tabs can be displayed in the tab-bar,
         // and the overflow tabs are listed in the overflow-menu.
@@ -252,6 +252,6 @@ namespace d14engine::uikit
 
         void onMouseButtonHelper(MouseButtonEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
     };
 }

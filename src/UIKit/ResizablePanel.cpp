@@ -210,14 +210,14 @@ namespace d14engine::uikit
         return math_utils::isOverlapped(p, sizingFrameExtendedRect(m_absoluteRect));
     }
 
-    void ResizablePanel::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void ResizablePanel::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Panel::onChangeThemeStyleHelper(style);
+        Panel::onThemeStyleChangedHelper(style);
 
-        onChangeThemeStyleWrapper(style);
+        onThemeStyleChangedWrapper(style);
     }
 
-    void ResizablePanel::onChangeThemeStyleWrapper(const ThemeStyle& style)
+    void ResizablePanel::onThemeStyleChangedWrapper(const ThemeStyle& style)
     {
         appearance().changeTheme(style.name);
     }
@@ -528,7 +528,7 @@ namespace d14engine::uikit
 
     void ResizablePanel::onMouseLeaveWrapper(MouseMoveEvent& e)
     {
-        if (!holdMouseFocus())
+        if (!isMouseFocused())
         {
             m_isLeftHover = m_isTopHover =
             m_isRightHover = m_isBottomHover = false;

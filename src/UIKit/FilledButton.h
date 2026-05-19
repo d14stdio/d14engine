@@ -10,12 +10,12 @@ namespace d14engine::uikit
     struct FilledButton : appearance::FilledButton, FlatButton
     {
         FilledButton(
-            ShrdPtrRefer<IconLabel> content,
+            SharedPtrParam<IconLabel> content,
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
         FilledButton(
-            WstrRefer text = L"Button",
+            WstrParam text = L"Button",
             float roundRadius = 0.0f,
             const D2D1_RECT_F& rect = {});
 
@@ -30,6 +30,6 @@ namespace d14engine::uikit
         // Panel
         //------------------------------------------------------------------
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
     };
 }

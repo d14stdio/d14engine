@@ -65,24 +65,24 @@ namespace d14engine::uikit
         ));
     }
 
-    void ComboBox::onSelectedChange(OptRefer<size_t> index)
+    void ComboBox::onSelectedChange(OptParam<size_t> index)
     {
         onSelectedChangeHelper(index);
 
         if (f_onSelectedChange) f_onSelectedChange(this, index);
     }
 
-    void ComboBox::onSelectedChangeHelper(OptRefer<size_t> index)
+    void ComboBox::onSelectedChangeHelper(OptParam<size_t> index)
     {
         // This method intentionally left blank.
     }
 
-    ShrdPtrRefer<PopupMenu> ComboBox::dropDownMenu() const
+    SharedPtrParam<PopupMenu> ComboBox::dropDownMenu() const
     {
         return m_dropDownMenu;
     }
 
-    void ComboBox::setDropDownMenu(ShrdPtrRefer<PopupMenu> menu)
+    void ComboBox::setDropDownMenu(SharedPtrParam<PopupMenu> menu)
     {
         if (menu && !cpp_lang_utils::isMostDerivedEqual(menu, m_dropDownMenu))
         {
@@ -93,12 +93,12 @@ namespace d14engine::uikit
         }
     }
 
-    OptRefer<size_t> ComboBox::selectedIndex() const
+    OptParam<size_t> ComboBox::selectedIndex() const
     {
         return m_selectedIndex;
     }
 
-    void ComboBox::setSelected(OptRefer<size_t> index)
+    void ComboBox::setSelected(OptParam<size_t> index)
     {
         auto& items = m_dropDownMenu->items();
         if (index.has_value() && index.value() < items.size())
@@ -171,9 +171,9 @@ namespace d14engine::uikit
         m_dropDownMenu->setSize(e.size.width, m_dropDownMenu->height());
     }
 
-    void ComboBox::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void ComboBox::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Button::onChangeThemeStyleHelper(style);
+        Button::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(FlatButton::appearance(), style.name);
     }

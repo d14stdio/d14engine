@@ -14,7 +14,7 @@ using namespace d14engine::renderer;
 
 namespace d14engine::uikit
 {
-    LabelArea::LabelArea(WstrRefer text, const D2D_RECT_F& rect)
+    LabelArea::LabelArea(WstrParam text, const D2D_RECT_F& rect)
         :
         Label(text, rect)
     {
@@ -73,12 +73,12 @@ namespace d14engine::uikit
         );
     }
 
-    void LabelArea::setSelectedText(WstrRefer text)
+    void LabelArea::setSelectedText(WstrParam text)
     {
         setSelectedTextHelper(text);
     }
 
-    bool LabelArea::setSelectedTextHelper(WstrRefer text)
+    bool LabelArea::setSelectedTextHelper(WstrParam text)
     {
         auto result = normalizeText(text);
         auto& source = result.has_value() ? result.value() : text;
@@ -115,7 +115,7 @@ namespace d14engine::uikit
                 m_textLayout = createTextLayout();
                 updateTextOverhangs();
 
-                onTextLayoutChange();
+                onTextLayoutChanged();
                 return true;
             }
             else return false;
@@ -156,7 +156,7 @@ namespace d14engine::uikit
         // Blink Caret //
         /////////////////
 
-        if (holdKeyboardFocus() && (m_caretBlinkingElapsedSecs += deltaSecs) >= blinkingSecs)
+        if (isKeyboardFocused() && (m_caretBlinkingElapsedSecs += deltaSecs) >= blinkingSecs)
         {
             m_caretBlinkingFlag = !m_caretBlinkingFlag;
             m_caretBlinkingElapsedSecs = 0.0f;
@@ -250,9 +250,9 @@ namespace d14engine::uikit
         }
     }
 
-    void LabelArea::onGetKeyboardFocusHelper()
+    void LabelArea::onKeyboardFocusGainedHelper()
     {
-        Label::onGetKeyboardFocusHelper();
+        Label::onKeyboardFocusGainedHelper();
 
         m_caretBlinkingFlag = true;
         m_caretBlinkingElapsedSecs = 0.0f;
@@ -260,9 +260,9 @@ namespace d14engine::uikit
         increaseAnimationCount();
     }
 
-    void LabelArea::onLoseKeyboardFocusHelper()
+    void LabelArea::onKeyboardFocusLostHelper()
     {
-        Label::onLoseKeyboardFocusHelper();
+        Label::onKeyboardFocusLostHelper();
 
         m_caretBlinkingFlag = false;
         m_caretBlinkingElapsedSecs = 0.0f;
@@ -294,7 +294,7 @@ namespace d14engine::uikit
 
         Application::g_app->cursor()->setIcon(Cursor::Text);
 
-        if (holdKeyboardFocus() && e.buttonState.leftPressed)
+        if (isKeyboardFocused() && e.buttonState.leftPressed)
         {
             m_caretBlinkingFlag = true;
             m_caretBlinkingElapsedSecs = 0.0f;
@@ -339,7 +339,7 @@ namespace d14engine::uikit
     {
         Label::onKeyboardHelper(e);
 
-        if (holdKeyboardFocus() && e.state.pressed() && e.CTRL())
+        if (isKeyboardFocused() && e.state.pressed() && e.CTRL())
         {
             switch (e.vkey)
             {
@@ -350,16 +350,16 @@ namespace d14engine::uikit
         }
     }
 
-    void LabelArea::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void LabelArea::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Label::onChangeThemeStyleHelper(style);
+        Label::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }
 
-    void LabelArea::onTextLayoutChangeHelper()
+    void LabelArea::onTextLayoutChangedHelper()
     {
-        Label::onTextLayoutChangeHelper();
+        Label::onTextLayoutChangedHelper();
 
         setCaretPosition(m_caretPosition);
         setSelectedRange(m_selectedRange);

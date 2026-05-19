@@ -76,7 +76,7 @@ namespace d14engine::uikit::appearance
         }
     }
 
-    void ScrollView::Appearance::changeTheme(WstrRefer themeName)
+    void ScrollView::Appearance::changeTheme(WstrParam themeName)
     {
         _D14_FIND_THEME_DATA(themeName);
 

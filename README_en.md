@@ -10,4 +10,4 @@ D14Engine is a set of game development tools for modern Windows platform.
 
 ## About
 
-The "ENGINE" in the logo is in Arcline font. This font has clear lines and only contains simple geometric elements, which is commonly used for displaying printed texts on circuit layouts. We hope that the engine can provide powerful technical support for game development like this font.
+The "ENGINE" in the logo is in Arcline font. This font is inspired by engineering drawings, and it has clear lines and only contains simple geometric elements. We hope that the engine can provide powerful technical support for game development like this font.

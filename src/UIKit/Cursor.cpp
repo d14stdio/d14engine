@@ -7,6 +7,8 @@
 #include "UIKit/BitmapUtils.h"
 #include "UIKit/FileSystemUtils.h"
 
+#include "UIKit/ResourceUtils.h"
+
 using namespace d14engine::renderer;
 using namespace fanim_literals;
 
@@ -17,8 +19,7 @@ namespace d14engine::uikit
         Panel(rect),
         m_classifiedBasicIcons(icons)
     {
-        // Keep the cursor always displayed at the top.
-        ISortable<IDrawObject2D>::m_priority = INT_MAX;
+        // Here left blank intentionally.
     }
 
     void Cursor::initialize()
@@ -26,6 +27,9 @@ namespace d14engine::uikit
         Panel::initialize();
 
         THROW_IF_NULL(Application::g_app);
+
+        // Keep the cursor always displayed at the top.
+        ISortable<IDrawObject2D>::m_priority = INT_MAX;
 
         Application::g_app->drawObjects().insert(shared_from_this());
     }
@@ -39,7 +43,7 @@ namespace d14engine::uikit
         };
     }
 
-    Cursor::IconSeries Cursor::loadBasicIconSeries(WstrRefer themeName)
+    Cursor::IconSeries Cursor::loadBasicIconSeries(WstrParam themeName)
     {
         THROW_IF_NULL(Application::g_app);
 
@@ -101,7 +105,7 @@ do { \
         return icons;
     }
 
-    Cursor::DynamicIcon Cursor::loadBasicIconFrames(WstrRefer framesPath)
+    Cursor::DynamicIcon Cursor::loadBasicIconFrames(WstrParam framesPath)
     {
         DynamicIcon icon = {};
 
@@ -112,7 +116,7 @@ do { \
         animation_utils::BitmapSequence::FramePackage frames = {};
 
         file_system_utils::foreachFileInDir
-        (framesPath, L"*.png", [&](WstrRefer path)
+        (framesPath, L"*.png", [&](WstrParam path)
         {
             auto name = file_system_utils::extractFilePrefix(
                         file_system_utils::extractFileName(path));
@@ -142,7 +146,7 @@ do { \
         return icon;
     }
 
-    void Cursor::registerIcon(WstrRefer themeName, StaticIconIndex index, const StaticIcon& icon)
+    void Cursor::registerIcon(WstrParam themeName, StaticIconIndex index, const StaticIcon& icon)
     {
         auto categoryItor = m_classifiedBasicIcons.find(themeName);
         if (categoryItor != m_classifiedBasicIcons.end())
@@ -152,17 +156,17 @@ do { \
         else (m_classifiedBasicIcons[themeName] = {}).staticIcons[(size_t)index] = icon;
     }
 
-    void Cursor::registerIcon(WstrRefer name, const StaticIcon& icon)
+    void Cursor::registerIcon(WstrParam name, const StaticIcon& icon)
     {
         m_customIcons.staticIcons[name] = icon;
     }
 
-    void Cursor::unregisterStaticIcon(WstrRefer name)
+    void Cursor::unregisterStaticIcon(WstrParam name)
     {
         m_customIcons.staticIcons.erase(name);
     }
 
-    void Cursor::registerIcon(WstrRefer themeName, DynamicIconIndex index, const DynamicIcon& icon)
+    void Cursor::registerIcon(WstrParam themeName, DynamicIconIndex index, const DynamicIcon& icon)
     {
         auto categoryItor = m_classifiedBasicIcons.find(themeName);
         if (categoryItor != m_classifiedBasicIcons.end())
@@ -172,12 +176,12 @@ do { \
         else (m_classifiedBasicIcons[themeName] = {}).dynamicIcons[(size_t)index] = icon;
     }
 
-    void Cursor::registerIcon(WstrRefer name, const DynamicIcon& icon)
+    void Cursor::registerIcon(WstrParam name, const DynamicIcon& icon)
     {
         m_customIcons.dynamicIcons[name] = icon;
     }
 
-    void Cursor::unregisterDynamicIcon(WstrRefer name)
+    void Cursor::unregisterDynamicIcon(WstrParam name)
     {
         m_customIcons.dynamicIcons.erase(name);
     }
@@ -195,7 +199,7 @@ do { \
         }
     }
 
-    void Cursor::setStaticIcon(WstrRefer name)
+    void Cursor::setStaticIcon(WstrParam name)
     {
         m_selectedIconID.emplace<g_staticIconSeat>(name);
     }
@@ -213,7 +217,7 @@ do { \
         }
     }
 
-    void Cursor::setDynamicIcon(WstrRefer name)
+    void Cursor::setDynamicIcon(WstrParam name)
     {
         m_selectedIconID.emplace<g_dynamicIconSeat>(name);
     }

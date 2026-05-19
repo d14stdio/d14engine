@@ -16,7 +16,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     IconLabel::IconLabel(
-        WstrRefer labelText,
+        WstrParam labelText,
         BmpObjParam iconBitmap,
         const D2D1_RECT_F& rect)
         :
@@ -42,7 +42,7 @@ namespace d14engine::uikit
         return m_label;
     }
 
-    void IconLabel::setLabel(ShrdPtrRefer<Label> label)
+    void IconLabel::setLabel(SharedPtrParam<Label> label)
     {
         if (label && !cpp_lang_utils::isMostDerivedEqual(label, m_label))
         {
@@ -103,7 +103,7 @@ namespace d14engine::uikit
         }
     }
 
-    bool IconLabel::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    bool IconLabel::releaseUIObjectHelper(SharedPtrParam<Panel> uiobj)
     {
         if (cpp_lang_utils::isMostDerivedEqual(uiobj, m_label)) return false;
 
@@ -116,7 +116,7 @@ namespace d14engine::uikit
     }
 
     SharedPtr<IconLabel> IconLabel::uniformLayout(
-        WstrRefer labelText,
+        WstrParam labelText,
         BmpObjParam iconBitmap,
         const D2D1_RECT_F& rect)
     {
@@ -175,7 +175,7 @@ namespace d14engine::uikit
     }
 
     SharedPtr<IconLabel> IconLabel::compactLayout(
-        WstrRefer labelText,
+        WstrParam labelText,
         BmpObjParam iconBitmap,
         float iconHeadPadding,
         float iconTailPadding,
@@ -221,7 +221,7 @@ namespace d14engine::uikit
     }
 
     SharedPtr<IconLabel> IconLabel::iconExpandedLayout(
-        WstrRefer labelText,
+        WstrParam labelText,
         BmpObjParam iconBitmap,
         const D2D1_RECT_F& rect)
     {
@@ -265,7 +265,7 @@ namespace d14engine::uikit
     }
 
     SharedPtr<IconLabel> IconLabel::labelExpandedLayout(
-        WstrRefer labelText,
+        WstrParam labelText,
         BmpObjParam iconBitmap,
         const D2D1_RECT_F& rect)
     {
@@ -310,7 +310,7 @@ namespace d14engine::uikit
     }
 
     SharedPtr<IconLabel> IconLabel::comboBoxLayout(
-        WstrRefer labelText,
+        WstrParam labelText,
         BmpObjParam iconBitmap,
         const D2D1_RECT_F& rect)
     {

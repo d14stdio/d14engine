@@ -8,7 +8,7 @@
 namespace d14engine::uikit
 {
     FilledButton::FilledButton(
-        ShrdPtrRefer<IconLabel> content,
+        SharedPtrParam<IconLabel> content,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -16,7 +16,7 @@ namespace d14engine::uikit
         FlatButton(content, roundRadius, rect) { }
 
     FilledButton::FilledButton(
-        WstrRefer text,
+        WstrParam text,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -25,9 +25,9 @@ namespace d14engine::uikit
             roundRadius,
             rect) { }
 
-    void FilledButton::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void FilledButton::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Button::onChangeThemeStyleHelper(style);
+        Button::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(FlatButton::appearance(), style.name);
     }

@@ -74,8 +74,8 @@ namespace d14engine::uikit
         UIDrawTarget m_drawObjects = {};
 
     public:
-        void registerDrawObject(ShrdPtrRefer<Panel> uiobj);
-        void unregisterDrawObject(ShrdPtrRefer<Panel> uiobj);
+        void registerDrawObject(SharedPtrParam<Panel> uiobj);
+        void unregisterDrawObject(SharedPtrParam<Panel> uiobj);
 
         //------------------------------------------------------------------
         // UI Properties
@@ -174,10 +174,10 @@ namespace d14engine::uikit
         float roundRadiusX = 0.0f, roundRadiusY = 0.0f;
 
     protected:
-        bool m_isPlayAnimation = false;
+        bool m_isAnimating = false;
 
     public:
-        bool isPlayAnimation() const;
+        bool isAnimating() const;
 
         void increaseAnimationCount();
         void decreaseAnimationCount();
@@ -202,34 +202,34 @@ namespace d14engine::uikit
     protected:
         WeakPtr<Panel> m_parent = {};
 
-        using ChildObjectSet = ISortable<Panel>::ShrdPrioritySet;
+        using ChildObjectSet = ISortable<Panel>::SharedPrioritySet;
 
         ChildObjectSet m_children = {};
 
         ChildObjectSet m_pinnedChildren = {};
 
-        using ChildObjectTempSet = ISortable<Panel>::WeakPrioritySet;
+        using ChildObjectWeakSet = ISortable<Panel>::WeakPrioritySet;
 
-        ChildObjectTempSet m_hitChildren = {};
+        ChildObjectWeakSet m_hitChildren = {};
 
     public:
         const WeakPtr<Panel>& parent() const;
-        void setParent(ShrdPtrRefer<Panel> uiobj);
+        void setParent(SharedPtrParam<Panel> uiobj);
 
         const ChildObjectSet& children() const;
 
-        void registerUIEvents(ShrdPtrRefer<Panel> uiobj);
-        void unregisterUIEvents(ShrdPtrRefer<Panel> uiobj);
+        void registerUIEvents(SharedPtrParam<Panel> uiobj);
+        void unregisterUIEvents(SharedPtrParam<Panel> uiobj);
 
-        void addUIObject(ShrdPtrRefer<Panel> uiobj);
-        void removeUIObject(ShrdPtrRefer<Panel> uiobj);
+        void addUIObject(SharedPtrParam<Panel> uiobj);
+        void removeUIObject(SharedPtrParam<Panel> uiobj);
 
         void clearAddedUIObjects();
 
         const ChildObjectSet& pinnedChildren() const;
 
-        void pinUIObject(ShrdPtrRefer<Panel> uiobj);
-        void unpinUIObject(ShrdPtrRefer<Panel> uiobj);
+        void pinUIObject(SharedPtrParam<Panel> uiobj);
+        void unpinUIObject(SharedPtrParam<Panel> uiobj);
 
         void clearPinnedUIObjects();
 
@@ -287,28 +287,22 @@ namespace d14engine::uikit
             bool keyboard = presetBoolean;
         };
 
-        // We want to find a word for describing whether the panel is able to
-        // react or respond to the specific app-event, but unfortunately none.
-        //
-        // After consulting Limiao, we are determinded to use "reactability",
-        // since we think it is very consistent with what we want to express.
-
-        struct ApplicationEventReactability : ApplicationEventFlag<true>
+        struct ApplicationEventHandling : ApplicationEventFlag<true>
         {
             bool hitTest = true;
 
             void set(bool value);
         }
-        appEventReactability = {};
+        appEventHandling = {};
 
-        struct ApplicationEventTransparency : ApplicationEventFlag<false>
+        struct ApplicationEventBlocking : ApplicationEventFlag<true>
         {
             // Here left blank intentionally.
         }
-        appEventTransparency = {};
+        appEventBlocking = {};
 
     protected:
-        void updateAppEventReactability();
+        void updateAppEventHandling();
 
     public:
         //------------------------------------------------------------------
@@ -321,9 +315,9 @@ namespace d14engine::uikit
 
         Function<void(Panel*)> f_onRelease = {};
 
-        bool releaseUIObject(ShrdPtrRefer<Panel> uiobj);
+        bool releaseUIObject(SharedPtrParam<Panel> uiobj);
 
-        Function<bool(Panel*, ShrdPtrRefer<Panel>)> f_onReleaseUIObject = {};
+        Function<bool(Panel*, SharedPtrParam<Panel>)> f_onReleaseUIObject = {};
 
         //------------------------------------------------------------------
         // Basic
@@ -333,20 +327,20 @@ namespace d14engine::uikit
 
         Function<bool(const Panel*, const Event::Point&)> f_isHit = {};
 
-        void onGetMouseFocus();
-        void onGetKeyboardFocus();
+        void onMouseFocusGained();
+        void onKeyboardFocusGained();
 
-        Function<void(Panel*)> f_onGetMouseFocus = {};
-        Function<void(Panel*)> f_onGetKeyboardFocus = {};
+        Function<void(Panel*)> f_onMouseFocusGained = {};
+        Function<void(Panel*)> f_onKeyboardFocusGained = {};
 
-        void onLoseMouseFocus();
-        void onLoseKeyboardFocus();
+        void onMouseFocusLost();
+        void onKeyboardFocusLost();
 
-        Function<void(Panel*)> f_onLoseMouseFocus = {};
-        Function<void(Panel*)> f_onLoseKeyboardFocus = {};
+        Function<void(Panel*)> f_onMouseFocusLost = {};
+        Function<void(Panel*)> f_onKeyboardFocusLost = {};
 
-        bool holdMouseFocus() const;
-        bool holdKeyboardFocus() const;
+        bool isMouseFocused() const;
+        bool isKeyboardFocused() const;
 
         //------------------------------------------------------------------
         // Size
@@ -435,13 +429,13 @@ namespace d14engine::uikit
 
         using ThemeStyle = Application::ThemeStyle;
 
-        void onChangeThemeStyle(const ThemeStyle& style);
+        void onThemeStyleChanged(const ThemeStyle& style);
 
-        Function<void(Panel*, const ThemeStyle&)> f_onChangeThemeStyle = {};
+        Function<void(Panel*, const ThemeStyle&)> f_onThemeStyleChanged = {};
 
-        void onChangeLangLocale(WstrRefer codeName);
+        void onLangLocaleChanged(WstrParam codeName);
 
-        Function<void(Panel*, WstrRefer)> f_onChangeLangLocale = {};
+        Function<void(Panel*, WstrParam)> f_onLangLocaleChanged = {};
 
         //------------------------------------------------------------------
         // D2D1 Object
@@ -487,7 +481,7 @@ namespace d14engine::uikit
         // Life Cycle
         //------------------------------------------------------------------
 
-        virtual bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj);
+        virtual bool releaseUIObjectHelper(SharedPtrParam<Panel> uiobj);
 
         //------------------------------------------------------------------
         // Basic
@@ -495,11 +489,11 @@ namespace d14engine::uikit
 
         virtual bool isHitHelper(const Event::Point& p) const;
 
-        virtual void onGetMouseFocusHelper();
-        virtual void onGetKeyboardFocusHelper();
+        virtual void onMouseFocusGainedHelper();
+        virtual void onKeyboardFocusGainedHelper();
 
-        virtual void onLoseMouseFocusHelper();
-        virtual void onLoseKeyboardFocusHelper();
+        virtual void onMouseFocusLostHelper();
+        virtual void onKeyboardFocusLostHelper();
 
         //------------------------------------------------------------------
         // Size
@@ -539,8 +533,8 @@ namespace d14engine::uikit
         // Miscellaneous
         //------------------------------------------------------------------
 
-        virtual void onChangeThemeStyleHelper(const ThemeStyle& style);
-        virtual void onChangeLangLocaleHelper(WstrRefer codeName);
+        virtual void onThemeStyleChangedHelper(const ThemeStyle& style);
+        virtual void onLangLocaleChangedHelper(WstrParam codeName);
 
         //------------------------------------------------------------------
         // D2D1 Object
@@ -577,7 +571,7 @@ namespace d14engine::uikit
 
     template<typename T, typename... Types>
     SharedPtr<T> makeManagedUIObject
-    (ShrdPtrRefer<Panel> parent, Types&& ...args)
+    (SharedPtrParam<Panel> parent, Types&& ...args)
     {
         auto uiobj = makeUIObject<T>(args...);
         parent->addUIObject(uiobj);

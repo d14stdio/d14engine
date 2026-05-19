@@ -48,7 +48,7 @@ namespace d14engine::uikit::appearance
             Appearance();
             static void initialize();
 
-            void changeTheme(WstrRefer themeName) override;
+            void changeTheme(WstrParam themeName) override;
 
             constexpr static auto g_stateCount =
                 cpp_lang_utils::enumCount<OnOffSwitchState::Flag>;

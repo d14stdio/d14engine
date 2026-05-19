@@ -199,7 +199,7 @@ namespace d14engine::uikit
         return m_sampleQuality;
     }
 
-    bool ScenePanel::setMultiSample(UINT count, OptRefer<UINT> quality)
+    bool ScenePanel::setMultiSample(UINT count, OptParam<UINT> quality)
     {
         THROW_IF_NULL(Application::g_app);
 

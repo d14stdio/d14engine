@@ -152,7 +152,7 @@ D14_SET_APP_ENTRY(mainImageViewer)
         Wstring assetsPath = L"Test/UIKit/ImageViewer/";
 
         std::vector<std::pair<Wstring, ComPtr<ID2D1Bitmap1>>> images;
-        file_system_utils::foreachFileInDir(assetsPath, L"*.png", [&](WstrRefer filePath)
+        file_system_utils::foreachFileInDir(assetsPath, L"*.png", [&](WstrParam filePath)
         {
             auto fileName = file_system_utils::extractFileName(filePath);
             auto filePrefix = file_system_utils::extractFilePrefix(fileName);
@@ -294,7 +294,7 @@ D14_SET_APP_ENTRY(mainImageViewer)
             geoInfo.axis.y = { 4, 1 };
             ui_sideLayout->addElement(ui_titleEditor, geoInfo);
 
-            ui_titleEditor->f_onTextChanged = [=](RawTextBox::TextInputObject* obj, WstrRefer text)
+            ui_titleEditor->f_onTextChanged = [=](RawTextBox::TextInputObject* obj, WstrParam text)
             {
                 if (!wk_tabGroup.expired())
                 {
@@ -397,7 +397,7 @@ D14_SET_APP_ENTRY(mainImageViewer)
                 wk_checkBox2 = (WeakPtr<CheckBox>)ui_checkBox2,
                 wk_checkBox3 = (WeakPtr<CheckBox>)ui_checkBox3
             ]
-            (TabGroup* tg, OptRefer<size_t> index)
+            (TabGroup* tg, OptParam<size_t> index)
             {
                 if (!wk_titleEditor.expired())
                 {

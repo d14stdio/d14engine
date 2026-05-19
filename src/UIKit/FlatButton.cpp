@@ -10,7 +10,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     FlatButton::FlatButton(
-        ShrdPtrRefer<IconLabel> content,
+        SharedPtrParam<IconLabel> content,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -18,7 +18,7 @@ namespace d14engine::uikit
         Button(content, roundRadius, rect) { }
 
     FlatButton::FlatButton(
-        WstrRefer text,
+        WstrParam text,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -39,9 +39,9 @@ namespace d14engine::uikit
         Button::onRendererDrawD2d1ObjectHelper(rndr);
     }
 
-    void FlatButton::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void FlatButton::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Button::onChangeThemeStyleHelper(style);
+        Button::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

@@ -14,7 +14,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     ViewItem::ViewItem(
-        ShrdPtrRefer<Panel> content,
+        SharedPtrParam<Panel> content,
         const D2D1_RECT_F& rect)
         :
         Panel(rect, resource_utils::solidColorBrush()),
@@ -27,7 +27,7 @@ namespace d14engine::uikit
         drawBufferRes.loadMask();
     }
 
-    ViewItem::ViewItem(WstrRefer text, const D2D1_RECT_F& rect)
+    ViewItem::ViewItem(WstrParam text, const D2D1_RECT_F& rect)
         :
         ViewItem(IconLabel::uniformLayout(text), rect)
     {
@@ -60,7 +60,7 @@ namespace d14engine::uikit
         return m_content;
     }
 
-    void ViewItem::setContent(ShrdPtrRefer<Panel> content)
+    void ViewItem::setContent(SharedPtrParam<Panel> content)
     {
         if (!cpp_lang_utils::isMostDerivedEqual(content, m_content))
         {
@@ -266,7 +266,7 @@ namespace d14engine::uikit
         return math_utils::isOverlappedExcludingBottom(p, m_absoluteRect);
     }
 
-    bool ViewItem::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    bool ViewItem::releaseUIObjectHelper(SharedPtrParam<Panel> uiobj)
     {
         if (cpp_lang_utils::isMostDerivedEqual(m_content, uiobj)) m_content.reset();
 
@@ -290,9 +290,9 @@ namespace d14engine::uikit
         if (m_content) m_content->transform(selfCoordRect());
     }
 
-    void ViewItem::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void ViewItem::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Panel::onChangeThemeStyleHelper(style);
+        Panel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

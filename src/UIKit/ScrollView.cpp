@@ -16,7 +16,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     ScrollView::ScrollView(
-        ShrdPtrRefer<Panel> content,
+        SharedPtrParam<Panel> content,
         const D2D1_RECT_F& rect)
         :
         Panel(rect, resource_utils::solidColorBrush()),
@@ -97,7 +97,7 @@ namespace d14engine::uikit
         else return { 0.0f, 0.0f };
     }
 
-    void ScrollView::setContent(ShrdPtrRefer<Panel> content)
+    void ScrollView::setContent(SharedPtrParam<Panel> content)
     {
         if (!cpp_lang_utils::isMostDerivedEqual(content, m_content))
         {
@@ -395,7 +395,7 @@ namespace d14engine::uikit
         ResizablePanel::drawD2d1ObjectPosterior(rndr);
     }
 
-    bool ScrollView::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    bool ScrollView::releaseUIObjectHelper(SharedPtrParam<Panel> uiobj)
     {
         if (cpp_lang_utils::isMostDerivedEqual(m_content, uiobj)) m_content.reset();
 
@@ -412,9 +412,9 @@ namespace d14engine::uikit
         setViewportOffset(m_viewportOffset);
     }
 
-    void ScrollView::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void ScrollView::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ResizablePanel::onChangeThemeStyleHelper(style);
+        ResizablePanel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }
@@ -514,7 +514,7 @@ namespace d14engine::uikit
     {
         ResizablePanel::onMouseLeaveHelper(e);
 
-        if (!holdMouseFocus())
+        if (!isMouseFocused())
         {
             m_isHorzBarHover = m_isHorzBarDown =
             m_isVertBarHover = m_isVertBarDown = false;

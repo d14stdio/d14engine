@@ -96,8 +96,8 @@ namespace d14engine::uikit
     protected:
         static BasicIconThemeMap loadBasicIcons();
 
-        static IconSeries loadBasicIconSeries(WstrRefer themeName);
-        static DynamicIcon loadBasicIconFrames(WstrRefer framesPath);
+        static IconSeries loadBasicIconSeries(WstrParam themeName);
+        static DynamicIcon loadBasicIconFrames(WstrParam framesPath);
 
         //------------------------------------------------------------------
         // Register Icons
@@ -119,15 +119,15 @@ namespace d14engine::uikit
         m_customIcons = {};
 
     public:
-        void registerIcon(WstrRefer themeName, StaticIconIndex index, const StaticIcon& icon);
+        void registerIcon(WstrParam themeName, StaticIconIndex index, const StaticIcon& icon);
 
-        void registerIcon(WstrRefer name, const StaticIcon& icon);
-        void unregisterStaticIcon(WstrRefer name);
+        void registerIcon(WstrParam name, const StaticIcon& icon);
+        void unregisterStaticIcon(WstrParam name);
 
-        void registerIcon(WstrRefer themeName, DynamicIconIndex index, const DynamicIcon& icon);
+        void registerIcon(WstrParam themeName, DynamicIconIndex index, const DynamicIcon& icon);
 
-        void registerIcon(WstrRefer name, const DynamicIcon& icon);
-        void unregisterDynamicIcon(WstrRefer name);
+        void registerIcon(WstrParam name, const DynamicIcon& icon);
+        void unregisterDynamicIcon(WstrParam name);
 
         //------------------------------------------------------------------
         // Select Icon
@@ -151,13 +151,13 @@ namespace d14engine::uikit
         // and its category will be decided by current theme automatically.
         //
         // For a custom icon, its icon-name is the unique identifier,
-        // and you may need to manually adapt it in the onChangeThemeStyle.
+        // and you may need to manually adapt it in the onThemeStyleChanged.
 
         void setIcon(StaticIconIndex index);
-        void setStaticIcon(WstrRefer name);
+        void setStaticIcon(WstrParam name);
 
         void setIcon(DynamicIconIndex index);
-        void setDynamicIcon(WstrRefer name);
+        void setDynamicIcon(WstrParam name);
 
         //------------------------------------------------------------------
         // Icon Source

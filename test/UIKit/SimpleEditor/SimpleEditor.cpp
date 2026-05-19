@@ -93,7 +93,7 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
             [
                 wk_mainWindow = (WeakPtr<MainWindow>)ui_mainWindow
             ]
-            (TextBox::TextInputObject* obj, WstrRefer text)
+            (TextBox::TextInputObject* obj, WstrParam text)
             {
                 if (!wk_mainWindow.expired())
                 {
@@ -206,7 +206,7 @@ D14_SET_APP_ENTRY(mainSimpleEditor)
             [
                 wk_characterCount = (WeakPtr<Label>)ui_characterCount
             ]
-            (TextEditor::TextInputObject* obj, WstrRefer text)
+            (TextEditor::TextInputObject* obj, WstrParam text)
             {
                 if (!wk_characterCount.expired())
                 {

@@ -48,6 +48,6 @@ namespace d14engine::uikit
         // Element Geometry Info
         //------------------------------------------------------------------
     protected:
-        void updateElement(ShrdPtrRefer<Panel> elem, const GeometryInfo& geoInfo) override;
+        void updateElement(SharedPtrParam<Panel> elem, const GeometryInfo& geoInfo) override;
     };
 }

@@ -43,15 +43,15 @@ namespace d14engine::uikit
         // Public Interfaces
         //------------------------------------------------------------------
     public:
-        void onSelectedChange(OptRefer<size_t> index);
+        void onSelectedChange(OptParam<size_t> index);
 
-        Function<void(ComboBox*, OptRefer<size_t>)> f_onSelectedChange = {};
+        Function<void(ComboBox*, OptParam<size_t>)> f_onSelectedChange = {};
 
         //------------------------------------------------------------------
         // Protected Helpers
         //------------------------------------------------------------------
     protected:
-        void onSelectedChangeHelper(OptRefer<size_t> index);
+        void onSelectedChangeHelper(OptParam<size_t> index);
 
         //////////////////////////
         // Graphical Components //
@@ -64,8 +64,8 @@ namespace d14engine::uikit
         SharedPtr<PopupMenu> m_dropDownMenu = {};
 
     public:
-        ShrdPtrRefer<PopupMenu> dropDownMenu() const;
-        void setDropDownMenu(ShrdPtrRefer<PopupMenu> menu);
+        SharedPtrParam<PopupMenu> dropDownMenu() const;
+        void setDropDownMenu(SharedPtrParam<PopupMenu> menu);
 
         ///////////////////////
         // Interaction Logic //
@@ -84,8 +84,8 @@ namespace d14engine::uikit
         Optional<size_t> m_selectedIndex = {};
 
     public:
-        OptRefer<size_t> selectedIndex() const;
-        void setSelected(OptRefer<size_t> index);
+        OptParam<size_t> selectedIndex() const;
+        void setSelected(OptParam<size_t> index);
 
         /////////////////////////
         // Interface Overrides //
@@ -104,7 +104,7 @@ namespace d14engine::uikit
 
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         //------------------------------------------------------------------
         // ClickablePanel

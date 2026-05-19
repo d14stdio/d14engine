@@ -69,14 +69,14 @@ void createGalleryTabPage(ConstraintLayout* page)
         auto clearIconLight = loadBitmap(L"SearchBox/Light/Clear.png");
         auto clearIconDark = loadBitmap(L"SearchBox/Dark/Clear.png");
 
-        ui_clearButton->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style)
+        ui_clearButton->f_onThemeStyleChanged = [=](Panel* p, const Panel::ThemeStyle& style)
         {
             auto& content = dynamic_cast<Button*>(p)->content();
             if (style.name == L"Light") content->icon.bitmap = clearIconLight;
             else if (style.name == L"Dark") content->icon.bitmap = clearIconDark;
             content->icon.bitmap.interpolationMode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
             // This ensures visual size of icons is consistent across different DPIs
-            content->icon.customSize = convert(content->icon.bitmap.data->GetPixelSize());
+            content->icon.size = convert(content->icon.bitmap.data->GetPixelSize());
             content->updateLayout();
         };
         ui_clearButton->f_onMouseButtonRelease =
@@ -89,8 +89,8 @@ void createGalleryTabPage(ConstraintLayout* page)
             {
                 auto sh_searchBox = wk_searchBox.lock();
                 sh_searchBox->setText(L"");
-                sh_searchBox->setIndicatorPosition(0);
-                sh_searchBox->setHiliteRange({ 0, 0 });
+                sh_searchBox->setCaretPosition(0);
+                sh_searchBox->setSelectedRange({ 0, 0 });
             }
         };
         auto ui_searchButton = makeManagedUIObject<FlatButton>(
@@ -102,14 +102,14 @@ void createGalleryTabPage(ConstraintLayout* page)
         auto searchIconLight = loadBitmap(L"SearchBox/Light/Search.png");
         auto searchIconDark = loadBitmap(L"SearchBox/Dark/Search.png");
 
-        ui_searchButton->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style)
+        ui_searchButton->f_onThemeStyleChanged = [=](Panel* p, const Panel::ThemeStyle& style)
         {
             auto& content = dynamic_cast<Button*>(p)->content();
             if (style.name == L"Light") content->icon.bitmap = searchIconLight;
             else if (style.name == L"Dark") content->icon.bitmap = searchIconDark;
             content->icon.bitmap.interpolationMode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
             // This ensures visual size of icons is consistent across different DPIs
-            content->icon.customSize = convert(content->icon.bitmap.data->GetPixelSize());
+            content->icon.size = convert(content->icon.bitmap.data->GetPixelSize());
             content->updateLayout();
         };
         ui_searchButton->f_onMouseButtonRelease =
@@ -163,11 +163,11 @@ void createGalleryTabPage(ConstraintLayout* page)
         };
         ui_sideCategory->appendRootItem(items);
 
-        ui_sideCategory->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style)
+        ui_sideCategory->f_onThemeStyleChanged = [=](Panel* p, const Panel::ThemeStyle& style)
         {
             for (auto& page : *categoryPages)
             {
-                page.second->onChangeThemeStyle(style);
+                page.second->onThemeStyleChanged(style);
             }
         };
     }

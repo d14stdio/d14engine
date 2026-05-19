@@ -114,13 +114,13 @@ D14_SET_APP_ENTRY(mainVariousFonts)
         }
         Wstring excerptDir = L"Test/UIKit/VariousFonts/";
 
-        auto getFileSize = [](WstrRefer filePath) -> size_t
+        auto getFileSize = [](WstrParam filePath) -> size_t
         {
             struct _stat fileinfo;
             _wstat(filePath.c_str(), &fileinfo);
             return fileinfo.st_size;
         };
-        file_system_utils::foreachFileInDir(excerptDir, L"*.txt", [&](WstrRefer filePath)
+        file_system_utils::foreachFileInDir(excerptDir, L"*.txt", [&](WstrParam filePath)
         {
             auto fileName = file_system_utils::extractFileName(filePath);
             auto filePrefix = file_system_utils::extractFilePrefix(fileName);
@@ -346,7 +346,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
                     textAntialiasModePairs.begin(), textAntialiasModePairs.end()
                 }
             ]
-            (ComboBox* cb, OptRefer<size_t> index)
+            (ComboBox* cb, OptParam<size_t> index)
             {
                 auto& modeStr = cb->content()->label()->text();
                 app->renderer()->setTextAntialiasMode(textAntialiasModeMap.at(modeStr));
@@ -458,7 +458,7 @@ D14_SET_APP_ENTRY(mainVariousFonts)
                 }
             }
         };
-        ui_fontNameSelector->f_onSelectedChange = [=](ComboBox* cb, OptRefer<size_t> index)
+        ui_fontNameSelector->f_onSelectedChange = [=](ComboBox* cb, OptParam<size_t> index)
         {
             if (!wk_fontSizeSlider.expired() && !wk_fontWeightSelector.expired())
             {

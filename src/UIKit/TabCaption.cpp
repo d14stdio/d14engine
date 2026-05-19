@@ -16,11 +16,11 @@ using namespace d14engine::renderer;
 
 namespace d14engine::uikit
 {
-    TabCaption::TabCaption(ShrdPtrRefer<IconLabel> title)
+    TabCaption::TabCaption(SharedPtrParam<IconLabel> title)
         :
         m_title(title) { }
 
-    TabCaption::TabCaption(WstrRefer text)
+    TabCaption::TabCaption(WstrParam text)
         :
         TabCaption(IconLabel::compactLayout(text)) { }
 
@@ -51,7 +51,7 @@ namespace d14engine::uikit
         return m_title;
     }
 
-    void TabCaption::setTitle(ShrdPtrRefer<IconLabel> title)
+    void TabCaption::setTitle(SharedPtrParam<IconLabel> title)
     {
         if (title && !cpp_lang_utils::isMostDerivedEqual(title, m_title))
         {
@@ -192,9 +192,9 @@ namespace d14engine::uikit
         m_title->transform(titleSelfcoordRect());
     }
 
-    void TabCaption::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void TabCaption::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Panel::onChangeThemeStyleHelper(style);
+        Panel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

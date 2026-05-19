@@ -32,7 +32,7 @@ namespace d14engine::uikit::color_utils
         {
             // Here left blank intentionally.
         }
-        constexpr ABGR(UINT32 abgr) : data(abgr) {}
+        constexpr ABGR(UINT32 abgr) : data(abgr) { }
 
         //------------------------------------------------------------------
         // Conversion

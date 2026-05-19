@@ -64,7 +64,7 @@ SharedPtr<TreeViewItem> createTextPanelPage
 
         ui_layout->addElement(ui_synopsisLabel, geoInfo);
     }
-    DEF_CATEGORY_ITEM(MASTER, TextPanel, Text Panel, 26X26)
+    DEFINE_CATEGORY_ITEM(MASTER, TextPanel, Text Panel, 26X26)
     START_ADD_CHILD_ITEMS
     ADD_CHILD_ITEM_PAGE(Label, Label),
     ADD_CHILD_ITEM_PAGE(IconLabel, Icon Label),
@@ -73,5 +73,5 @@ SharedPtr<TreeViewItem> createTextPanelPage
     ADD_CHILD_ITEM_PAGE(TextEditor, Text Editor),
     ADD_CHILD_ITEM_PAGE(NumberBox, Number Box)
     END_ADD_CHILD_ITEMS
-    RET_CATEGORY_ITEM
+    RETURN_CATEGORY_ITEM
 }

@@ -28,6 +28,6 @@ SharedPtr<TreeViewItem> createFilledButtonPage(ConstraintLayout* page)
             dark.background.color = D2D1::ColorF{ 0x272727 };
         }
     }
-    DEF_CATEGORY_ITEM(SLAVER, FilledButton, Filled Button, 30X18)
-    RET_CATEGORY_ITEM
+    DEFINE_CATEGORY_ITEM(SLAVER, FilledButton, Filled Button, 30X18)
+    RETURN_CATEGORY_ITEM
 }

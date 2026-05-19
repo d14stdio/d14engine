@@ -14,7 +14,7 @@ namespace d14engine::uikit::appearance
             Appearance();
             static void initialize();
 
-            void changeTheme(WstrRefer themeName) override;
+            void changeTheme(WstrParam themeName) override;
 
             float thumbAreaExtension = 8.0f;
 

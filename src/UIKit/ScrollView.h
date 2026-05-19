@@ -10,7 +10,7 @@ namespace d14engine::uikit
 {
     struct ScrollView : appearance::ScrollView, ResizablePanel
     {
-        ScrollView(ShrdPtrRefer<Panel> content = nullptr, const D2D1_RECT_F& rect = {});
+        ScrollView(SharedPtrParam<Panel> content = nullptr, const D2D1_RECT_F& rect = {});
 
         void initialize() override;
 
@@ -70,7 +70,7 @@ namespace d14engine::uikit
             if constexpr (std::is_same_v<T, Panel>) return m_content;
             else return std::dynamic_pointer_cast<T>(m_content);
         }
-        void setContent(ShrdPtrRefer<Panel> content);
+        void setContent(SharedPtrParam<Panel> content);
 
     protected:
         D2D1_POINT_2F m_viewportOffset = { 0.0f, 0.0f };
@@ -118,11 +118,11 @@ namespace d14engine::uikit
         void drawD2d1ObjectPosterior(Renderer* rndr) override;
 
         // Panel
-        bool releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj) override;
+        bool releaseUIObjectHelper(SharedPtrParam<Panel> uiobj) override;
 
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         void onMouseMoveHelper(MouseMoveEvent& e) override;
 

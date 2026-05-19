@@ -183,14 +183,14 @@ namespace d14engine::uikit
         THROW_IF_FAILED(geoSink->Close());
     }
 
-    void TabGroup::onSelectedTabChange(OptRefer<size_t> index)
+    void TabGroup::onSelectedTabChange(OptParam<size_t> index)
     {
         onSelectedTabChangeHelper(index);
 
         if (f_onSelectedTabChange) f_onSelectedTabChange(this, index);
     }
 
-    void TabGroup::onSelectedTabChangeHelper(OptRefer<size_t> index)
+    void TabGroup::onSelectedTabChangeHelper(OptParam<size_t> index)
     {
         // This method intentionally left blank.
     }
@@ -366,7 +366,7 @@ do { \
         };
     }
 
-    D2D1_RECT_F TabGroup::tabAbsoluteRect(OptRefer<size_t> index) const
+    D2D1_RECT_F TabGroup::tabAbsoluteRect(OptParam<size_t> index) const
     {
         if (index.has_value())
         {
@@ -376,7 +376,7 @@ do { \
         return math_utils::zeroRectF();
     }
 
-    D2D1_RECT_F TabGroup::tabCaptionAbsoluteRect(OptRefer<size_t> index) const
+    D2D1_RECT_F TabGroup::tabCaptionAbsoluteRect(OptParam<size_t> index) const
     {
         auto state = getTabState(index);
 
@@ -391,7 +391,7 @@ do { \
         else return math_utils::increaseBottom(tabAbsoluteRect(index), -tabRoundRadius);
     }
 
-    D2D1_RECT_F TabGroup::separatorAbsoluteRect(OptRefer<size_t> index) const
+    D2D1_RECT_F TabGroup::separatorAbsoluteRect(OptParam<size_t> index) const
     {
         auto& geometry = appearance().tabBar.separator.geometry;
 
@@ -411,12 +411,12 @@ do { \
         return math_utils::rect(overflowButtonLeftTop, geometry.size);
     }
 
-    OptRefer<size_t> TabGroup::selectedTabIndex() const
+    OptParam<size_t> TabGroup::selectedTabIndex() const
     {
         return m_selectedTabIndex;
     }
 
-    void TabGroup::setSelectedTab(OptRefer<size_t> index)
+    void TabGroup::setSelectedTab(OptParam<size_t> index)
     {
         if (index.has_value() && index.value() >= m_tabs.size()) return;
 
@@ -469,7 +469,7 @@ do { \
         }
     }
 
-    TabGroup::TabState TabGroup::getTabState(OptRefer<size_t> index) const
+    TabGroup::TabState TabGroup::getTabState(OptParam<size_t> index) const
     {
         if (index.has_value())
         {
@@ -1317,9 +1317,9 @@ do { \
         }
     }
 
-    void TabGroup::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void TabGroup::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ResizablePanel::onChangeThemeStyleHelper(style);
+        ResizablePanel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
 
@@ -1331,7 +1331,7 @@ do { \
 
             if (tab.m_overflowItem->parent().expired())
             {
-                tab.m_overflowItem->onChangeThemeStyle(style);
+                tab.m_overflowItem->onThemeStyleChanged(style);
             }
         }
     }

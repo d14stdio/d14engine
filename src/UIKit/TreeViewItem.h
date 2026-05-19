@@ -18,9 +18,9 @@ namespace d14engine::uikit
     {
         friend TreeView;
 
-        TreeViewItem(ShrdPtrRefer<Panel> content, const D2D1_RECT_F& rect = {});
+        TreeViewItem(SharedPtrParam<Panel> content, const D2D1_RECT_F& rect = {});
 
-        TreeViewItem(WstrRefer text = L"ViewItem", const D2D1_RECT_F& rect = {});
+        TreeViewItem(WstrParam text = L"ViewItem", const D2D1_RECT_F& rect = {});
 
         using ChildItemArray = std::vector<SharedPtr<TreeViewItem>>;
 
@@ -49,7 +49,7 @@ namespace d14engine::uikit
             else return std::dynamic_pointer_cast<T>(content().lock());
         }
         WeakPtr<Panel> content() const;
-        void setContent(ShrdPtrRefer<Panel> content);
+        void setContent(SharedPtrParam<Panel> content);
 
     protected:
         WeakPtr<TreeView> m_parentView = {};
@@ -75,7 +75,7 @@ namespace d14engine::uikit
         {
             friend TreeViewItem;
 
-            ChildItemImpl(ShrdPtrRefer<TreeViewItem> rhs)
+            ChildItemImpl(SharedPtrParam<TreeViewItem> rhs)
                 : ptr(rhs), m_unfoldedHeight(rhs->height()) { }
 
             SharedPtr<TreeViewItem> ptr = {};
@@ -124,7 +124,7 @@ namespace d14engine::uikit
         void removeItem(size_t index, size_t count = 1);
         void clearAllItems();
 
-        WeakPtrRefer<ChildItemImpl> itemImplPtr() const;
+        WeakPtrParam<ChildItemImpl> itemImplPtr() const;
 
     protected:
         void fold(); void notifyHideChildItems();
@@ -173,7 +173,7 @@ namespace d14engine::uikit
         // Panel
         void onSizeHelper(SizeEvent& e) override;
 
-        void onChangeThemeStyleHelper(const ThemeStyle& style) override;
+        void onThemeStyleChangedHelper(const ThemeStyle& style) override;
 
         void onMouseButtonHelper(MouseButtonEvent& e) override;
 

@@ -11,17 +11,17 @@ d14engine::SharedPtr<d14engine::uikit::TreeViewItem> createPageTemplate
 D2D1_SIZE_F convert(const D2D1_SIZE_U& size);
 D2D1_SIZE_U convert(const D2D1_SIZE_F& size);
 
-d14engine::ComPtr<ID2D1Bitmap1> loadBitmap(d14engine::WstrRefer bitmapPath);
+d14engine::ComPtr<ID2D1Bitmap1> loadBitmap(d14engine::WstrParam bitmapPath);
 
 // Type: MASTER, SLAVER
 // Name: Category Name
 // IconSize: 30X18, 26X26, 18X12
-#define DEF_CATEGORY_ITEM(Type, Id, Name, IconSize) \
+#define DEFINE_CATEGORY_ITEM(Type, Id, Name, IconSize) \
 _MAKE_CATEGORY_ITEM(Name, IconSize) \
 _CONFIGURE_CATEGORY_ITEM_ARROW_##Type \
 _CONFIGURE_CATEGORY_ITEM_CONTENT(Id)
 
-#define RET_CATEGORY_ITEM return item;
+#define RETURN_CATEGORY_ITEM return item;
 
 #define _ICON_PADDING_FOR_SIZE_30X9  9.0f, 21.0f
 #define _ICON_PADDING_FOR_SIZE_30X18 9.0f, 21.0f
@@ -52,14 +52,14 @@ auto& label = item->getContent<IconLabel>().lock()->label(); \
 label->setTextFormat(D14_FONT(L"Default/14")); \
 auto icon1 = loadBitmap(L"SideCategory/Light/" L#Id L".png"); \
 auto icon2 = loadBitmap(L"SideCategory/Dark/" L#Id L".png"); \
-item->f_onChangeThemeStyle = [=](Panel* p, const Panel::ThemeStyle& style) \
+item->f_onThemeStyleChanged = [=](Panel* p, const Panel::ThemeStyle& style) \
 { \
     auto content = ((TreeViewItem*)p)->getContent<IconLabel>().lock(); \
     if (style.name == L"Light") content->icon.bitmap = icon1; \
     else if (style.name == L"Dark") content->icon.bitmap = icon2; \
     content->icon.bitmap.interpolationMode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR; \
     /* This ensures visual size of icons is consistent across different DPIs */ \
-    content->icon.customSize = convert(content->icon.bitmap.data->GetPixelSize()); \
+    content->icon.size = convert(content->icon.bitmap.data->GetPixelSize()); \
     content->updateLayout(); \
 };
 

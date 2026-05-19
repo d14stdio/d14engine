@@ -82,7 +82,7 @@ namespace d14engine::uikit
         void initMiscComponents();
 
     public:
-        int run(FuncRefer<void(Application* app)> onLaunch = {});
+        int run(FuncParam<void(Application* app)> onLaunch = {});
 
         void exit(); // The exit code is returned by calling run.
 
@@ -168,8 +168,8 @@ namespace d14engine::uikit
 
         const SharedPtr<UICommandLayer>& uiCmdLayer() const;
 
-        void registerDrawObject(ShrdPtrRefer<Panel> uiobj);
-        void unregisterDrawObject(ShrdPtrRefer<Panel> uiobj);
+        void registerDrawObject(SharedPtrParam<Panel> uiobj);
+        void unregisterDrawObject(SharedPtrParam<Panel> uiobj);
 
         //------------------------------------------------------------------
         // Resource Capture
@@ -198,7 +198,7 @@ namespace d14engine::uikit
         ////////////////////
 
     private:
-        using UIObjectSet = ISortable<Panel>::ShrdPrioritySet;
+        using UIObjectSet = ISortable<Panel>::SharedPrioritySet;
 
         UIObjectSet m_uiObjects = {};
 
@@ -208,25 +208,25 @@ namespace d14engine::uikit
 
         UIObjectSet m_pinnedUIObjects = {};
 
-        using UIObjectTempSet = ISortable<Panel>::WeakPrioritySet;
+        using UIObjectWeakSet = ISortable<Panel>::WeakPrioritySet;
 
-        UIObjectTempSet m_hitUIObjects = {};
+        UIObjectWeakSet m_hitUIObjects = {};
 
     public:
         const UIObjectSet& uiObjects() const;
 
-        void registerUIEvents(ShrdPtrRefer<Panel> uiobj);
-        void unregisterUIEvents(ShrdPtrRefer<Panel> uiobj);
+        void registerUIEvents(SharedPtrParam<Panel> uiobj);
+        void unregisterUIEvents(SharedPtrParam<Panel> uiobj);
 
-        void addUIObject(ShrdPtrRefer<Panel> uiobj);
-        void removeUIObject(ShrdPtrRefer<Panel> uiobj);
+        void addUIObject(SharedPtrParam<Panel> uiobj);
+        void removeUIObject(SharedPtrParam<Panel> uiobj);
 
         void clearAddedUIObjects();
 
         const UIObjectSet& pinnedUIObjects() const;
 
-        void pinUIObject(ShrdPtrRefer<Panel> uiobj);
-        void unpinUIObject(ShrdPtrRefer<Panel> uiobj);
+        void pinUIObject(SharedPtrParam<Panel> uiobj);
+        void unpinUIObject(SharedPtrParam<Panel> uiobj);
 
         void clearPinnedUIObjects();
 
@@ -249,12 +249,12 @@ namespace d14engine::uikit
         enum class FocusType { Mouse, Keyboard };
 
     private:
-        using FocusedTempMap = cpp_lang_utils::EnumMap<FocusType, WeakPtr<Panel>>;
+        using FocusedWeakMap = cpp_lang_utils::EnumMap<FocusType, WeakPtr<Panel>>;
 
-        FocusedTempMap m_focusedUIObjects = {};
+        FocusedWeakMap m_focusedUIObjects = {};
 
     public:
-        void focusUIObject(FocusType focus, ShrdPtrRefer<Panel> uiobj);
+        void focusUIObject(FocusType focus, SharedPtrParam<Panel> uiobj);
 
     private:
         // The UI objects are maintained with a std::set, and the UI event
@@ -382,8 +382,8 @@ namespace d14engine::uikit
         Wstring m_langLocale = L"en-us";
 
     public:
-        WstrRefer langLocale() const;
-        void setLangLocale(WstrRefer codeName);
+        WstrParam langLocale() const;
+        void setLangLocale(WstrParam codeName);
 
         ///////////////////////
         // Custom Extensions //

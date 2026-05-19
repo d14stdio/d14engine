@@ -15,7 +15,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     MainWindow::MainWindow(
-        ShrdPtrRefer<IconLabel> caption,
+        SharedPtrParam<IconLabel> caption,
         float captionPanelHeight,
         float decorativeBarHeight)
         :
@@ -45,11 +45,11 @@ namespace d14engine::uikit
         {
             m_displayState = m_originalDisplayState;
         };
-        respondSetForegroundEvent = false; // bottom-most
+        bringToFrontOnMouseButton = false; // bottom-most
     }
 
     MainWindow::MainWindow(
-        WstrRefer title,
+        WstrParam title,
         float captionPanelHeight,
         float decorativeBarHeight)
         :
@@ -153,9 +153,9 @@ namespace d14engine::uikit
         return ret;
     }
 
-    void MainWindow::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void MainWindow::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        Window::onChangeThemeStyleHelper(style);
+        Window::onThemeStyleChangedHelper(style);
 
         if (m_accentBorder && m_borderColor != NoneColor)
         {

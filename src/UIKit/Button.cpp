@@ -14,7 +14,7 @@ using namespace d14engine::renderer;
 namespace d14engine::uikit
 {
     Button::Button(
-        ShrdPtrRefer<IconLabel> content,
+        SharedPtrParam<IconLabel> content,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -26,7 +26,7 @@ namespace d14engine::uikit
     }
 
     Button::Button(
-        WstrRefer text,
+        WstrParam text,
         float roundRadius,
         const D2D1_RECT_F& rect)
         :
@@ -56,7 +56,7 @@ namespace d14engine::uikit
         return m_content;
     }
 
-    void Button::setContent(ShrdPtrRefer<IconLabel> content)
+    void Button::setContent(SharedPtrParam<IconLabel> content)
     {
         if (content && !cpp_lang_utils::isMostDerivedEqual(content, m_content))
         {
@@ -122,7 +122,7 @@ namespace d14engine::uikit
         );
     }
 
-    bool Button::releaseUIObjectHelper(ShrdPtrRefer<Panel> uiobj)
+    bool Button::releaseUIObjectHelper(SharedPtrParam<Panel> uiobj)
     {
         if (cpp_lang_utils::isMostDerivedEqual(uiobj, m_content)) return false;
 
@@ -155,9 +155,9 @@ namespace d14engine::uikit
         m_state = ButtonState::Idle;
     }
 
-    void Button::onChangeThemeStyleHelper(const ThemeStyle& style)
+    void Button::onThemeStyleChangedHelper(const ThemeStyle& style)
     {
-        ClickablePanel::onChangeThemeStyleHelper(style);
+        ClickablePanel::onThemeStyleChangedHelper(style);
 
         appearance().changeTheme(style.name);
     }

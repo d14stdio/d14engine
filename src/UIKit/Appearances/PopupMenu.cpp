@@ -26,7 +26,7 @@ namespace d14engine::uikit::appearance
         }
     }
 
-    void PopupMenu::Appearance::changeTheme(WstrRefer themeName)
+    void PopupMenu::Appearance::changeTheme(WstrParam themeName)
     {
         _D14_FIND_THEME_DATA(themeName);
 
