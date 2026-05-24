@@ -11,15 +11,12 @@ namespace d14engine::renderer
 }
 namespace d14engine::pipeline
 {
-    struct SpriteGroup : renderer::DrawLayer
+    struct SpriteLayer : renderer::DrawLayer
     {
-        explicit SpriteGroup(renderer::Renderer* rndr);
+        explicit SpriteLayer(renderer::Renderer* rndr);
 
         // prevent std::unique_ptr from generating default deleter
-        virtual ~SpriteGroup() = default;
-
-    protected:
-        void onRendererDrawD3d12LayerHelper(renderer::Renderer* rndr) override;
+        virtual ~SpriteLayer() = default;
 
     protected:
         ComPtr<ID3D12RootSignature> m_rootSigature = {};
@@ -38,5 +35,8 @@ namespace d14engine::pipeline
         void createRootSignature();
         void createPipelineState();
         void createVertexBuffer();
+
+    protected:
+        void onRendererDrawD3d12LayerHelper(renderer::Renderer* rndr) override;
     };
 }

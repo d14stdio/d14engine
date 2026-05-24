@@ -9,6 +9,11 @@
 
 namespace d14engine::uikit::platform_utils
 {
+    // It is safe to return the temporary `wpgmptr` here because
+    // `_get_wpgmptr` makes it point to a global variable (const static)
+    // whose storage duration lasts for the entire lifetime of the app.
+    // Therefore, there is no risk of memory leaks or dangling pointers.
+
     WstringView exePath()
     {
         wchar_t* wpgmptr = {};

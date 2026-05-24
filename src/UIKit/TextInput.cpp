@@ -46,9 +46,10 @@ namespace d14engine::uikit
 
         if (isKeyboardFocused() && animSetting.enabled && totalDistance > 0.0f)
         {
-            m_dynamicBottomLineLength = animation_utils::motionAccelUniformDecel
-                (m_dynamicBottomLineLength, deltaSecs, totalDistance,
-                animSetting.durationInSecs.uniform, animSetting.durationInSecs.variable);
+            m_dynamicBottomLineLength = animation_utils::advanceTrapezoidalMotion(
+                m_dynamicBottomLineLength, deltaSecs, totalDistance,
+                animSetting.durationInSecs.uniform, animSetting.durationInSecs.variable
+            );
         }
     }
 
@@ -95,15 +96,12 @@ namespace d14engine::uikit
             });
             auto point1 = math_utils::offset(point0, { m_dynamicBottomLineLength, 0.0f });
 
-            auto solidColorBrush = resource_utils::solidColorBrush();
-            float strokeWidth = srcBtlnSetting.strokeWidth;
-
             rndr->d2d1DeviceContext()->DrawLine
             (
             /* point0      */ point0,
             /* point1      */ point1,
-            /* brush       */ solidColorBrush,
-            /* strokeWidth */ strokeWidth
+            /* brush       */ resource_utils::solidColorBrush(),
+            /* strokeWidth */ srcBtlnSetting.strokeWidth
             );
         }
     }

@@ -37,6 +37,11 @@ namespace d14engine
     using OptParam = const Optional<T>&;
 
     template<typename T>
+    using Ref = std::reference_wrapper<T>;
+    template<typename T>
+    using RefParam = const Ref<T>&;
+
+    template<typename T>
     using SharedPtr = std::shared_ptr<T>;
     template<typename T>
     using SharedPtrParam = const SharedPtr<T>&;

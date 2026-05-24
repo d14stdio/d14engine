@@ -14,10 +14,10 @@ using namespace fanim_literals;
 
 namespace d14engine::uikit
 {
-    Cursor::Cursor(const BasicIconThemeMap& icons, const D2D1_RECT_F& rect)
+    Cursor::Cursor(const D2D1_RECT_F& rect, const ThemeIconLibrary& iconLib)
         :
         Panel(rect),
-        m_classifiedBasicIcons(icons)
+        m_themeIconLibrary(iconLib)
     {
         // Here left blank intentionally.
     }
@@ -34,20 +34,20 @@ namespace d14engine::uikit
         Application::g_app->drawObjects().insert(shared_from_this());
     }
 
-    Cursor::BasicIconThemeMap Cursor::loadBasicIcons()
+    Cursor::ThemeIconLibrary Cursor::loadThemeIconLibrary()
     {
         return
         {
-            { L"Light", loadBasicIconSeries(L"Light") },
-            { L"Dark", loadBasicIconSeries(L"Dark") }
+            { L"Light", loadThemeIcon(L"Light") },
+            { L"Dark",  loadThemeIcon(L"Dark") }
         };
     }
 
-    Cursor::IconSeries Cursor::loadBasicIconSeries(WstrParam themeName)
+    Cursor::ThemeIcon Cursor::loadThemeIcon(WstrParam themeName)
     {
         THROW_IF_NULL(Application::g_app);
 
-        IconSeries icons = {};
+        ThemeIcon icons = {};
 
         auto cursorPath = Application::g_app->createInfo.cursorPath() + themeName + L"/";
 
@@ -92,7 +92,7 @@ namespace d14engine::uikit
 
 #define LOAD_DYNAMIC_ICON(Name, ...) \
 do { \
-    auto frames = loadBasicIconFrames(cursorPath + L#Name L"/"); \
+    auto frames = loadDynamicIcon(cursorPath + L#Name L"/"); \
     frames.hotSpotOffset = __VA_ARGS__; \
     icons.dynamicIcons[(size_t)DynamicIconIndex::Name] = std::move(frames); \
 } while (0)
@@ -105,7 +105,7 @@ do { \
         return icons;
     }
 
-    Cursor::DynamicIcon Cursor::loadBasicIconFrames(WstrParam framesPath)
+    Cursor::DynamicIcon Cursor::loadDynamicIcon(WstrParam imagePath)
     {
         DynamicIcon icon = {};
 
@@ -116,7 +116,7 @@ do { \
         animation_utils::BitmapSequence::FramePackage frames = {};
 
         file_system_utils::foreachFileInDir
-        (framesPath, L"*.png", [&](WstrParam path)
+        (imagePath, L"*.png", [&](WstrParam path)
         {
             auto name = file_system_utils::extractFilePrefix(
                         file_system_utils::extractFileName(path));
@@ -146,93 +146,107 @@ do { \
         return icon;
     }
 
-    void Cursor::registerIcon(WstrParam themeName, StaticIconIndex index, const StaticIcon& icon)
+    void Cursor::registerThemeIcon(WstrParam themeName, const ThemeIcon& icon)
     {
-        auto categoryItor = m_classifiedBasicIcons.find(themeName);
-        if (categoryItor != m_classifiedBasicIcons.end())
+        auto iconItor = m_themeIconLibrary.find(themeName);
+        if (iconItor != m_themeIconLibrary.end())
         {
-            categoryItor->second.staticIcons[(size_t)index] = icon;
+            iconItor->second = icon;
         }
-        else (m_classifiedBasicIcons[themeName] = {}).staticIcons[(size_t)index] = icon;
+        else m_themeIconLibrary[themeName] = icon;
     }
 
-    void Cursor::registerIcon(WstrParam name, const StaticIcon& icon)
+    void Cursor::unregisterThemeIcon(WstrParam themeName)
     {
-        m_customIcons.staticIcons[name] = icon;
+        m_themeIconLibrary.erase(themeName);
     }
 
-    void Cursor::unregisterStaticIcon(WstrParam name)
+    void Cursor::registerNamedIcon(WstrParam iconName, const NamedIcon& icon)
     {
-        m_customIcons.staticIcons.erase(name);
-    }
-
-    void Cursor::registerIcon(WstrParam themeName, DynamicIconIndex index, const DynamicIcon& icon)
-    {
-        auto categoryItor = m_classifiedBasicIcons.find(themeName);
-        if (categoryItor != m_classifiedBasicIcons.end())
+        auto iconItor = m_namedIconLibrary.find(iconName);
+        if (iconItor != m_namedIconLibrary.end())
         {
-            categoryItor->second.dynamicIcons[(size_t)index] = icon;
+            iconItor->second = icon;
         }
-        else (m_classifiedBasicIcons[themeName] = {}).dynamicIcons[(size_t)index] = icon;
+        else m_namedIconLibrary[iconName] = icon;
     }
 
-    void Cursor::registerIcon(WstrParam name, const DynamicIcon& icon)
+    void Cursor::unregisterNamedIcon(WstrParam iconName)
     {
-        m_customIcons.dynamicIcons[name] = icon;
+        m_namedIconLibrary.erase(iconName);
     }
 
-    void Cursor::unregisterDynamicIcon(WstrParam name)
-    {
-        m_customIcons.dynamicIcons.erase(name);
-    }
-
-    void Cursor::setIcon(StaticIconIndex index)
+    void Cursor::setIcon(const IconIDView& iconID)
     {
         THROW_IF_NULL(Application::g_app);
 
-        m_selectedIconID = index;
-
-        if (m_iconSource == System && !m_systemIconUpdateFlag)
+        if (std::holds_alternative<WstringView>(iconID))
         {
-            m_systemIconUpdateFlag = true;
+            m_selectedIconID = (Wstring)std::get<WstringView>(iconID);
+        }
+        else if (std::holds_alternative<StaticIconIndex>(iconID))
+        {
+            m_selectedIconID = std::get<StaticIconIndex>(iconID);
+        }
+        else if (std::holds_alternative<DynamicIconIndex>(iconID))
+        {
+            m_selectedIconID = std::get<DynamicIconIndex>(iconID);
+        }
+        else THROW_ERROR(L"Invalid IconID type: Cursor::setIcon.");
+
+        if (m_drawBackend == System && !m_hasPendingSetCursorMessage)
+        {
+            m_hasPendingSetCursorMessage = true;
             PostMessage(Application::g_app->win32Window(), WM_SETCURSOR, 0, HTCLIENT);
         }
     }
 
-    void Cursor::setStaticIcon(WstrParam name)
+    Cursor::DrawBackend Cursor::drawBackend() const
     {
-        m_selectedIconID.emplace<g_staticIconSeat>(name);
+        return m_drawBackend;
     }
 
-    void Cursor::setIcon(DynamicIconIndex index)
+    void Cursor::setDrawBackend(DrawBackend backend)
+    {
+        if ((m_drawBackend = backend) == System)
+        {
+            PostMessage(Application::g_app->win32Window(), WM_SETCURSOR, 0, HTCLIENT);
+        }
+    }
+
+    Cursor::IconObject Cursor::getIconObject(const IconIDData& iconIDData)
     {
         THROW_IF_NULL(Application::g_app);
 
-        m_selectedIconID = index;
+        auto& app = Application::g_app;
 
-        if (m_iconSource == System && !m_systemIconUpdateFlag)
+        if (std::holds_alternative<Wstring>(iconIDData))
         {
-            m_systemIconUpdateFlag = true;
-            PostMessage(Application::g_app->win32Window(), WM_SETCURSOR, 0, HTCLIENT);
+            auto& iconID = std::get<Wstring>(iconIDData);
+            auto& namedIcon = m_namedIconLibrary.at(iconID);
+            if (std::holds_alternative<StaticIcon>(namedIcon))
+            {
+                return std::get<StaticIcon>(namedIcon);
+            }
+            else if (std::holds_alternative<DynamicIcon>(namedIcon))
+            {
+                return std::get<DynamicIcon>(namedIcon);
+            }
+            else THROW_ERROR(L"Invalid IconID type: Cursor::getIconObject");
         }
-    }
-
-    void Cursor::setDynamicIcon(WstrParam name)
-    {
-        m_selectedIconID.emplace<g_dynamicIconSeat>(name);
-    }
-
-    Cursor::IconSource Cursor::iconSource() const
-    {
-        return m_iconSource;
-    }
-
-    void Cursor::setIconSource(IconSource src)
-    {
-        if ((m_iconSource = src) == System)
+        else if (std::holds_alternative<StaticIconIndex>(iconIDData))
         {
-            PostMessage(Application::g_app->win32Window(), WM_SETCURSOR, 0, HTCLIENT);
+            auto& iconID = std::get<StaticIconIndex>(iconIDData);
+            auto& themeIcon = m_themeIconLibrary.at(app->themeStyle().name);
+            return themeIcon.staticIcons.at((size_t)iconID);
         }
+        else if (std::holds_alternative<DynamicIconIndex>(iconIDData))
+        {
+            auto& iconID = std::get<DynamicIconIndex>(iconIDData);
+            auto& themeIcon = m_themeIconLibrary.at(app->themeStyle().name);
+            return themeIcon.dynamicIcons.at((size_t)iconID);
+        }
+        else THROW_ERROR(L"Invalid IconID type: Cursor::getIconObject");
     }
 
     void Cursor::setSystemIcon()
@@ -241,108 +255,83 @@ do { \
         {
 #define SET_CURSOR(Icon_Name) SetCursor(LoadCursor(nullptr, Icon_Name)); break
 
-            if (m_selectedIconID.index() == g_staticIconSeat)
+            if (std::holds_alternative<Wstring>(m_selectedIconID))
             {
-                auto& iconID1 = std::get<g_staticIconSeat>(m_selectedIconID);
-                if (iconID1.index() == g_basicIconSeat)
+                SetCursor(nullptr);
+            }
+            else if (std::holds_alternative<StaticIconIndex>(m_selectedIconID))
+            {
+                switch (std::get<StaticIconIndex>(m_selectedIconID))
                 {
-                    auto& iconID2 = std::get<g_basicIconSeat>(iconID1);
-                    switch (iconID2)
-                    {
-                    case Alternate: SET_CURSOR(IDC_UPARROW);
-                    case Arrow:     SET_CURSOR(IDC_ARROW);
-                    case BackDiag:  SET_CURSOR(IDC_SIZENESW);
-                    case Hand:      SET_CURSOR(IDC_HAND);
-                    case Help:      SET_CURSOR(IDC_HELP);
-                    case HorzSize:  SET_CURSOR(IDC_SIZEWE);
-                    case MainDiag:  SET_CURSOR(IDC_SIZENWSE);
-                    case Move:      SET_CURSOR(IDC_SIZEALL);
-                    case Person:    SET_CURSOR(IDC_PERSON);
-                    case Pin:       SET_CURSOR(IDC_PIN);
-                    case Select:    SET_CURSOR(IDC_CROSS);
-                    case Stop:      SET_CURSOR(IDC_NO);
-                    case Text:      SET_CURSOR(IDC_IBEAM);
-                    case VertSize:  SET_CURSOR(IDC_SIZENS);
-                    default: SetCursor(nullptr); break;
-                    }
-                    return;
+                case Alternate: SET_CURSOR(IDC_UPARROW);
+                case Arrow:     SET_CURSOR(IDC_ARROW);
+                case BackDiag:  SET_CURSOR(IDC_SIZENESW);
+                case Hand:      SET_CURSOR(IDC_HAND);
+                case Help:      SET_CURSOR(IDC_HELP);
+                case HorzSize:  SET_CURSOR(IDC_SIZEWE);
+                case MainDiag:  SET_CURSOR(IDC_SIZENWSE);
+                case Move:      SET_CURSOR(IDC_SIZEALL);
+                case Person:    SET_CURSOR(IDC_PERSON);
+                case Pin:       SET_CURSOR(IDC_PIN);
+                case Select:    SET_CURSOR(IDC_CROSS);
+                case Stop:      SET_CURSOR(IDC_NO);
+                case Text:      SET_CURSOR(IDC_IBEAM);
+                case VertSize:  SET_CURSOR(IDC_SIZENS);
+                default: SetCursor(nullptr); break;
                 }
             }
-            else if (m_selectedIconID.index() == g_dynamicIconSeat)
+            else if (std::holds_alternative<DynamicIconIndex>(m_selectedIconID))
             {
-                auto& iconID1 = std::get<g_dynamicIconSeat>(m_selectedIconID);
-                if (iconID1.index() == g_basicIconSeat)
+                switch (std::get<DynamicIconIndex>(m_selectedIconID))
                 {
-                    auto& iconID2 = std::get<g_basicIconSeat>(iconID1);
-                    switch (iconID2)
-                    {
-                    case Busy:    SET_CURSOR(IDC_WAIT);
-                    case Working: SET_CURSOR(IDC_APPSTARTING);
-                    default: SetCursor(nullptr); break;
-                    }
-                    return;
+                case Busy:    SET_CURSOR(IDC_WAIT);
+                case Working: SET_CURSOR(IDC_APPSTARTING);
+                default: SetCursor(nullptr); break;
                 }
             }
 #undef SET_CURSOR
         }
-        SetCursor(nullptr);
-    }
-
-    Cursor::StaticIcon& Cursor::getCurrentSelectedStaticIcon()
-    {
-        THROW_IF_NULL(Application::g_app);
-
-        auto& iconID = std::get<g_staticIconSeat>(m_selectedIconID);
-        auto& basicIcons = m_classifiedBasicIcons.at(Application::g_app->themeStyle().name);
-
-        return (iconID.index() == g_basicIconSeat) ?
-            basicIcons.staticIcons[(size_t)std::get<g_basicIconSeat>(iconID)] :
-            m_customIcons.staticIcons[std::get<g_customIconSeat>(iconID)];
-    }
-
-    Cursor::DynamicIcon& Cursor::getCurrentSelectedDynamicIcon()
-    {
-        THROW_IF_NULL(Application::g_app);
-
-        auto& iconID = std::get<g_dynamicIconSeat>(m_selectedIconID);
-        auto& basicIcons = m_classifiedBasicIcons.at(Application::g_app->themeStyle().name);
-
-        return (iconID.index() == g_basicIconSeat) ?
-            basicIcons.dynamicIcons[(size_t)std::get<g_basicIconSeat>(iconID)] :
-            m_customIcons.dynamicIcons[std::get<g_customIconSeat>(iconID)];
+        else SetCursor(nullptr);
     }
 
     void Cursor::onRendererUpdateObject2DHelper(Renderer* rndr)
     {
-        if (m_iconSource == UIKit)
+        if (m_drawBackend == UIKit)
         {
-            if (m_selectedIconID.index() == g_dynamicIconSeat)
+            auto iconObj = getIconObject(m_selectedIconID);
+            if (std::holds_alternative<Ref<DynamicIcon>>(iconObj))
             {
-                getCurrentSelectedDynamicIcon().bitmapData.update(rndr);
+                auto& icon = std::get<Ref<DynamicIcon>>(iconObj).get();
+                icon.bitmapData.update(rndr);
             }
         }
     }
 
     void Cursor::onRendererDrawD2d1ObjectHelper(Renderer* rndr)
     {
-        if (m_iconSource == UIKit)
+        if (m_drawBackend == UIKit)
         {
-            if (m_lastSelectedIconID.index() == g_staticIconSeat &&
-                m_selectedIconID.index() == g_dynamicIconSeat)
+            auto iconObj = getIconObject(m_selectedIconID);
+            auto lastIconObj = getIconObject(m_lastSelectedIconID);
+
+            if (std::holds_alternative<Ref<DynamicIcon>>(iconObj) &&
+                std::holds_alternative<Ref<StaticIcon>>(lastIconObj))
             {
-                getCurrentSelectedDynamicIcon().bitmapData.restore();
+                auto& icon = std::get<Ref<DynamicIcon>>(iconObj).get();
+
+                icon.bitmapData.restore();
                 increaseAnimationCount();
             }
-            if (m_lastSelectedIconID.index() == g_dynamicIconSeat &&
-                m_selectedIconID.index() == g_staticIconSeat)
+            if (std::holds_alternative<Ref<StaticIcon>>(iconObj) &&
+                std::holds_alternative<Ref<DynamicIcon>>(lastIconObj))
             {
                 decreaseAnimationCount();
             }
             m_lastSelectedIconID = m_selectedIconID;
 
-            if (m_selectedIconID.index() == g_staticIconSeat)
+            if (std::holds_alternative<Ref<StaticIcon>>(iconObj))
             {
-                auto& icon = getCurrentSelectedStaticIcon();
+                auto& icon = std::get<Ref<StaticIcon>>(iconObj).get();
 
                 auto hs = math_utils::minus(icon.hotSpotOffset);
                 auto rect = math_utils::offset(m_absoluteRect, hs);
@@ -356,9 +345,9 @@ do { \
                 /* interpolationMode    */ bmpobj.getInterpolationMode()
                 );
             }
-            else if (m_selectedIconID.index() == g_dynamicIconSeat)
+            else if (std::holds_alternative<Ref<DynamicIcon>>(iconObj))
             {
-                auto& icon = getCurrentSelectedDynamicIcon();
+                auto& icon = std::get<Ref<DynamicIcon>>(iconObj).get();
 
                 auto hs = math_utils::minus(icon.hotSpotOffset);
                 auto rect = math_utils::offset(m_absoluteRect, hs);

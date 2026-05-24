@@ -118,7 +118,7 @@ namespace d14engine::uikit
             float totalDistance = std::abs(leftOffsetOn - leftOffsetOff);
 
             m_currHandleDisplacement =
-                animation_utils::motionAccelUniformDecel(
+                animation_utils::advanceTrapezoidalMotion(
                     m_currHandleDisplacement,
                     deltaSecs, totalDistance,
                     animSetting.durationInSecs.uniform,

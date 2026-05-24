@@ -27,12 +27,12 @@ D14_SET_APP_ENTRY(mainWidgetsGallery)
     };
     return Application(info).run([&](Application* app)
     {
-        app->cursor()->setIconSource(Cursor::IconSource::UIKit);
+        app->cursor()->setDrawBackend(Cursor::UIKit);
 
         auto ui_mainWindow = makeRootUIObject<MainWindow>(L"D14Engine - WidgetsGallery @ UIKit");
         {
-            ui_mainWindow->setCaptionPanelHeight(40.0f);
-            ui_mainWindow->setDecorativeBarHeight(2.0f);
+            ui_mainWindow->setTitleBarHeight(40.0f);
+            ui_mainWindow->setAccentBarHeight(2.0f);
 
             ui_mainWindow->bringToFront();
         }

@@ -55,7 +55,7 @@ namespace d14engine::uikit
 #undef SET_DYNAMIC_ALIAS
 
         //------------------------------------------------------------------
-        // Icon Object
+        // Icon Types
         //------------------------------------------------------------------
 
         template<typename BitmapData>
@@ -69,20 +69,20 @@ namespace d14engine::uikit
         using StaticIconMap = cpp_lang_utils::EnumMap<StaticIconIndex, StaticIcon>;
         using DynamicIconMap = cpp_lang_utils::EnumMap<DynamicIconIndex, DynamicIcon>;
 
-        struct IconSeries
+        struct ThemeIcon
         {
             StaticIconMap staticIcons = {};
             DynamicIconMap dynamicIcons = {};
         };
-        using BasicIconThemeMap = std::unordered_map<Wstring, IconSeries>;
+        using ThemeIconLibrary = std::unordered_map<Wstring, ThemeIcon>;
 
         //------------------------------------------------------------------
         // Initialization
         //------------------------------------------------------------------
 
         Cursor(
-            const BasicIconThemeMap& icons = loadBasicIcons(),
-            const D2D1_RECT_F& rect = { 0.0f, 0.0f, 32.0f, 32.0f });
+            const D2D1_RECT_F& rect = { 0.0f, 0.0f, 32.0f, 32.0f },
+            const ThemeIconLibrary& iconLib = loadThemeIconLibrary());
 
         void initialize() override;
 
@@ -91,106 +91,81 @@ namespace d14engine::uikit
         ///////////////////////
 
         //------------------------------------------------------------------
-        // Default Icons
+        // Theme Icons
         //------------------------------------------------------------------
     protected:
-        static BasicIconThemeMap loadBasicIcons();
+        ThemeIconLibrary m_themeIconLibrary = {};
 
-        static IconSeries loadBasicIconSeries(WstrParam themeName);
-        static DynamicIcon loadBasicIconFrames(WstrParam framesPath);
+        static ThemeIconLibrary loadThemeIconLibrary();
 
-        //------------------------------------------------------------------
-        // Register Icons
-        //------------------------------------------------------------------
-    protected:
-        BasicIconThemeMap m_classifiedBasicIcons = {};
-
-        template<typename T>
-        using IconLibrary = std::unordered_map<Wstring, T>;
-
-        using StaticIconLibrary = IconLibrary<StaticIcon>;
-        using DynamicIconLibrary = IconLibrary<DynamicIcon>;
-
-        struct CustomIconSeries
-        {
-            StaticIconLibrary staticIcons = {};
-            DynamicIconLibrary dynamicIcons = {};
-        }
-        m_customIcons = {};
+        static ThemeIcon loadThemeIcon(WstrParam themeName);
+        static DynamicIcon loadDynamicIcon(WstrParam imagePath);
 
     public:
-        void registerIcon(WstrParam themeName, StaticIconIndex index, const StaticIcon& icon);
+        void registerThemeIcon(WstrParam themeName, const ThemeIcon& icon);
+        void unregisterThemeIcon(WstrParam themeName);
 
-        void registerIcon(WstrParam name, const StaticIcon& icon);
-        void unregisterStaticIcon(WstrParam name);
+        //------------------------------------------------------------------
+        // Named Icons
+        //------------------------------------------------------------------
+    protected:
+        using NamedIcon = Variant<StaticIcon, DynamicIcon>;
+        using NamedIconLibrary = std::unordered_map<Wstring, NamedIcon>;
 
-        void registerIcon(WstrParam themeName, DynamicIconIndex index, const DynamicIcon& icon);
+        NamedIconLibrary m_namedIconLibrary = {};
 
-        void registerIcon(WstrParam name, const DynamicIcon& icon);
-        void unregisterDynamicIcon(WstrParam name);
+    public:
+        void registerNamedIcon(WstrParam iconName, const NamedIcon& icon);
+        void unregisterNamedIcon(WstrParam iconName);
 
         //------------------------------------------------------------------
         // Select Icon
         //------------------------------------------------------------------
     protected:
         template<typename T>
-        using IconID = Variant<T, Wstring>;
-        constexpr static size_t g_basicIconSeat = 0, g_customIconSeat = 1;
+        using IconID = Variant<StaticIconIndex, DynamicIconIndex, T>;
 
-        using StaticIconID = IconID<StaticIconIndex>;
-        using DynamicIconID = IconID<DynamicIconIndex>;
+        using IconIDData = IconID<Wstring>;
+        using IconIDView = IconID<WstringView>;
 
-        using SelectedIconID = Variant<StaticIconID, DynamicIconID>;
-        constexpr static size_t g_staticIconSeat = 0, g_dynamicIconSeat = 1;
-
-        SelectedIconID m_selectedIconID = StaticIconIndex::Arrow;
-        SelectedIconID m_lastSelectedIconID = StaticIconIndex::Arrow;
+        IconIDData m_selectedIconID = Arrow;
+        IconIDData m_lastSelectedIconID = Arrow;
 
     public:
-        // To show a basic icon, you only need to specify the index,
-        // and its category will be decided by current theme automatically.
-        //
-        // For a custom icon, its icon-name is the unique identifier,
-        // and you may need to manually adapt it in the onThemeStyleChanged.
+        void setIcon(const IconIDView& iconID);
 
-        void setIcon(StaticIconIndex index);
-        void setStaticIcon(WstrParam name);
-
-        void setIcon(DynamicIconIndex index);
-        void setDynamicIcon(WstrParam name);
+        Optional<Wstring> customIconTheme = {};
 
         //------------------------------------------------------------------
-        // Icon Source
+        // Draw Backend
         //------------------------------------------------------------------
     public:
-        enum class IconSource { System, UIKit };
+        enum class DrawBackend { System, UIKit };
 
-        constexpr static auto System = IconSource::System;
-        constexpr static auto UIKit = IconSource::UIKit;
+        constexpr static auto System = DrawBackend::System;
+        constexpr static auto UIKit = DrawBackend::UIKit;
 
     protected:
-        IconSource m_iconSource = System;
+        DrawBackend m_drawBackend = System;
 
     public:
-        IconSource iconSource() const;
-        void setIconSource(IconSource src);
-
-        //------------------------------------------------------------------
-        // System Icons
-        //------------------------------------------------------------------
-    protected:
-        bool m_systemIconUpdateFlag = false;
-
-        // Displays the corresponding system default cursor
-        // related on the currently selected basic icon index.
-        void setSystemIcon();
+        DrawBackend drawBackend() const;
+        void setDrawBackend(DrawBackend backend);
 
         //------------------------------------------------------------------
         // Miscellaneous
         //------------------------------------------------------------------
     protected:
-        StaticIcon& getCurrentSelectedStaticIcon();
-        DynamicIcon& getCurrentSelectedDynamicIcon();
+        // Displays the corresponding system built-in cursor
+        // related to the currently selected theme icon index.
+        void setSystemIcon();
+
+        bool m_hasPendingSetCursorMessage = false;
+
+    protected:
+        using IconObject = Variant<Ref<StaticIcon>, Ref<DynamicIcon>>;
+
+        IconObject getIconObject(const IconIDData& iconIDData);
 
         /////////////////////////
         // Interface Overrides //

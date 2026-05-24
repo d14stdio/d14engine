@@ -19,15 +19,15 @@ namespace d14engine::uikit
     Window::Window(
         SharedPtrParam<IconLabel> caption,
         const D2D1_RECT_F& rect,
-        float captionPanelHeight,
-        float decorativeBarHeight)
+        float titleBarHeight,
+        float accentBarHeight)
         :
         Panel(rect, resource_utils::solidColorBrush()),
         DraggablePanel(rect, resource_utils::solidColorBrush()),
         ResizablePanel(rect, resource_utils::solidColorBrush()),
         m_caption(caption),
-        m_captionPanelHeight(captionPanelHeight),
-        m_decorativeBarHeight(decorativeBarHeight)
+        m_titleBarHeight(titleBarHeight),
+        m_accentBarHeight(accentBarHeight)
     {
         // Here left blank intentionally.
     }
@@ -35,14 +35,14 @@ namespace d14engine::uikit
     Window::Window(
         WstrParam title,
         const D2D1_RECT_F& rect,
-        float captionPanelHeight,
-        float decorativeBarHeight)
+        float titleBarHeight,
+        float accentBarHeight)
         :
         Window(
             IconLabel::labelExpandedLayout(title),
             rect,
-            captionPanelHeight,
-            decorativeBarHeight)
+            titleBarHeight,
+            accentBarHeight)
     {
         // Here left blank intentionally.
     }
@@ -64,7 +64,7 @@ namespace d14engine::uikit
         drawBufferRes.loadShadowMask();
         drawBufferRes.loadBrush();
 
-        decorativeBarRes.loadBrush();
+        accentBarRes.loadBrush();
 
         ///////////////////
         // Child Objects //
@@ -76,7 +76,7 @@ namespace d14engine::uikit
         }
         registerUIEvents(m_caption);
 
-        m_caption->transform(captionTitleSelfcoordRect());
+        m_caption->transform(captionSelfcoordRect());
     }
 
     void Window::DrawBufferRes::loadShadowMask()
@@ -112,7 +112,7 @@ namespace d14engine::uikit
         ));
     }
 
-    void Window::DecorativeBarRes::loadBrush()
+    void Window::AccentBarRes::loadBrush()
     {
         Window* w = m_master;
         THROW_IF_NULL(w);
@@ -206,7 +206,7 @@ namespace d14engine::uikit
             m_caption = caption;
             registerUIEvents(m_caption);
 
-            m_caption->transform(captionTitleSelfcoordRect());
+            m_caption->transform(captionSelfcoordRect());
         }
     }
 
@@ -223,62 +223,62 @@ namespace d14engine::uikit
         }
     }
 
-    D2D1_RECT_F Window::captionPanelAbsoluteRect() const
+    D2D1_RECT_F Window::titleBarAbsoluteRect() const
     {
         return
         {
             m_absoluteRect.left,
             m_absoluteRect.top,
             m_absoluteRect.right,
-            m_absoluteRect.top + m_captionPanelHeight
+            m_absoluteRect.top + m_titleBarHeight
         };
     }
 
-    D2D1_RECT_F Window::decorativeBarAbsoluteRect() const
+    D2D1_RECT_F Window::accentBarAbsoluteRect() const
     {
         return
         {
             m_absoluteRect.left,
-            m_absoluteRect.top + m_captionPanelHeight,
+            m_absoluteRect.top + m_titleBarHeight,
             m_absoluteRect.right,
             m_absoluteRect.top + nonClientAreaHeight()
         };
     }
 
-    D2D1_RECT_F Window::captionTitleSelfcoordRect() const
+    D2D1_RECT_F Window::captionSelfcoordRect() const
     {
         return
         {
-            buttonPanelLeftmostOffset(),
+            buttonAreaLeftmostOffset(),
             0.0f,
-            std::max(width() - buttonPanelLeftmostOffset(), buttonPanelLeftmostOffset()),
-            m_captionPanelHeight
+            std::max(width() - buttonAreaLeftmostOffset(), buttonAreaLeftmostOffset()),
+            m_titleBarHeight
         };
     }
 
-    float Window::captionPanelHeight() const
+    float Window::titleBarHeight() const
     {
-        return m_captionPanelHeight;
+        return m_titleBarHeight;
     }
 
-    void Window::setCaptionPanelHeight(float value)
+    void Window::setTitleBarHeight(float value)
     {
-        m_captionPanelHeight = value;
+        m_titleBarHeight = value;
 
-        m_caption->transform(captionTitleSelfcoordRect());
+        m_caption->transform(captionSelfcoordRect());
         if (m_content) m_content->transform(clientAreaSelfcoordRect());
     }
 
-    float Window::decorativeBarHeight() const
+    float Window::accentBarHeight() const
     {
-        return m_decorativeBarHeight;
+        return m_accentBarHeight;
     }
 
-    void Window::setDecorativeBarHeight(float value)
+    void Window::setAccentBarHeight(float value)
     {
-        m_decorativeBarHeight = value;
+        m_accentBarHeight = value;
 
-        m_caption->transform(captionTitleSelfcoordRect());
+        m_caption->transform(captionSelfcoordRect());
         if (m_content) m_content->transform(clientAreaSelfcoordRect());
     }
 
@@ -294,7 +294,7 @@ namespace d14engine::uikit
 
     float Window::nonClientAreaHeight() const
     {
-        return m_captionPanelHeight + m_decorativeBarHeight;
+        return m_titleBarHeight + m_accentBarHeight;
     }
 
     D2D1_RECT_F Window::nonClientAreaSelfcoordRect() const
@@ -311,9 +311,9 @@ namespace d14engine::uikit
     {
         return
         {
-            m_absoluteRect.right - buttonPanelLeftmostOffset(),
+            m_absoluteRect.right - buttonAreaLeftmostOffset(),
             m_absoluteRect.top,
-            m_absoluteRect.right - buttonPanelLeftmostOffset() + button1Width(),
+            m_absoluteRect.right - buttonAreaLeftmostOffset() + button1Width(),
             m_absoluteRect.top + buttonHeight()
         };
     }
@@ -322,9 +322,9 @@ namespace d14engine::uikit
     {
         return
         {
-            m_absoluteRect.right - buttonPanelLeftmostOffset() + button1Width(),
+            m_absoluteRect.right - buttonAreaLeftmostOffset() + button1Width(),
             m_absoluteRect.top,
-            m_absoluteRect.right - buttonPanelRightmostOffset() - button3Width(),
+            m_absoluteRect.right - buttonAreaRightmostOffset() - button3Width(),
             m_absoluteRect.top + buttonHeight()
         };
     }
@@ -333,9 +333,9 @@ namespace d14engine::uikit
     {
         return
         {
-            m_absoluteRect.right - buttonPanelRightmostOffset() - button3Width(),
+            m_absoluteRect.right - buttonAreaRightmostOffset() - button3Width(),
             m_absoluteRect.top,
-            m_absoluteRect.right - buttonPanelRightmostOffset(),
+            m_absoluteRect.right - buttonAreaRightmostOffset(),
             m_absoluteRect.top + buttonHeight()
         };
     }
@@ -399,7 +399,7 @@ namespace d14engine::uikit
         }
     }
 
-    bool Window::isPerformSpecialOperation() const
+    bool Window::isPerformingSpecialOperation() const
     {
         return m_isDragging || isSizing();
     }
@@ -582,7 +582,7 @@ namespace d14engine::uikit
             /////////////////////
             {
                 //------------------------------------------------------------------
-                // Caption Panel
+                // Title Bar
                 //------------------------------------------------------------------
                 {
                     auto& background = appearance().captionPanel.background;
@@ -592,7 +592,7 @@ namespace d14engine::uikit
 
                     rndr->d2d1DeviceContext()->FillRectangle
                     (
-                    /* rect  */ captionPanelAbsoluteRect(),
+                    /* rect  */ titleBarAbsoluteRect(),
                     /* brush */ resource_utils::solidColorBrush()
                     );
                     if (m_caption->isD2d1ObjectVisible())
@@ -601,12 +601,12 @@ namespace d14engine::uikit
                     }
                 }
                 //------------------------------------------------------------------
-                // Decorative Bar
+                // Accent Bar
                 //------------------------------------------------------------------
                 {
-                    auto& brush = decorativeBarRes.brush;
+                    auto& brush = accentBarRes.brush;
 
-                    auto rect = decorativeBarAbsoluteRect();
+                    auto rect = accentBarAbsoluteRect();
 
                     brush->SetStartPoint({ rect.left, rect.top });
                     brush->SetEndPoint({ rect.right, rect.top });
@@ -886,7 +886,7 @@ namespace d14engine::uikit
         // Update Child Objects //
         //////////////////////////
 
-        m_caption->transform(captionTitleSelfcoordRect());
+        m_caption->transform(captionSelfcoordRect());
         if (m_content) m_content->transform(clientAreaSelfcoordRect());
     }
 
@@ -900,7 +900,7 @@ namespace d14engine::uikit
         // Reload Cached Resources //
         /////////////////////////////
 
-        decorativeBarRes.loadBrush();
+        accentBarRes.loadBrush();
     }
 
     void Window::onMouseMoveHelper(MouseMoveEvent& e)
@@ -909,7 +909,7 @@ namespace d14engine::uikit
 
         auto& p = e.cursorPoint;
 
-        if (!isPerformSpecialOperation())
+        if (!isPerformingSpecialOperation())
         {
             if (button1Enabled)
             {
@@ -972,7 +972,7 @@ namespace d14engine::uikit
         }
         if (e.state.leftDown() || e.state.leftDblclk())
         {
-            if (!isPerformSpecialOperation())
+            if (!isPerformingSpecialOperation())
             {
                 if (button1Enabled) m_isButton1Down = m_isButton1Hover;
                 if (button2Enabled) m_isButton2Down = m_isButton2Hover;
@@ -1006,9 +1006,9 @@ namespace d14engine::uikit
         handleMouseButtonForRegisteredTabGroups(e);
     }
 
-    bool Window::canDragHelper(const Event::Point& p)
+    bool Window::isDragAreaHitHelper(const Event::Point& p)
     {
-        return math_utils::isInside(p, captionPanelAbsoluteRect()) &&
+        return math_utils::isInside(p, titleBarAbsoluteRect()) &&
             !m_isButton1Hover && !m_isButton2Hover && !m_isButton3Hover;
     }
 }

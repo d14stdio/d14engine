@@ -33,15 +33,15 @@ namespace d14engine::uikit
         if (f_onDragEnd) f_onDragEnd(this);
     }
 
-    bool DraggablePanel::canDrag(const Event::Point& p)
+    bool DraggablePanel::isDragAreaHit(const Event::Point& p)
     {
         if (!draggable) return false;
 
-        if (f_canDrag)
+        if (f_isDragAreaHit)
         {
-            return f_canDrag(this, p);
+            return f_isDragAreaHit(this, p);
         }
-        else return canDragHelper(p);
+        else return isDragAreaHitHelper(p);
     }
 
     void DraggablePanel::onDragStartHelper()
@@ -82,7 +82,7 @@ namespace d14engine::uikit
         app->cursor()->setIcon(Cursor::Arrow);
     }
 
-    bool DraggablePanel::canDragHelper(const Event::Point& p)
+    bool DraggablePanel::isDragAreaHitHelper(const Event::Point& p)
     {
         return isHit(p);
     }
@@ -163,7 +163,7 @@ namespace d14engine::uikit
 
         if (e.state.leftDown() || e.state.leftDblclk())
         {
-            if (m_isDragging = canDrag(p))
+            if (m_isDragging = isDragAreaHit(p))
             {
                 switch (dragTarget)
                 {

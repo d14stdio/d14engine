@@ -10,6 +10,11 @@ using namespace d14engine::renderer;
 
 namespace d14engine::pipeline
 {
+    const Sprite::BufferArray& Sprite::buffers() const
+    {
+        return m_buffers;
+    }
+
     void Sprite::onRendererUpdateObjectHelper(Renderer* rndr)
     {
         textureData.update(rndr);
@@ -21,8 +26,4 @@ namespace d14engine::pipeline
         textureData.draw(rndr, { rootParamIndex, buffer->GetGPUVirtualAddress() });
     }
 
-    const Sprite::BufferArray& Sprite::buffers() const
-    {
-        return m_buffers;
-    }
 }

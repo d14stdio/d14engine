@@ -29,9 +29,9 @@ namespace d14engine::uikit
 
         Function<void(DraggablePanel*)> f_onDragEnd = {};
 
-        bool canDrag(const Event::Point& p);
+        bool isDragAreaHit(const Event::Point& p);
 
-        Function<bool(DraggablePanel*, const Event::Point&)> f_canDrag = {};
+        Function<bool(DraggablePanel*, const Event::Point&)> f_isDragAreaHit = {};
 
         //------------------------------------------------------------------
         // Protected Helpers
@@ -40,7 +40,7 @@ namespace d14engine::uikit
         virtual void onDragStartHelper();
         virtual void onDragEndHelper();
 
-        virtual bool canDragHelper(const Event::Point& p);
+        virtual bool isDragAreaHitHelper(const Event::Point& p);
 
         ///////////////////////
         // Interaction Logic //

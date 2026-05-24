@@ -15,10 +15,6 @@ namespace d14engine::pipeline
         // prevent std::unique_ptr from generating default deleter
         virtual ~Sprite() = default;
 
-    protected:
-        void onRendererUpdateObjectHelper(renderer::Renderer* rndr) override;
-        void onRendererDrawD3d12ObjectHelper(renderer::Renderer* rndr) override;
-
     public:
         TextureSequence textureData = {};
 
@@ -36,5 +32,9 @@ namespace d14engine::pipeline
 
     public:
         const BufferArray& buffers() const;
+
+    protected:
+        void onRendererUpdateObjectHelper(renderer::Renderer* rndr) override;
+        void onRendererDrawD3d12ObjectHelper(renderer::Renderer* rndr) override;
     };
 }

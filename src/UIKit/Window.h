@@ -17,14 +17,14 @@ namespace d14engine::uikit
         Window(
             SharedPtrParam<IconLabel> caption,
             const D2D1_RECT_F& rect = {},
-            float captionPanelHeight = 32.0f,
-            float decorativeBarHeight = 4.0f);
+            float titleBarHeight = 32.0f,
+            float accentBarHeight = 4.0f);
 
         Window(
             WstrParam title = L"Untitled",
             const D2D1_RECT_F& rect = {},
-            float captionPanelHeight = 32.0f,
-            float decorativeBarHeight = 4.0f);
+            float titleBarHeight = 32.0f,
+            float accentBarHeight = 4.0f);
 
         void initialize() override;
 
@@ -51,14 +51,14 @@ namespace d14engine::uikit
         }
         drawBufferRes{ this };
 
-        struct DecorativeBarRes : MasterPtr
+        struct AccentBarRes : MasterPtr
         {
             using MasterPtr::MasterPtr;
 
             ComPtr<ID2D1LinearGradientBrush> brush = {};
             void loadBrush();
         }
-        decorativeBarRes{ this };
+        accentBarRes{ this };
 
         ////////////////////////
         // Callback Functions //
@@ -123,20 +123,20 @@ namespace d14engine::uikit
         // Drawing Properties
         //------------------------------------------------------------------
     protected:
-        float m_captionPanelHeight = {};
-        float m_decorativeBarHeight = {};
+        float m_titleBarHeight = {};
+        float m_accentBarHeight = {};
 
-        D2D1_RECT_F captionPanelAbsoluteRect() const;
-        D2D1_RECT_F decorativeBarAbsoluteRect() const;
+        D2D1_RECT_F titleBarAbsoluteRect() const;
+        D2D1_RECT_F accentBarAbsoluteRect() const;
 
-        D2D1_RECT_F captionTitleSelfcoordRect() const;
+        D2D1_RECT_F captionSelfcoordRect() const;
 
     public:
-        float captionPanelHeight() const;
-        void setCaptionPanelHeight(float value);
+        float titleBarHeight() const;
+        void setTitleBarHeight(float value);
 
-        float decorativeBarHeight() const;
-        void setDecorativeBarHeight(float value);
+        float accentBarHeight() const;
+        void setAccentBarHeight(float value);
 
         float clientAreaHeight() const;
         D2D1_RECT_F clientAreaSelfcoordRect() const;
@@ -154,7 +154,7 @@ namespace d14engine::uikit
         D2D1_RECT_F nonClientAreaMinimalSelfcoordRect() const;
 
     protected:
-        // Button panel consists of 3 buttons, from left to right:
+        // Button area consists of 3 buttons, from left to right:
         // (Minimize Button) (Maximize/Restore Button) (Close Button)
 
         constexpr static float button1Width()
@@ -173,15 +173,15 @@ namespace d14engine::uikit
         {
             return 24.0f;
         }
-        constexpr static float buttonPanelWidth()
+        constexpr static float buttonAreaWidth()
         {
             return button1Width() + button2Width() + button3Width();
         }
-        constexpr static float buttonPanelLeftmostOffset()
+        constexpr static float buttonAreaLeftmostOffset()
         {
-            return buttonPanelRightmostOffset() + buttonPanelWidth();
+            return buttonAreaRightmostOffset() + buttonAreaWidth();
         }
-        constexpr static float buttonPanelRightmostOffset()
+        constexpr static float buttonAreaRightmostOffset()
         {
             return 20.0f;
         }
@@ -255,7 +255,7 @@ namespace d14engine::uikit
         void setDisplayState(DisplayState state);
 
         //------------------------------------------------------------------
-        // Button Panel
+        // Button State
         //------------------------------------------------------------------
     public:
         bool button1Enabled = true, button2Enabled = true, button3Enabled = true;
@@ -269,7 +269,7 @@ namespace d14engine::uikit
         // Indicates whether a special operation is being performed on the
         // window (e.g. resizing, dragging). When this is true, the buttons
         // should not respond UI events even if they are enabled indeed.
-        bool isPerformSpecialOperation() const;
+        bool isPerformingSpecialOperation() const;
 
         bool m_isButton1Hover = false, m_isButton1Down = false;
         bool m_isButton2Hover = false, m_isButton2Down = false;
@@ -362,6 +362,6 @@ namespace d14engine::uikit
         // DraggablePanel
         //------------------------------------------------------------------
 
-        bool canDragHelper(const Event::Point& p) override;
+        bool isDragAreaHitHelper(const Event::Point& p) override;
     };
 }

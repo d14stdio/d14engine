@@ -11,7 +11,7 @@ set(
     # (2) Add the module source here:
     #----------------------------------------------------------
     "2D/Sprite.cpp"
-    "2D/SpriteGroup.cpp"
+    "2D/SpriteLayer.cpp"
     "2D/TextureSequence.cpp"
     "Cameras/Camera2D.cpp"
     "Cameras/Camera3D.cpp"

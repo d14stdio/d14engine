@@ -349,14 +349,14 @@ namespace d14engine::uikit
         {
             if (app != nullptr && LOWORD(lParam) == HTCLIENT)
             {
-                if (app->m_cursor->m_iconSource == Cursor::System)
+                if (app->m_cursor->m_drawBackend == Cursor::System)
                 {
                     app->m_cursor->setSystemIcon();
                 }
                 else SetCursor(nullptr); // Take over cursor drawing from GDI.
 
                 // reset this for next candidate WM_SETCURSOR message
-                app->m_cursor->m_systemIconUpdateFlag = false;
+                app->m_cursor->m_hasPendingSetCursorMessage = false;
 
                 // If an application processes this message,
                 // it should return TRUE to halt further processing.
@@ -545,7 +545,7 @@ namespace d14engine::uikit
             // so we need to show it explicitly in every mouse-move event.
             app->m_cursor->setPrivateVisible(true);
 
-            if (app->m_cursor->m_iconSource == Cursor::System)
+            if (app->m_cursor->m_drawBackend == Cursor::System)
             {
                 app->m_cursor->setSystemIcon();
             }
