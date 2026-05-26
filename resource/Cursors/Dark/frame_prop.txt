@@ -1,0 +1,17 @@
+alternate           33.0f, 8.0f
+beam                31.0f, 31.0f
+busy                31.0f, 31.0f        2s/60
+dgn1                31.0f, 31.0f
+dgn2                31.0f, 31.0f
+handwriting         12.0f, 16.0f
+help                6.0f, 18.0f
+horz                31.0f, 31.0f
+link                25.0f, 14.0f
+move                31.0f, 31.0f
+person              21.0f, 14.0f
+pin                 21.0f, 14.0f
+pointer             6.0f, 18.0f
+precision           32.0f, 32.0f
+unavailable         31.0f, 31.0f
+vert                31.0f, 31.0f
+working             6.0f, 18.0f         2s/60

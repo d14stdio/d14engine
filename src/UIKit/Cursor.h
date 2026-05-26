@@ -24,7 +24,7 @@ namespace d14engine::uikit
         enum class StaticIconIndex
         {
             Alternate, Arrow, BackDiag, Hand, Help, HorzSize,
-            MainDiag, Move, Person, Pin, Select, Stop, Text, VertSize
+            MainDiag, Move, Pen, Person, Pin, Select, Stop, Text, VertSize
         };
         enum class DynamicIconIndex
         {
@@ -41,6 +41,7 @@ namespace d14engine::uikit
         SET_STATIC_ALIAS(HorzSize)
         SET_STATIC_ALIAS(MainDiag)
         SET_STATIC_ALIAS(Move)
+        SET_STATIC_ALIAS(Pen)
         SET_STATIC_ALIAS(Person)
         SET_STATIC_ALIAS(Pin)
         SET_STATIC_ALIAS(Select)

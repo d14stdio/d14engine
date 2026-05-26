@@ -2,11 +2,12 @@
 
 #include "UIKit/Cursor.h"
 
+#include "Common/CppLangUtils/EnumMagic.h"
 #include "Common/MathUtils/2D.h"
 
 #include "UIKit/BitmapUtils.h"
 #include "UIKit/FileSystemUtils.h"
-
+#include "UIKit/PlatformUtils.h"
 #include "UIKit/ResourceUtils.h"
 
 using namespace d14engine::renderer;
@@ -55,34 +56,61 @@ namespace d14engine::uikit
         // Load Static Icons //
         ///////////////////////
 
-#define DEF_STATIC_ICON(Name, ...) { StaticIconIndex::Name, L#Name L".png ", __VA_ARGS__ }
+#define SET_STATIC_ICON(Index, Name, ...) \
+do { \
+    staticIconInfo[(size_t)StaticIconIndex::Index] = { L#Name L".png", __VA_ARGS__ }; \
+} while (0)
 
-        std::tuple<StaticIconIndex, Wstring, D2D1_POINT_2F> staticIconPaths[] =
+        using StaticIconInfo = std::pair<Wstring, D2D1_POINT_2F>;
+        using StaticIconInfoMap = cpp_lang_utils::EnumMap<StaticIconIndex, StaticIconInfo>;
+
+        StaticIconInfoMap staticIconInfo = {};
+        if (themeName == L"Light")
         {
-            DEF_STATIC_ICON(Alternate, { 30.0f, 0.0f }),
-            DEF_STATIC_ICON(Arrow,     { 2.0f, 0.0f }),
-            DEF_STATIC_ICON(BackDiag,  { 16.0f, 16.0f }),
-            DEF_STATIC_ICON(Hand,      { 3.0f, 3.0f }),
-            DEF_STATIC_ICON(Help,      { 3.0f, 3.0f }),
-            DEF_STATIC_ICON(HorzSize,  { 16.0f, 16.0f }),
-            DEF_STATIC_ICON(MainDiag,  { 16.0f, 16.0f }),
-            DEF_STATIC_ICON(Move,      { 16.0f, 16.0f }),
-            DEF_STATIC_ICON(Person,    { 2.0f, 0.0f }),
-            DEF_STATIC_ICON(Pin,       { 2.0f, 0.0f }),
-            DEF_STATIC_ICON(Select,    { 16.0f, 16.0f }),
-            DEF_STATIC_ICON(Stop,      { 2.0f, 0.0f }),
-            DEF_STATIC_ICON(Text,      { 16.0f, 16.0f }),
-            DEF_STATIC_ICON(VertSize,  { 16.0f, 16.0f })
-        };
-
-#undef DEF_STATIC_ICON
-
-        for (auto& path : staticIconPaths)
+            SET_STATIC_ICON(Alternate, alternate,   { 33.0f, 8.0f });
+            SET_STATIC_ICON(Arrow,     pointer,     { 6.0f, 18.0f });
+            SET_STATIC_ICON(BackDiag,  dgn2,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(Hand,      link,        { 25.0f, 14.0f });
+            SET_STATIC_ICON(Help,      help,        { 6.0f, 18.0f });
+            SET_STATIC_ICON(HorzSize,  horz,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(MainDiag,  dgn1,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(Move,      move,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(Pen,       handwriting, { 10.0f, 14.0f });
+            SET_STATIC_ICON(Person,    person,      { 21.0f, 14.0f });
+            SET_STATIC_ICON(Pin,       pin,         { 21.0f, 14.0f });
+            SET_STATIC_ICON(Select,    precision,   { 32.0f, 32.0f });
+            SET_STATIC_ICON(Stop,      unavailable, { 31.0f, 31.0f });
+            SET_STATIC_ICON(Text,      beam,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(VertSize,  vert,        { 31.0f, 31.0f });
+        }
+        else if (themeName == L"Dark")
         {
-            icons.staticIcons[(size_t)std::get<0>(path)] =
+            SET_STATIC_ICON(Alternate, alternate,   { 33.0f, 8.0f });
+            SET_STATIC_ICON(Arrow,     pointer,     { 6.0f, 18.0f });
+            SET_STATIC_ICON(BackDiag,  dgn2,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(Hand,      link,        { 25.0f, 14.0f });
+            SET_STATIC_ICON(Help,      help,        { 6.0f, 18.0f });
+            SET_STATIC_ICON(HorzSize,  horz,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(MainDiag,  dgn1,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(Move,      move,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(Pen,       handwriting, { 12.0f, 16.0f });
+            SET_STATIC_ICON(Person,    person,      { 21.0f, 14.0f });
+            SET_STATIC_ICON(Pin,       pin,         { 21.0f, 14.0f });
+            SET_STATIC_ICON(Select,    precision,   { 32.0f, 32.0f });
+            SET_STATIC_ICON(Stop,      unavailable, { 31.0f, 31.0f });
+            SET_STATIC_ICON(Text,      beam,        { 31.0f, 31.0f });
+            SET_STATIC_ICON(VertSize,  vert,        { 31.0f, 31.0f });
+        }
+
+#undef SET_STATIC_ICON
+
+        for (size_t i = 0; i < staticIconInfo.size(); ++i)
+        {
+            auto& info = staticIconInfo[i];
+            icons.staticIcons[i] =
             {
-                bitmap_utils::loadBitmap(cursorPath + std::get<1>(path)),
-                std::get<2>(path) // hot spot offset
+                bitmap_utils::loadBitmap(cursorPath + info.first),
+                platform_utils::restoredByDpi(info.second)
             };
         }
 
@@ -90,15 +118,23 @@ namespace d14engine::uikit
         // Load Dynamic Icons //
         ////////////////////////
 
-#define LOAD_DYNAMIC_ICON(Name, ...) \
+#define LOAD_DYNAMIC_ICON(Index, Name, ...) \
 do { \
     auto frames = loadDynamicIcon(cursorPath + L#Name L"/"); \
     frames.hotSpotOffset = __VA_ARGS__; \
-    icons.dynamicIcons[(size_t)DynamicIconIndex::Name] = std::move(frames); \
+    icons.dynamicIcons[(size_t)DynamicIconIndex::Index] = std::move(frames); \
 } while (0)
 
-        LOAD_DYNAMIC_ICON(Busy,    { 16.0f, 16.0f });
-        LOAD_DYNAMIC_ICON(Working, { 2.0f, 0.0f });
+        if (themeName == L"Light")
+        {
+            LOAD_DYNAMIC_ICON(Busy,    busy,    { 31.0f, 31.0f });
+            LOAD_DYNAMIC_ICON(Working, working, { 6.0f, 18.0f });
+        }
+        else if (themeName == L"Dark")
+        {
+            LOAD_DYNAMIC_ICON(Busy,    busy,    { 31.0f, 31.0f });
+            LOAD_DYNAMIC_ICON(Working, working, { 6.0f, 18.0f });
+        }
 
 #undef LOAD_DYNAMIC_ICON
 
@@ -113,7 +149,7 @@ do { \
         // Load Images //
         /////////////////
 
-        animation_utils::BitmapSequence::FramePackage frames = {};
+        animation_utils::BitmapSequence::FrameMap frames = {};
 
         file_system_utils::foreachFileInDir
         (imagePath, L"*.png", [&](WstrParam path)

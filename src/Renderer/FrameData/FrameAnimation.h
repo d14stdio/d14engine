@@ -16,7 +16,7 @@ namespace d14engine::renderer
     struct FrameAnimation
     {
         using FrameArray = std::vector<FrameType>;
-        using FramePackage = std::unordered_map<Wstring, FrameType>;
+        using FrameMap = std::unordered_map<Wstring, FrameType>;
 
         FrameArray frames = {};
 

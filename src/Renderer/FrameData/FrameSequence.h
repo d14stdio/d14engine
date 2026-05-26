@@ -14,7 +14,7 @@ namespace d14engine::renderer
         using FrameAnim = FrameAnimation<FrameType>;
 
         using FrameArray = FrameAnim::FrameArray;
-        using FramePackage = FrameAnim::FramePackage;
+        using FrameMap = FrameAnim::FrameMap;
 
         bool enabled = true;
         bool visible = true;
